@@ -55,6 +55,7 @@
         "watch:labextension": "jupyter labextension watch ."
     },
     "dependencies": {
+        "@codesandbox/sandpack-client": "^2.19.8",
         "@jupyterlab/application": "^4.0.0"
     },
     "devDependencies": {

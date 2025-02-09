@@ -57,7 +57,6 @@ export class SandpackDocModel implements DocumentRegistry.IModel {
   }
 
   fromString(data: string): void {
-    console.log('fromString', data);
     this.sharedModel.setSource(data);
 
     this.dirty = true;

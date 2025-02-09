@@ -1,6 +1,6 @@
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
-export class SandpackWidget extends DocumentWidget {
+export class SandpackDocWidget extends DocumentWidget {
   constructor(options: DocumentWidget.IOptions) {
     super(options);
   }

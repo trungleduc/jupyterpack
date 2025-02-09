@@ -1,12 +1,12 @@
-import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
-import { CommandRegistry } from '@lumino/commands';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-
+import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ServiceManager } from '@jupyterlab/services';
+import { CommandRegistry } from '@lumino/commands';
+
+import { SandpackPanel } from '../widget/sandpackPanel';
 import { SandpackDocModel } from './model';
-import { SandpackWidget } from '../widget/sandpackWidget';
-import { Widget } from '@lumino/widgets';
+import { SandpackDocWidget } from './sandpackDocWidget';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
@@ -17,7 +17,7 @@ interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
 }
 
 export class SandpackWidgetFactory extends ABCWidgetFactory<
-  SandpackWidget,
+  SandpackDocWidget,
   SandpackDocModel
 > {
   constructor(options: IOptions) {
@@ -32,14 +32,11 @@ export class SandpackWidgetFactory extends ABCWidgetFactory<
    */
   protected createNewWidget(
     context: DocumentRegistry.IContext<SandpackDocModel>
-  ): SandpackWidget {
-    const { model } = context;
+  ): SandpackDocWidget {
+    // const { model } = context;
 
-    const content = new Widget();
-    model.contentChanged.connect(() => {
-      content.node.innerHTML = model.toString();
-    });
+    const content = new SandpackPanel();
 
-    return new SandpackWidget({ context, content });
+    return new SandpackDocWidget({ context, content });
   }
 }
