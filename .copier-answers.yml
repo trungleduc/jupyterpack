@@ -1,0 +1,14 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.3.7
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: leductrungxf@gmail.com
+author_name: Trung Le
+has_binder: false
+has_settings: false
+kind: frontend
+labextension_name: sandpyter
+project_short_description: A JupyterLab extension for Sandpack.
+python_name: sandpyter
+repository: https://github.com/trungleduc/sandpyter
+test: false
+
