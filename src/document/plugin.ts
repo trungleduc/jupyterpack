@@ -37,7 +37,7 @@ const activate = (app: JupyterFrontEnd): void => {
 };
 
 export const spkPlugin: JupyterFrontEndPlugin<void> = {
-  id: 'sandpyter:spkplugin',
+  id: 'jupyterpack:spkplugin',
   requires: [],
   autoStart: true,
   activate

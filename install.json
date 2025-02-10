@@ -1,5 +1,5 @@
 {
   "packageManager": "python",
-  "packageName": "sandpyter",
-  "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package sandpyter"
+  "packageName": "jupyterpack",
+  "uninstallInstructions": "Use your Python package manager (pip, conda, etc.) to uninstall the package jupyterpack"
 }

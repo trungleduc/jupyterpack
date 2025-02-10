@@ -33,9 +33,10 @@ export class SandpackWidgetFactory extends ABCWidgetFactory<
   protected createNewWidget(
     context: DocumentRegistry.IContext<SandpackDocModel>
   ): SandpackDocWidget {
-    // const { model } = context;
-
-    const content = new SandpackPanel();
+    const { model } = context;
+    const path = context.localPath;
+    console.log('path', path);
+    const content = new SandpackPanel({ model });
 
     return new SandpackDocWidget({ context, content });
   }

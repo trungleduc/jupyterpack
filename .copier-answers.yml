@@ -6,9 +6,9 @@ author_name: Trung Le
 has_binder: false
 has_settings: false
 kind: frontend
-labextension_name: sandpyter
+labextension_name: jupyterpack
 project_short_description: A JupyterLab extension for Sandpack.
-python_name: sandpyter
-repository: https://github.com/trungleduc/sandpyter
+python_name: jupyterpack
+repository: https://github.com/trungleduc/jupyterpack
 test: false
 

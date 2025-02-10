@@ -1,1 +1,4 @@
-foo barsssss
+{
+  "name": "React Example",
+  "entry": "/index.html"
+}

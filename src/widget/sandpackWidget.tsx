@@ -4,20 +4,34 @@ import {
   loadSandpackClient,
   SandboxSetup
 } from '@codesandbox/sandpack-client';
+import { SandpackDocModel } from '../document/model';
 
-export function SandpackWidget() {
+export function SandpackWidget(props: { model: SandpackDocModel }) {
   React.useEffect(() => {
     const iframe = document.getElementById(
       'sandpack-iframe'
     ) as HTMLIFrameElement;
     const content: SandboxSetup = {
       files: {
+        '/package.json': {
+          code: JSON.stringify({
+            main: 'App.js',
+            dependencies: { react: '^18.0.0', 'react-dom': '^18.0.0' }
+          })
+        },
+        '/tools.js': {
+          code: `
+            console.log('hello world')
+            export const foo = 'bar'
+          `
+        },
         '/App.js': {
           code: `
             import React from 'react';
             import ReactDOM from 'react-dom';
-    
+            import { foo } from './tools.js';
             function App() {
+              console.log(foo);
               return <h1>Hello, Sandpack!</h1>;
             }
     
@@ -39,18 +53,14 @@ export function SandpackWidget() {
             </html>
           `
         }
-      },
-      // Provide dependencies
-      dependencies: {
-        react: '^18.0.0',
-        'react-dom': '^18.0.0'
-      },
-      entry: '/App.js'
-      // template: 'react'
+      }
     };
-
+    console.log(content);
     // Optional options
-    const options: ClientOptions = { showOpenInCodeSandbox: false };
+    const options: ClientOptions = {
+      showOpenInCodeSandbox: false,
+      showLoadingScreen: true
+    };
     // Properly load and mount the bundler
     loadSandpackClient(iframe, content, options);
   }, []);

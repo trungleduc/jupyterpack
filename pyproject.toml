@@ -3,7 +3,7 @@ requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0
 build-backend = "hatchling.build"
 
 [project]
-name = "sandpyter"
+name = "jupyterpack"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
@@ -33,24 +33,24 @@ source = "nodejs"
 fields = ["description", "authors", "urls", "keywords"]
 
 [tool.hatch.build.targets.sdist]
-artifacts = ["sandpyter/labextension"]
+artifacts = ["jupyterpack/labextension"]
 exclude = [".github", "binder"]
 
 [tool.hatch.build.targets.wheel.shared-data]
-"sandpyter/labextension" = "share/jupyter/labextensions/sandpyter"
-"install.json" = "share/jupyter/labextensions/sandpyter/install.json"
+"jupyterpack/labextension" = "share/jupyter/labextensions/jupyterpack"
+"install.json" = "share/jupyter/labextensions/jupyterpack/install.json"
 
 [tool.hatch.build.hooks.version]
-path = "sandpyter/_version.py"
+path = "jupyterpack/_version.py"
 
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = ["hatch-jupyter-builder>=0.5"]
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
-    "sandpyter/labextension/static/style.js",
-    "sandpyter/labextension/package.json",
+    "jupyterpack/labextension/static/style.js",
+    "jupyterpack/labextension/package.json",
 ]
-skip-if-exists = ["sandpyter/labextension/static/style.js"]
+skip-if-exists = ["jupyterpack/labextension/static/style.js"]
 
 [tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:prod"
@@ -60,7 +60,7 @@ npm = ["jlpm"]
 build_cmd = "install:extension"
 npm = ["jlpm"]
 source_dir = "src"
-build_dir = "sandpyter/labextension"
+build_dir = "jupyterpack/labextension"
 
 [tool.jupyter-releaser.options]
 version_cmd = "hatch version"

@@ -1,6 +1,6 @@
-# sandpyter
+# jupyterpack
 
-[![Github Actions Status](https://github.com/trungleduc/sandpyter/workflows/Build/badge.svg)](https://github.com/trungleduc/sandpyter/actions/workflows/build.yml)
+[![Github Actions Status](https://github.com/trungleduc/jupyterpack/workflows/Build/badge.svg)](https://github.com/trungleduc/jupyterpack/actions/workflows/build.yml)
 
 A JupyterLab extension for Sandpack.
 
@@ -13,7 +13,7 @@ A JupyterLab extension for Sandpack.
 To install the extension, execute:
 
 ```bash
-pip install sandpyter
+pip install jupyterpack
 ```
 
 ## Uninstall
@@ -21,7 +21,7 @@ pip install sandpyter
 To remove the extension, execute:
 
 ```bash
-pip uninstall sandpyter
+pip uninstall jupyterpack
 ```
 
 ## Contributing
@@ -36,7 +36,7 @@ The `jlpm` command is JupyterLab's pinned version of
 
 ```bash
 # Clone the repo to your local environment
-# Change directory to the sandpyter directory
+# Change directory to the jupyterpack directory
 # Install package in development mode
 pip install -e "."
 # Link your development version of the extension with JupyterLab
@@ -65,12 +65,12 @@ jupyter lab build --minimize=False
 ### Development uninstall
 
 ```bash
-pip uninstall sandpyter
+pip uninstall jupyterpack
 ```
 
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
-folder is located. Then you can remove the symlink named `sandpyter` within that folder.
+folder is located. Then you can remove the symlink named `jupyterpack` within that folder.
 
 ### Packaging the extension
 
