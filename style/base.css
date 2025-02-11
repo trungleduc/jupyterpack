@@ -7,3 +7,8 @@
 .jp-SandpackPanel {
   display: flex;
 }
+
+.jp-SandpackPanel > iframe {
+  flex-grow: 1;
+  border: 0;
+}

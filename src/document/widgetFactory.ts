@@ -1,7 +1,5 @@
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ServiceManager } from '@jupyterlab/services';
+import { ServiceManager, Contents } from '@jupyterlab/services';
 import { CommandRegistry } from '@lumino/commands';
 
 import { SandpackPanel } from '../widget/sandpackPanel';
@@ -10,10 +8,7 @@ import { SandpackDocWidget } from './sandpackDocWidget';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
-
-  manager?: ServiceManager.IManager;
-  mimeTypeService?: IEditorMimeTypeService;
-  rendermime?: IRenderMimeRegistry;
+  manager: ServiceManager.IManager;
 }
 
 export class SandpackWidgetFactory extends ABCWidgetFactory<
@@ -22,6 +17,7 @@ export class SandpackWidgetFactory extends ABCWidgetFactory<
 > {
   constructor(options: IOptions) {
     super(options);
+    this._contentsManager = options.manager.contents;
   }
 
   /**
@@ -33,11 +29,16 @@ export class SandpackWidgetFactory extends ABCWidgetFactory<
   protected createNewWidget(
     context: DocumentRegistry.IContext<SandpackDocModel>
   ): SandpackDocWidget {
-    const { model } = context;
-    const path = context.localPath;
-    console.log('path', path);
-    const content = new SandpackPanel({ model });
+    const content = new SandpackPanel({
+      context,
+      contentsManager: this._contentsManager
+    });
 
-    return new SandpackDocWidget({ context, content });
+    return new SandpackDocWidget({
+      context,
+      content
+    });
   }
+
+  private _contentsManager: Contents.IManager;
 }

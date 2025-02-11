@@ -21,7 +21,7 @@ const activate = (app: JupyterFrontEnd): void => {
 
   // Registering the widget factory
   app.docRegistry.addWidgetFactory(widgetFactory);
-
+  app.serviceManager.contents.fileChanged;
   // Creating and registering the model factory for our custom DocumentModel
   const modelFactory = new SandpackDocModelFactory();
   app.docRegistry.addModelFactory(modelFactory);
