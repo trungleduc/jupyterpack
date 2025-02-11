@@ -124,9 +124,10 @@ jobs:
 
       - name: Build the lite site
         shell: bash -l {0}
+        working-directory: lite
         run: |
           set -eux
-          jupyter lite build --contents sample --output-dir dist 
+          jupyter lite build --contents ../sample --output-dir ../dist 
 
       - name: Upload artifact
         id: upload-jupyterlite-artifact

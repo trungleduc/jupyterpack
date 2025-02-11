@@ -18,6 +18,7 @@ export class SandpackFilesModel {
       });
       this._allFiles = await this.flattenDirectory(files);
     }
+
     return this._allFiles;
   }
 
@@ -37,11 +38,19 @@ export class SandpackFilesModel {
     for (const item of content) {
       if (item.type === 'file') {
         const pathWithoutRoot = this._removeRoot(item.path);
-        if (!item.content) {
-          const itemContent = await this._getContent(item.path);
-          flatDict[pathWithoutRoot] = { code: itemContent.content };
+        let itemContent = item;
+        if (!itemContent.content) {
+          itemContent = await this._getContent(item.path);
+        }
+        if (
+          itemContent.mimetype === 'application/json' &&
+          typeof itemContent.content !== 'string'
+        ) {
+          flatDict[pathWithoutRoot] = {
+            code: JSON.stringify(itemContent.content)
+          };
         } else {
-          flatDict[pathWithoutRoot] = { code: item.content };
+          flatDict[pathWithoutRoot] = { code: itemContent.content };
         }
       } else if (item.type === 'directory') {
         // If it's a directory, recursively flatten its content
