@@ -21,7 +21,9 @@ export class SandpackPanel extends Widget {
 
     this._contentsManager = options.contentsManager;
     this._iframe = document.createElement('iframe');
-
+    this._spinner = document.createElement('div');
+    this._spinner.classList.add('jp-SandpackPanel-spinner');
+    this.node.appendChild(this._spinner);
     this.node.appendChild(this._iframe);
 
     options.context.ready.then(async () => {
@@ -57,6 +59,20 @@ export class SandpackPanel extends Widget {
     sandpackClient: SandpackClient
   ) {
     filesModel.fileChanged.connect(this._onFileChanged, this);
+    sandpackClient.listen(msg => {
+      switch (msg.type) {
+        case 'start': {
+          this._spinner.style.display = 'unset';
+          break;
+        }
+        case 'success': {
+          this._spinner.style.display = 'none';
+          break;
+        }
+        default:
+          break;
+      }
+    });
   }
 
   private _onFileChanged(
@@ -72,5 +88,6 @@ export class SandpackPanel extends Widget {
 
   private _spClient?: SandpackClient;
   private _iframe: HTMLIFrameElement;
+  private _spinner: HTMLDivElement;
   private _contentsManager: Contents.IManager;
 }

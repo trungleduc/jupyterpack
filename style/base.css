@@ -12,3 +12,34 @@
   flex-grow: 1;
   border: 0;
 }
+
+.jp-SandpackPanel-spinner {
+  top: calc(50% - 4px);
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  position: relative;
+  border-radius: 50%;
+  background: rgb(212 72 13 / 100%);
+  animation: wave 1.5s ease-in infinite;
+}
+
+@keyframes wave {
+  0% {
+    box-shadow:
+      0 0 0 0 rgb(212 72 13 / 0%),
+      0 0 0 10px rgb(212 72 13 / 20%),
+      0 0 0 20px rgb(212 72 13 / 60%),
+      0 0 0 30px rgb(212 72 13 / 40%),
+      0 0 0 40px rgb(212 72 13 / 20%);
+  }
+
+  100% {
+    box-shadow:
+      0 0 0 40px rgb(212 72 13 / 0%),
+      0 0 0 30px rgb(212 72 13 / 20%),
+      0 0 0 20px rgb(212 72 13 / 40%),
+      0 0 0 10px rgb(212 72 13 / 60%),
+      0 0 0 0 rgb(212 72 13 / 100%);
+  }
+}
