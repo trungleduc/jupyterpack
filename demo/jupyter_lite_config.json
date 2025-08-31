@@ -1,0 +1,12 @@
+{
+  "LiteBuildConfig": {
+    "extra_file_types": {
+      "spk": {
+        "name": "spk",
+        "extensions": [".spk", ".SPK"],
+        "mimeTypes": ["text/json"],
+        "fileFormat": "text"
+      }
+    }
+  }
+}

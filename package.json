@@ -29,6 +29,8 @@
         "url": "https://github.com/trungleduc/jupyterpack.git"
     },
     "scripts": {
+        "build:demo": "cd demo && rm -rf .jupyterlite.doit.db _output && jupyter lite build .",
+        "update:demo": "node script/update-demo.mjs",
         "build": "jlpm build:lib && jlpm build:labextension:dev",
         "build:prod": "jlpm clean && jlpm build:lib:prod && jlpm build:labextension",
         "build:labextension": "jupyter labextension build .",

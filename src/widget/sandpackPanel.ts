@@ -7,13 +7,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents } from '@jupyterlab/services';
 import { Widget } from '@lumino/widgets';
 
-import { SandpackDocModel } from '../document/model';
 import { SandpackFilesModel } from './sandpackFilesModel';
 import { IDict } from '../type';
 
 export class SandpackPanel extends Widget {
   constructor(options: {
-    context: DocumentRegistry.IContext<SandpackDocModel>;
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
     contentsManager: Contents.IManager;
   }) {
     super();

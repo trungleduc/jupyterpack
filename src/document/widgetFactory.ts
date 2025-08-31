@@ -3,7 +3,6 @@ import { ServiceManager, Contents } from '@jupyterlab/services';
 import { CommandRegistry } from '@lumino/commands';
 
 import { SandpackPanel } from '../widget/sandpackPanel';
-import { SandpackDocModel } from './model';
 import { SandpackDocWidget } from './sandpackDocWidget';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
@@ -11,10 +10,7 @@ interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   manager: ServiceManager.IManager;
 }
 
-export class SandpackWidgetFactory extends ABCWidgetFactory<
-  SandpackDocWidget,
-  SandpackDocModel
-> {
+export class SandpackWidgetFactory extends ABCWidgetFactory<SandpackDocWidget> {
   constructor(options: IOptions) {
     super(options);
     this._contentsManager = options.manager.contents;
@@ -27,13 +23,15 @@ export class SandpackWidgetFactory extends ABCWidgetFactory<
    * @returns The widget
    */
   protected createNewWidget(
-    context: DocumentRegistry.IContext<SandpackDocModel>
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>
   ): SandpackDocWidget {
     const content = new SandpackPanel({
       context,
       contentsManager: this._contentsManager
     });
-
+    context.ready.then(() => {
+      console.log('content', context.model.toString());
+    });
     return new SandpackDocWidget({
       context,
       content
