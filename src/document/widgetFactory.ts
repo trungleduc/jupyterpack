@@ -1,16 +1,18 @@
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
-import { ServiceManager, Contents } from '@jupyterlab/services';
+import { Contents, ServiceManager } from '@jupyterlab/services';
 import { CommandRegistry } from '@lumino/commands';
+import { Panel } from '@lumino/widgets';
 
-import { SandpackPanel } from '../widget/sandpackPanel';
-import { SandpackDocWidget } from './sandpackDocWidget';
+import { IJupyterPackFileFormat, JupyterPackFramework } from '../type';
+import { SandpackPanel } from '../sandpackWidget/sandpackPanel';
+import { JupyterPackDocWidget } from './jupyterpackDocWidget';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
   manager: ServiceManager.IManager;
 }
 
-export class SandpackWidgetFactory extends ABCWidgetFactory<SandpackDocWidget> {
+export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWidget> {
   constructor(options: IOptions) {
     super(options);
     this._contentsManager = options.manager.contents;
@@ -24,15 +26,28 @@ export class SandpackWidgetFactory extends ABCWidgetFactory<SandpackDocWidget> {
    */
   protected createNewWidget(
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>
-  ): SandpackDocWidget {
-    const content = new SandpackPanel({
-      context,
-      contentsManager: this._contentsManager
-    });
+  ): JupyterPackDocWidget {
+    const content = new Panel();
+    content.addClass('jp-jupyterpack-document-panel');
     context.ready.then(() => {
-      console.log('content', context.model.toString());
+      const jpackModel =
+        context.model.toJSON() as any as IJupyterPackFileFormat;
+      switch (jpackModel.framework) {
+        case JupyterPackFramework.REACT: {
+          const jpContent = new SandpackPanel({
+            context,
+            contentsManager: this._contentsManager
+          });
+          content.addWidget(jpContent);
+          break;
+        }
+        default: {
+          console.error('Unsupported framework');
+          break;
+        }
+      }
     });
-    return new SandpackDocWidget({
+    return new JupyterPackDocWidget({
       context,
       content
     });

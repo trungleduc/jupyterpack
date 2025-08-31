@@ -4,8 +4,15 @@
     https://jupyterlab.readthedocs.io/en/stable/developer/css.html
 */
 
+.jp-jupyterpack-document-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+
 .jp-SandpackPanel {
   display: flex;
+  flex-grow: 1;
 }
 
 .jp-SandpackPanel > iframe {

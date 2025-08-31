@@ -1,0 +1,5 @@
+{
+  "name": "Dash Example",
+  "entry": "dash.py",
+  "framework": "dash"
+}

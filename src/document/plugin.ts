@@ -3,7 +3,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { SandpackWidgetFactory } from './widgetFactory';
+import { JupyterPackWidgetFactory } from './widgetFactory';
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
@@ -13,7 +13,7 @@ export const spkPlugin: JupyterFrontEndPlugin<void> = {
   requires: [],
   autoStart: true,
   activate: (app: JupyterFrontEnd): void => {
-    const widgetFactory = new SandpackWidgetFactory({
+    const widgetFactory = new JupyterPackWidgetFactory({
       name: FACTORY,
       modelName: 'text',
       fileTypes: [CONTENT_TYPE],
