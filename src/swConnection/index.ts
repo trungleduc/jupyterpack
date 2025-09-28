@@ -54,16 +54,13 @@ export async function initServiceWorker(): Promise<
   }
 }
 
-/**
- * Initialization data for the jupyter-monstra extension.
- */
 export const swPlugin: JupyterFrontEndPlugin<IConnectionManager> = {
-  id: 'jupyter-monstra:plugin',
-  description: 'A JupyterLab extension.',
+  id: 'jupyterpack:service-worker-plugin',
+  description: 'jupyterpack service worker plugin',
   autoStart: true,
   provides: IConnectionManagerToken,
   activate: async (app: JupyterFrontEnd): Promise<IConnectionManager> => {
-    console.log('JupyterLab extension jupyter-monstra is activated!');
+    console.log('Activating jupyterpack service worker');
     const serviceWorker = await initServiceWorker();
     if (!serviceWorker) {
       throw new Error(

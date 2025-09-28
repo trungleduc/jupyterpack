@@ -11,6 +11,8 @@ import {
 import { SandpackPanel } from '../sandpackWidget/sandpackPanel';
 import { JupyterPackDocWidget } from './jupyterpackDocWidget';
 import { PythonWidgetModel } from '../pythonWidget/pythonWidgetModel';
+import { UUID } from '@lumino/coreutils';
+import { PythonWidget } from '../pythonWidget/pythonWidget';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
@@ -51,9 +53,14 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
           const model = new PythonWidgetModel({
             context,
             manager: this.options.manager,
+            contentsManager: this._contentsManager,
             connectionManager: this.options.connectionManager
           });
-          console.log('model', model);
+          const pythonWidget = new PythonWidget({
+            model,
+            id: UUID.uuid4()
+          });
+          content.addWidget(pythonWidget);
           break;
         }
         default: {

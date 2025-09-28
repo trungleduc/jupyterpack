@@ -1,15 +1,22 @@
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IDisposable } from '@lumino/disposable';
-import { ServiceManager, Session, Kernel } from '@jupyterlab/services';
+import {
+  ServiceManager,
+  Session,
+  Kernel,
+  Contents
+} from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { IConnectionManager } from '../type';
+import { IConnectionManager, IJupyterPackFileFormat } from '../type';
 import { KernelExecutor } from './kernelExecutor';
+import { PathExt } from '@jupyterlab/coreutils';
 
 export class PythonWidgetModel implements IDisposable {
-  constructor(options: MonstraDocModel.IOptions) {
+  constructor(options: PythonWidgetModel.IOptions) {
     this._context = options.context;
     this._manager = options.manager;
     this._connectionManager = options.connectionManager;
+    this._contentsManager = options.contentsManager;
   }
 
   get isDisposed(): boolean {
@@ -26,6 +33,16 @@ export class PythonWidgetModel implements IDisposable {
       return null;
     }
     const filePath = this._context.localPath;
+    const spkContent =
+      this._context.model.toJSON() as any as IJupyterPackFileFormat;
+    console.log('filePath', filePath, spkContent.entry);
+    const entryPath = PathExt.join(PathExt.dirname(filePath), spkContent.entry);
+
+    const entryContent = await this._contentsManager.get(entryPath, {
+      content: true,
+      format: 'text'
+    });
+
     const sessionManager = this._manager.sessions;
     await sessionManager.ready;
     await this._manager.kernelspecs.ready;
@@ -52,7 +69,7 @@ export class PythonWidgetModel implements IDisposable {
     });
     const data = await this._connectionManager.registerConnection(executor);
     await executor.init({
-      initCode: this._context.model.toString(),
+      initCode: entryContent.content,
       ...data
     });
     const finish = new PromiseDelegate<void>();
@@ -78,12 +95,14 @@ export class PythonWidgetModel implements IDisposable {
   private _manager: ServiceManager.IManager;
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private _connectionManager: IConnectionManager;
+  private _contentsManager: Contents.IManager;
 }
 
-export namespace MonstraDocModel {
+export namespace PythonWidgetModel {
   export interface IOptions {
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
     manager: ServiceManager.IManager;
     connectionManager: IConnectionManager;
+    contentsManager: Contents.IManager;
   }
 }

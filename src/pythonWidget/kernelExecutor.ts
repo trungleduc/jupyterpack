@@ -16,7 +16,8 @@ export class KernelExecutor implements IKernelExecutor {
     kernelClientId: string;
   }) {
     const { initCode, instanceId, kernelClientId } = options;
-    const baseURL = `/extensions/jupyter-monstra/static/${instanceId}/dash/${kernelClientId}/`;
+
+    const baseURL = `/extensions/jupyterpack/static/${instanceId}/dash/${kernelClientId}/`;
     const osCode = `
     import os
     os.environ['DASH_URL_BASE_PATHNAME'] = '${baseURL}'

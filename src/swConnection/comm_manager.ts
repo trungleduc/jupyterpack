@@ -19,7 +19,7 @@ export class CommManager {
       }
     }
     const params = url.searchParams.toString();
-    const pathAfterExtensionName = urlPath.split('/jupyter-monstra/static')[1];
+    const pathAfterExtensionName = urlPath.split('/jupyterpack/static')[1];
     const pathList = pathAfterExtensionName.split('/').filter(Boolean);
     const instanceId = pathList[0];
     const kernelClientId = pathList[2];

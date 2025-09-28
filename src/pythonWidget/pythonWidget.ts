@@ -12,7 +12,11 @@ export class PythonWidget extends IFramePanel {
       }
       const iframe = this._iframe;
       const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
-      iframe.src = `${fullLabextensionsUrl}/jupyter-monstra/static/${connectionData.instanceId}/dash/${connectionData.kernelClientId}/`;
+      iframe.src = `${fullLabextensionsUrl}/jupyterpack/static/${connectionData.instanceId}/dash/${connectionData.kernelClientId}/`;
+      iframe.addEventListener('load', () => {
+        console.log('Iframe finished loading the page!');
+        this.toggleSpinner(false);
+      });
     });
   }
 
