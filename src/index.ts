@@ -1,3 +1,4 @@
 import { spkPlugin } from './document/plugin';
+import { swPlugin } from './swConnection';
 
-export default [spkPlugin];
+export default [swPlugin, spkPlugin];

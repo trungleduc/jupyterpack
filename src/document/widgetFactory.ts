@@ -3,17 +3,23 @@ import { Contents, ServiceManager } from '@jupyterlab/services';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel } from '@lumino/widgets';
 
-import { IJupyterPackFileFormat, JupyterPackFramework } from '../type';
+import {
+  IConnectionManager,
+  IJupyterPackFileFormat,
+  JupyterPackFramework
+} from '../type';
 import { SandpackPanel } from '../sandpackWidget/sandpackPanel';
 import { JupyterPackDocWidget } from './jupyterpackDocWidget';
+import { PythonWidgetModel } from '../pythonWidget/pythonWidgetModel';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
   manager: ServiceManager.IManager;
+  connectionManager: IConnectionManager;
 }
 
 export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWidget> {
-  constructor(options: IOptions) {
+  constructor(private options: IOptions) {
     super(options);
     this._contentsManager = options.manager.contents;
   }
@@ -39,6 +45,15 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
             contentsManager: this._contentsManager
           });
           content.addWidget(jpContent);
+          break;
+        }
+        case JupyterPackFramework.DASH: {
+          const model = new PythonWidgetModel({
+            context,
+            manager: this.options.manager,
+            connectionManager: this.options.connectionManager
+          });
+          console.log('model', model);
           break;
         }
         default: {

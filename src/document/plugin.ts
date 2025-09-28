@@ -4,22 +4,28 @@ import {
 } from '@jupyterlab/application';
 
 import { JupyterPackWidgetFactory } from './widgetFactory';
+import { IConnectionManager } from '../type';
+import { IConnectionManagerToken } from '../token';
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
 
 export const spkPlugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterpack:spkplugin',
-  requires: [],
+  requires: [IConnectionManagerToken],
   autoStart: true,
-  activate: (app: JupyterFrontEnd): void => {
+  activate: (
+    app: JupyterFrontEnd,
+    connectionManager: IConnectionManager
+  ): void => {
     const widgetFactory = new JupyterPackWidgetFactory({
       name: FACTORY,
       modelName: 'text',
       fileTypes: [CONTENT_TYPE],
       defaultFor: [CONTENT_TYPE],
       commands: app.commands,
-      manager: app.serviceManager
+      manager: app.serviceManager,
+      connectionManager
     });
 
     // Registering the widget factory

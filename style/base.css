@@ -9,18 +9,17 @@
   flex-direction: column;
 }
 
-
-.jp-SandpackPanel {
+.jupyterpack-iframe-panel {
   display: flex;
   flex-grow: 1;
 }
 
-.jp-SandpackPanel > iframe {
+.jupyterpack-iframe-panel iframe {
   flex-grow: 1;
   border: 0;
 }
 
-.jp-SandpackPanel-spinner {
+.jupyterpack-spinner {
   top: calc(50% - 4px);
   left: calc(50% - 4px);
   width: 8px;

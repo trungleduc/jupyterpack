@@ -5,26 +5,18 @@ import {
 } from '@codesandbox/sandpack-client';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents } from '@jupyterlab/services';
-import { Widget } from '@lumino/widgets';
 
-import { SandpackFilesModel } from './sandpackFilesModel';
+import { IFramePanel } from '../document/iframePanel';
 import { IDict } from '../type';
+import { SandpackFilesModel } from './sandpackFilesModel';
 
-export class SandpackPanel extends Widget {
+export class SandpackPanel extends IFramePanel {
   constructor(options: {
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
     contentsManager: Contents.IManager;
   }) {
     super();
-    this.addClass('jp-SandpackPanel');
-
     this._contentsManager = options.contentsManager;
-    this._iframe = document.createElement('iframe');
-    this._spinner = document.createElement('div');
-    this._spinner.classList.add('jp-SandpackPanel-spinner');
-    this.node.appendChild(this._spinner);
-    this.node.appendChild(this._iframe);
-
     options.context.ready.then(async () => {
       await this.init(options.context.localPath);
     });
@@ -61,11 +53,11 @@ export class SandpackPanel extends Widget {
     sandpackClient.listen(msg => {
       switch (msg.type) {
         case 'start': {
-          this._spinner.style.display = 'unset';
+          this.toggleSpinner(true);
           break;
         }
         case 'success': {
-          this._spinner.style.display = 'none';
+          this.toggleSpinner(false);
           break;
         }
         default:
@@ -86,7 +78,5 @@ export class SandpackPanel extends Widget {
   }
 
   private _spClient?: SandpackClient;
-  private _iframe: HTMLIFrameElement;
-  private _spinner: HTMLDivElement;
   private _contentsManager: Contents.IManager;
 }
