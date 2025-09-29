@@ -35,14 +35,13 @@ export class PythonWidgetModel implements IDisposable {
     const filePath = this._context.localPath;
     const spkContent =
       this._context.model.toJSON() as any as IJupyterPackFileFormat;
-    console.log('filePath', filePath, spkContent.entry);
+
     const entryPath = PathExt.join(PathExt.dirname(filePath), spkContent.entry);
 
     const entryContent = await this._contentsManager.get(entryPath, {
       content: true,
       format: 'text'
     });
-
     const sessionManager = this._manager.sessions;
     await sessionManager.ready;
     await this._manager.kernelspecs.ready;

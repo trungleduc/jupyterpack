@@ -15,7 +15,6 @@ self.addEventListener('message', onMessage);
  * Handle installation
  */
 async function onInstall(event: ExtendableEvent): Promise<void> {
-  console.log('installing service worker');
   await self.skipWaiting();
 }
 
