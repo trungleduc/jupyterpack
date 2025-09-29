@@ -126,10 +126,10 @@ jobs:
 
       - name: Build the lite site
         shell: bash -l {0}
-        working-directory: lite
+        working-directory: demo
         run: |
           set -eux
-          jlpm build:demo
+          jupyter lite build .
 
       - name: Upload artifact
         id: upload-jupyterlite-artifact
