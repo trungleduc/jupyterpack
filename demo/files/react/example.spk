@@ -1,0 +1,5 @@
+{
+  "name": "React Example",
+  "entry": "/index.html",
+  "framework": "react"
+}

@@ -1,21 +1,27 @@
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
-import { ServiceManager, Contents } from '@jupyterlab/services';
+import { Contents, ServiceManager } from '@jupyterlab/services';
 import { CommandRegistry } from '@lumino/commands';
+import { Panel } from '@lumino/widgets';
 
-import { SandpackPanel } from '../widget/sandpackPanel';
-import { SandpackDocModel } from './model';
-import { SandpackDocWidget } from './sandpackDocWidget';
+import {
+  IConnectionManager,
+  IJupyterPackFileFormat,
+  JupyterPackFramework
+} from '../type';
+import { SandpackPanel } from '../sandpackWidget/sandpackPanel';
+import { JupyterPackDocWidget } from './jupyterpackDocWidget';
+import { PythonWidgetModel } from '../pythonWidget/pythonWidgetModel';
+import { UUID } from '@lumino/coreutils';
+import { PythonWidget } from '../pythonWidget/pythonWidget';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
   manager: ServiceManager.IManager;
+  connectionManager: IConnectionManager;
 }
 
-export class SandpackWidgetFactory extends ABCWidgetFactory<
-  SandpackDocWidget,
-  SandpackDocModel
-> {
-  constructor(options: IOptions) {
+export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWidget> {
+  constructor(private options: IOptions) {
     super(options);
     this._contentsManager = options.manager.contents;
   }
@@ -27,14 +33,43 @@ export class SandpackWidgetFactory extends ABCWidgetFactory<
    * @returns The widget
    */
   protected createNewWidget(
-    context: DocumentRegistry.IContext<SandpackDocModel>
-  ): SandpackDocWidget {
-    const content = new SandpackPanel({
-      context,
-      contentsManager: this._contentsManager
+    context: DocumentRegistry.IContext<DocumentRegistry.IModel>
+  ): JupyterPackDocWidget {
+    const content = new Panel();
+    content.addClass('jp-jupyterpack-document-panel');
+    context.ready.then(() => {
+      const jpackModel =
+        context.model.toJSON() as any as IJupyterPackFileFormat;
+      switch (jpackModel.framework) {
+        case JupyterPackFramework.REACT: {
+          const jpContent = new SandpackPanel({
+            context,
+            contentsManager: this._contentsManager
+          });
+          content.addWidget(jpContent);
+          break;
+        }
+        case JupyterPackFramework.DASH: {
+          const model = new PythonWidgetModel({
+            context,
+            manager: this.options.manager,
+            contentsManager: this._contentsManager,
+            connectionManager: this.options.connectionManager
+          });
+          const pythonWidget = new PythonWidget({
+            model,
+            id: UUID.uuid4()
+          });
+          content.addWidget(pythonWidget);
+          break;
+        }
+        default: {
+          console.error('Unsupported framework');
+          break;
+        }
+      }
     });
-
-    return new SandpackDocWidget({
+    return new JupyterPackDocWidget({
       context,
       content
     });

@@ -1,0 +1,11 @@
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - dash
+  - werkzeug>=2.2,<3.0
+  - httpx
+  - numpy
+  - pandas
