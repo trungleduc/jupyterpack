@@ -1,6 +1,8 @@
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { KernelMessage, Session } from '@jupyterlab/services';
-import { IDict, IKernelExecutor } from '../type';
+
 import { arrayBufferToBase64 } from '../tools';
+import { IDict, IKernelExecutor } from '../type';
 
 export class KernelExecutor implements IKernelExecutor {
   constructor(options: KernelExecutor.IOptions) {
@@ -16,8 +18,16 @@ export class KernelExecutor implements IKernelExecutor {
     kernelClientId: string;
   }) {
     const { initCode, instanceId, kernelClientId } = options;
+    const labBaseUrl = PageConfig.getOption('baseUrl');
+    const baseURL = URLExt.join(
+      labBaseUrl,
+      'extensions/jupyterpack/static',
+      instanceId,
+      'dash',
+      kernelClientId,
+      '/'
+    );
 
-    const baseURL = `/extensions/jupyterpack/static/${instanceId}/dash/${kernelClientId}/`;
     const osCode = `
     import os
     os.environ['DASH_URL_BASE_PATHNAME'] = '${baseURL}'
