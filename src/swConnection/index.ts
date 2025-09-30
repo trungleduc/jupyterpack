@@ -78,6 +78,10 @@ export const swPlugin: JupyterFrontEndPlugin<IConnectionManager> = {
       { type: MessageAction.INIT, data: { instanceId } },
       [serviceWorkerToMain]
     );
+    setInterval(() => {
+      serviceWorker.postMessage({ type: MessageAction.PING });
+    }, 10000);
+
     return connectionManager;
   }
 };

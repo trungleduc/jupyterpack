@@ -44,6 +44,10 @@ function onMessage(
       COMM_MANAGER.registerComm(instanceId, serviceWorkerToMain);
       break;
     }
+    case MessageAction.PING: {
+      (msg as any).waitUntil(new Promise(r => setTimeout(r, 5000)));
+      break;
+    }
     default:
       break;
   }
