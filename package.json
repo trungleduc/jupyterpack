@@ -1,7 +1,7 @@
 {
     "name": "jupyterpack",
     "version": "0.1.0",
-    "description": "A JupyterLab extension for Sandpack.",
+    "description": "A JupyterLab extension for serving web app.",
     "keywords": [
         "jupyter",
         "jupyterlab",

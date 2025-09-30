@@ -1,77 +1,79 @@
-# jupyterpack
+<h1 align="center">jupyterpack</h1>
 
-[![Github Actions Status](https://github.com/trungleduc/jupyterpack/workflows/Build/badge.svg)](https://github.com/trungleduc/jupyterpack/actions/workflows/build.yml)
+[![Github Actions Status](https://github.com/trungleduc/jupyterpack/workflows/Build/badge.svg)](https://github.com/trungleduc/specta/actions/workflows/build.yml)
+[![Try on lite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://trungleduc.github.io/jupyterpack/lab/)
 
-A JupyterLab extension for Sandpack.
+<h2 align="center"> A JupyterLite extension to serve in-browser Python and Javascript web application</h2>
 
-## Requirements
+## Features
 
-- JupyterLab >= 4.0.0
+- **Python Web Apps**: Serve Python web applications directly in the browser using JupyterLite's in-browser Python kernel. `jupyterpack` currently supports Dash.
+- **JavaScript Web Apps**: Bundle and serve JavaScript web applications using in-browser bundlers.
 
-## Install
+## Installation
 
-To install the extension, execute:
+You can install `jupyterpack` using `pip` or `conda`
 
 ```bash
+# Install using pip
 pip install jupyterpack
+
+# Install using conda
+conda install -c conda-forge jupyterpack
 ```
 
-## Uninstall
+## Usage
 
-To remove the extension, execute:
+To use `jupyterpack`, you need to create a `.spk` file that defines your web application. Here's an example structure of a React application:
 
 ```bash
-pip uninstall jupyterpack
+my_app/
+├── app.spk
+├── App.js         # Your JS code
+├── package.json   # Your JS dependencies
+└── index.html      # HTML entry for JS apps
 ```
 
-## Contributing
+the `app.spk` is the entry point of your React app, it should contain the following content:
 
-### Development install
+```json
+{
+  "name": "React Example",
+  "entry": "/index.html",
+  "framework": "react"
+}
+```
 
-Note: You will need NodeJS to build the extension package.
+Double clicking the `spk` file to open the web app as a tab of JupyterLab.
 
-The `jlpm` command is JupyterLab's pinned version of
-[yarn](https://yarnpkg.com/) that is installed with JupyterLab. You may use
-`yarn` or `npm` in lieu of `jlpm` below.
+### Dash application
+
+Same as the React application, here is the structure of a Dash application:
 
 ```bash
-# Clone the repo to your local environment
-# Change directory to the jupyterpack directory
-# Install package in development mode
-pip install -e "."
-# Link your development version of the extension with JupyterLab
-jupyter labextension develop . --overwrite
-# Rebuild extension Typescript source after making changes
-jlpm build
+my_app/
+├── app.spk
+├── server.py         # Your Dash code
 ```
 
-You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
+the `app.spk` is the entry point of your Dash app, it should contain the following content:
 
-```bash
-# Watch the source directory in one terminal, automatically rebuilding when needed
-jlpm watch
-# Run JupyterLab in another terminal
-jupyter lab
+```json
+{
+  "name": "Dash Example",
+  "entry": "server.py",
+  "framework": "dash"
+}
 ```
 
-With the watch command running, every saved change will immediately be built locally and available in your running JupyterLab. Refresh JupyterLab to load the change in your browser (you may need to wait several seconds for the extension to be rebuilt).
+For the Dash code, you need to define your Dash app variable as `app` and do not call `app.run_server` directly, `jupyterpack` will handle the server for you. Just as the case of React app, double clicking the spk file will open the Dash app in a new JupyterLab tab.
 
-By default, the `jlpm build` command generates the source maps for this extension to make it easier to debug using the browser dev tools. To also generate source maps for the JupyterLab core extensions, you can run the following command:
+## Try it online!
 
-```bash
-jupyter lab build --minimize=False
-```
+You can try it online by clicking on this badge:
 
-### Development uninstall
+[![Try on lite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://trungleduc.github.io/jupyterpack/lab/)
 
-```bash
-pip uninstall jupyterpack
-```
+## License
 
-In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
-command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
-folder is located. Then you can remove the symlink named `jupyterpack` within that folder.
-
-### Packaging the extension
-
-See [RELEASE](RELEASE.md)
+jupyterpack is licensed under the BSD-3-Clause license.
