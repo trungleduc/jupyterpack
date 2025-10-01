@@ -1,4 +1,6 @@
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
+
 const rules = [
   {
     test: /\.ts$/,
@@ -20,6 +22,19 @@ module.exports = [
     },
     module: {
       rules
-    }
+    },
+    plugins: [
+      new CopyPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, 'src/ping.html'),
+            to: path.resolve(
+              __dirname,
+              'jupyterpack/labextension/static/__jupyterpack__/ping.html'
+            )
+          }
+        ]
+      })
+    ]
   }
 ];

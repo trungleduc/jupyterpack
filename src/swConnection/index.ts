@@ -2,7 +2,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { UUID } from '@lumino/coreutils';
 import { expose } from 'comlink';
 
@@ -10,16 +10,15 @@ import { IConnectionManagerToken } from '../token';
 import { IConnectionManager, MessageAction } from '../type';
 import { ConnectionManager } from './connection_manager';
 
-export async function initServiceWorker(): Promise<
-  ServiceWorker | undefined | null
-> {
+const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
+const SCOPE = `${fullLabextensionsUrl}/jupyterpack/static`;
+async function initServiceWorker(): Promise<ServiceWorker | undefined | null> {
   if (!('serviceWorker' in navigator)) {
     console.error('Cannot start extension without service worker');
 
     return;
   }
-  const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
-  const SCOPE = `${fullLabextensionsUrl}/jupyterpack/static`;
+
   const fullWorkerUrl = `${SCOPE}/service-worker.js`;
 
   try {
@@ -54,6 +53,13 @@ export async function initServiceWorker(): Promise<
   }
 }
 
+function createPingFrame() {
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = URLExt.join(SCOPE, '__jupyterpack__', 'ping.html');
+  document.body.appendChild(iframe);
+}
+
 export const swPlugin: JupyterFrontEndPlugin<IConnectionManager> = {
   id: 'jupyterpack:service-worker-plugin',
   description: 'jupyterpack service worker plugin',
@@ -78,8 +84,8 @@ export const swPlugin: JupyterFrontEndPlugin<IConnectionManager> = {
       { type: MessageAction.INIT, data: { instanceId } },
       [serviceWorkerToMain]
     );
-    setInterval(() => {
-      serviceWorker.postMessage({ type: MessageAction.PING });
+    setTimeout(() => {
+      createPingFrame();
     }, 10000);
 
     return connectionManager;

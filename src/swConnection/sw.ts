@@ -29,6 +29,13 @@ async function onActivate(event: ExtendableEvent): Promise<void> {
  * Handle fetching a single resource.
  */
 async function onFetch(event: FetchEvent): Promise<void> {
+  const url = event.request.url;
+  if (url.endsWith('__jupyterpack__/ping')) {
+    return event.respondWith(new Response('pong'));
+  }
+  if (url.endsWith('__jupyterpack__/ping.html')) {
+    return;
+  }
   event.respondWith(COMM_MANAGER.generateResponse(event.request));
 }
 
@@ -42,10 +49,6 @@ function onMessage(
       const { instanceId } = data;
       const serviceWorkerToMain = msg.ports[0];
       COMM_MANAGER.registerComm(instanceId, serviceWorkerToMain);
-      break;
-    }
-    case MessageAction.PING: {
-      (msg as any).waitUntil(new Promise(r => setTimeout(r, 5000)));
       break;
     }
     default:
