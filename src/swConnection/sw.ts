@@ -36,7 +36,10 @@ async function onFetch(event: FetchEvent): Promise<void> {
   if (url.endsWith('__jupyterpack__/ping.html')) {
     return;
   }
-  event.respondWith(COMM_MANAGER.generateResponse(event.request));
+  if (url.includes('extensions/jupyterpack/static')) {
+    return event.respondWith(COMM_MANAGER.generateResponse(event.request));
+  }
+  return;
 }
 
 function onMessage(

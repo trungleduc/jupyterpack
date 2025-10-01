@@ -9,3 +9,5 @@ dependencies:
   - httpx
   - numpy
   - pandas
+  - pip:
+    - pyodide_http

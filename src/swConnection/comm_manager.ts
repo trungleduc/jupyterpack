@@ -19,11 +19,15 @@ export class CommManager {
       }
     }
     const params = url.searchParams.toString();
-    const pathAfterExtensionName = urlPath.split('/jupyterpack/static')[1];
-    const pathList = pathAfterExtensionName.split('/').filter(Boolean);
-    const instanceId = pathList[0];
-    const kernelClientId = pathList[2];
-
+    const pathAfterExtensionName: string | undefined = urlPath.split(
+      '/jupyterpack/static'
+    )[1];
+    const pathList = pathAfterExtensionName?.split('/').filter(Boolean);
+    const instanceId = pathList?.[0];
+    const kernelClientId = pathList?.[2];
+    if (!instanceId || !kernelClientId) {
+      return await fetch(url, { method });
+    }
     const comm = this._commIds.get(instanceId);
     if (!comm) {
       throw new Error('Missing comm');
