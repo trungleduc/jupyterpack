@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <body>
+    <script>
+      const pingUrl = window.location.href.replace('ping.html', 'ping');
+      async function ping() {
+        try {
+          const res = await fetch(pingUrl);
+        } catch (e) {
+          console.warn('Ping failed', e);
+        }
+        setTimeout(ping, 15000);
+      }
+
+      ping();
+    </script>
+  </body>
+</html>

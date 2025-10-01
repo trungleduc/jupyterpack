@@ -17,8 +17,7 @@ export interface IJupyterPackFileFormat {
 }
 
 export enum MessageAction {
-  INIT = 'INIT',
-  PING = 'PING'
+  INIT = 'INIT'
 }
 
 export interface IKernelExecutorParams {
