@@ -1,15 +1,16 @@
+import { PathExt } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { IDisposable } from '@lumino/disposable';
 import {
-  ServiceManager,
-  Session,
+  Contents,
   Kernel,
-  Contents
+  ServiceManager,
+  Session
 } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+
+import { PYTHON_SERVER } from '../pythonServer';
 import { IConnectionManager, IJupyterPackFileFormat } from '../type';
-import { KernelExecutor } from './kernelExecutor';
-import { PathExt } from '@jupyterlab/coreutils';
 
 export class PythonWidgetModel implements IDisposable {
   constructor(options: PythonWidgetModel.IOptions) {
@@ -17,6 +18,7 @@ export class PythonWidgetModel implements IDisposable {
     this._manager = options.manager;
     this._connectionManager = options.connectionManager;
     this._contentsManager = options.contentsManager;
+    this._jpackModel = options.jpackModel;
   }
 
   get isDisposed(): boolean {
@@ -25,16 +27,22 @@ export class PythonWidgetModel implements IDisposable {
   get connectionManager(): IConnectionManager {
     return this._connectionManager;
   }
-  async initialize(): Promise<{
-    instanceId: string;
-    kernelClientId: string;
-  } | null> {
+  async initialize(): Promise<
+    | {
+        success: true;
+        instanceId: string;
+        kernelClientId: string;
+      }
+    | { success: false; error: string }
+  > {
     if (this._kernelStarted) {
-      return null;
+      return {
+        success: false,
+        error: 'Server is called twice'
+      };
     }
     const filePath = this._context.localPath;
-    const spkContent =
-      this._context.model.toJSON() as any as IJupyterPackFileFormat;
+    const spkContent = this._jpackModel;
 
     const entryPath = PathExt.join(PathExt.dirname(filePath), spkContent.entry);
 
@@ -47,7 +55,10 @@ export class PythonWidgetModel implements IDisposable {
     await this._manager.kernelspecs.ready;
     const specs = this._manager.kernelspecs.specs;
     if (!specs) {
-      return null;
+      return {
+        success: false,
+        error: 'Missing kernel spec'
+      };
     }
     const { kernelspecs } = specs;
     let kernelName = Object.keys(kernelspecs)[0];
@@ -63,7 +74,15 @@ export class PythonWidgetModel implements IDisposable {
       },
       type: 'notebook'
     });
-    const executor = new KernelExecutor({
+    const framework = spkContent.framework;
+    const ServerClass = PYTHON_SERVER.get(framework);
+    if (!ServerClass) {
+      return {
+        success: false,
+        error: `Framework "${framework}" is not supported. Please check your .spk file.`
+      };
+    }
+    const executor = new ServerClass({
       sessionConnection: this._sessionConnection
     });
     const data = await this._connectionManager.registerConnection(executor);
@@ -82,7 +101,7 @@ export class PythonWidgetModel implements IDisposable {
 
     await finish.promise;
     this._kernelStarted = true;
-    return data;
+    return { ...data, success: true };
   }
   dispose(): void {
     this._isDisposed = true;
@@ -95,10 +114,12 @@ export class PythonWidgetModel implements IDisposable {
   private _context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
   private _connectionManager: IConnectionManager;
   private _contentsManager: Contents.IManager;
+  private _jpackModel: IJupyterPackFileFormat;
 }
 
 export namespace PythonWidgetModel {
   export interface IOptions {
+    jpackModel: IJupyterPackFileFormat;
     context: DocumentRegistry.IContext<DocumentRegistry.IModel>;
     manager: ServiceManager.IManager;
     connectionManager: IConnectionManager;

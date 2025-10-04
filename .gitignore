@@ -123,3 +123,5 @@ dmypy.json
 
 demo/_output
 *.doit.db
+
+generatedPythonFiles.ts

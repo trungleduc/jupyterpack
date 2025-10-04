@@ -7,7 +7,8 @@ export interface IDict<T = any> {
 
 export enum JupyterPackFramework {
   REACT = 'react',
-  DASH = 'dash'
+  DASH = 'dash',
+  STREAMLIT = 'streamlit'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
@@ -32,6 +33,11 @@ export interface IKernelExecutor extends IDisposable {
   executeCode(
     code: KernelMessage.IExecuteRequestMsg['content']
   ): Promise<string>;
+  init(options: {
+    initCode?: string;
+    instanceId: string;
+    kernelClientId: string;
+  }): Promise<void>;
 }
 
 export interface IConnectionManager {

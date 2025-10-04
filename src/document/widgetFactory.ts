@@ -49,8 +49,10 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
           content.addWidget(jpContent);
           break;
         }
-        case JupyterPackFramework.DASH: {
+        case JupyterPackFramework.DASH:
+        case JupyterPackFramework.STREAMLIT: {
           const model = new PythonWidgetModel({
+            jpackModel,
             context,
             manager: this.options.manager,
             contentsManager: this._contentsManager,

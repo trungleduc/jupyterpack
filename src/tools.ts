@@ -16,3 +16,7 @@ export function arrayBufferToBase64(buffer: ArrayBuffer) {
   }
   return btoa(binary);
 }
+
+export function stringOrNone(content?: string) {
+  return content ? `"${content}"` : 'None';
+}
