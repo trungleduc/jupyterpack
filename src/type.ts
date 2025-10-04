@@ -32,6 +32,11 @@ export interface IKernelExecutor extends IDisposable {
   executeCode(
     code: KernelMessage.IExecuteRequestMsg['content']
   ): Promise<string>;
+  init(options: {
+    initCode?: string;
+    instanceId: string;
+    kernelClientId: string;
+  }): Promise<void>;
 }
 
 export interface IConnectionManager {

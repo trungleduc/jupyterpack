@@ -4,7 +4,7 @@ import { KernelMessage, Session } from '@jupyterlab/services';
 import { arrayBufferToBase64 } from '../tools';
 import { IDict, IKernelExecutor } from '../type';
 
-export class KernelExecutor implements IKernelExecutor {
+export abstract class KernelExecutor implements IKernelExecutor {
   constructor(options: KernelExecutor.IOptions) {
     this._sessionConnection = options.sessionConnection;
   }
@@ -12,52 +12,21 @@ export class KernelExecutor implements IKernelExecutor {
   get isDisposed(): boolean {
     return this._isDisposed;
   }
-  async init(options: {
+
+  abstract getResponseFunctionFactory(options: {
+    urlPath: string;
+    method: string;
+    headers: IDict;
+    params?: string;
+    content?: string;
+  }): string;
+
+  abstract init(options: {
     initCode?: string;
     instanceId: string;
     kernelClientId: string;
-  }) {
-    const { initCode, instanceId, kernelClientId } = options;
-    const labBaseUrl = PageConfig.getOption('baseUrl');
-    const baseURL = URLExt.join(
-      labBaseUrl,
-      'extensions/jupyterpack/static',
-      instanceId,
-      'dash',
-      kernelClientId,
-      '/'
-    );
+  }): Promise<void>;
 
-    const osCode = `
-    import os
-    os.environ['DASH_URL_BASE_PATHNAME'] = '${baseURL}'
-    `;
-    await this.executeCode({ code: osCode });
-    if (initCode) {
-      await this.executeCode({ code: initCode });
-    }
-    const serverCode = `
-    import httpx, json, base64
-    __monstra_transport = httpx.WSGITransport(app=app.server)
-    def __monstra_get_response(method, url, headers, content=None, params=None):
-      decoded_content = None
-      if content is not None:
-        content = base64.b64decode(content)
-        decoded_content = content.decode()
-      with httpx.Client(transport=__monstra_transport, base_url="http://testserver") as client:
-        r = client.request(method, url, headers=headers, content=content, params=params)
-        response = {
-          "headers": dict(r.headers),
-          "content": r.text,
-          "status_code": r.status_code,
-          "original_request": {"method": method, "url": url, "content": decoded_content, "params": params, "headers": headers},
-        }
-        json_str = json.dumps(response)
-        b64_str = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
-        return b64_str
-    `;
-    await this.executeCode({ code: serverCode });
-  }
   async getResponse(options: {
     method: string;
     urlPath: string;
@@ -67,7 +36,13 @@ export class KernelExecutor implements IKernelExecutor {
   }): Promise<IDict> {
     const { method, urlPath, requestBody, params, headers } = options;
     const content = requestBody ? arrayBufferToBase64(requestBody) : undefined;
-    const code = `__monstra_get_response("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${content ? `"${content}"` : 'None'}, params=${params ? `"${params}"` : 'None'})`;
+    const code = this.getResponseFunctionFactory({
+      method,
+      urlPath,
+      headers,
+      params,
+      content
+    });
     const raw = await this.executeCode({ code });
     const jsonStr = atob(raw.slice(1, -1));
     const obj = JSON.parse(jsonStr);
@@ -127,6 +102,24 @@ export class KernelExecutor implements IKernelExecutor {
     }
     this._isDisposed = true;
     this._sessionConnection.dispose();
+  }
+
+  protected buildBaseURL(options: {
+    instanceId: string;
+    kernelClientId: string;
+  }) {
+    const { instanceId, kernelClientId } = options;
+    const labBaseUrl = PageConfig.getOption('baseUrl');
+    const baseURL = URLExt.join(
+      labBaseUrl,
+      'extensions/jupyterpack/static',
+      instanceId,
+      'dash',
+      kernelClientId,
+      '/'
+    );
+
+    return baseURL;
   }
 
   private _isDisposed: boolean = false;

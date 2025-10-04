@@ -1,15 +1,16 @@
+import { PathExt } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-import { IDisposable } from '@lumino/disposable';
 import {
-  ServiceManager,
-  Session,
+  Contents,
   Kernel,
-  Contents
+  ServiceManager,
+  Session
 } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
+
+import { PYTHON_SERVER } from '../pythonServer';
 import { IConnectionManager, IJupyterPackFileFormat } from '../type';
-import { KernelExecutor } from './kernelExecutor';
-import { PathExt } from '@jupyterlab/coreutils';
 
 export class PythonWidgetModel implements IDisposable {
   constructor(options: PythonWidgetModel.IOptions) {
@@ -63,7 +64,12 @@ export class PythonWidgetModel implements IDisposable {
       },
       type: 'notebook'
     });
-    const executor = new KernelExecutor({
+    const framework = spkContent.framework;
+    const ServerClass = PYTHON_SERVER.get(framework);
+    if (!ServerClass) {
+      return null;
+    }
+    const executor = new ServerClass({
       sessionConnection: this._sessionConnection
     });
     const data = await this._connectionManager.registerConnection(executor);
