@@ -1,6 +1,7 @@
 import { IKernelExecutor, JupyterPackFramework } from '../type';
 import { DashServer } from './dashServer';
 import { KernelExecutor } from './kernelExecutor';
+import { StreamlitServer } from './streamlit/streamlitServer';
 
 type KernelExecutorConstructor = new (
   options: KernelExecutor.IOptions
@@ -9,4 +10,7 @@ type KernelExecutorConstructor = new (
 export const PYTHON_SERVER = new Map<
   JupyterPackFramework,
   KernelExecutorConstructor
->([[JupyterPackFramework.DASH, DashServer]]);
+>([
+  [JupyterPackFramework.DASH, DashServer],
+  [JupyterPackFramework.STREAMLIT, StreamlitServer]
+]);

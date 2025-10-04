@@ -52,6 +52,7 @@ export class DashServer extends KernelExecutor {
   }) {
     const { method, urlPath, headers, params, content } = options;
     const code = `${this.DASH_GET_RESPONSE_FUNCTION}("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
+    console.log('code', code);
     return code;
   }
 

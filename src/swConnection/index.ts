@@ -8,7 +8,7 @@ import { expose } from 'comlink';
 
 import { IConnectionManagerToken } from '../token';
 import { IConnectionManager, MessageAction } from '../type';
-import { ConnectionManager } from './connection_manager';
+import { ConnectionManager } from './mainConnectionManager';
 
 const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
 const SCOPE = `${fullLabextensionsUrl}/jupyterpack/static`;

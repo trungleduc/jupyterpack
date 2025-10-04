@@ -57,6 +57,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
       throw new Error('Session has no kernel.');
     }
     return new Promise<string>((resolve, reject) => {
+      console.log('exectuing', code);
       const future = kernel.requestExecute(code, false, undefined);
       const parentMsgid = future.msg.header.msg_id;
       let executeResult = '';
