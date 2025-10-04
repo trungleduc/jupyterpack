@@ -7,7 +7,8 @@ export interface IDict<T = any> {
 
 export enum JupyterPackFramework {
   REACT = 'react',
-  DASH = 'dash'
+  DASH = 'dash',
+  STREAMLIT = 'streamlit'
 }
 export interface IJupyterPackFileFormat {
   entry: string;

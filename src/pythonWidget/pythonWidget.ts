@@ -7,7 +7,9 @@ export class PythonWidget extends IFramePanel {
     super();
     this._model = options.model;
     this._model.initialize().then(connectionData => {
-      if (!connectionData) {
+      if (!connectionData.success) {
+        this.toggleSpinner(false);
+        this._iframe.contentDocument!.body.innerText = `Failed to start server: ${connectionData.error}`;
         return;
       }
       const iframe = this._iframe;
