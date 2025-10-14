@@ -7,9 +7,10 @@ import path from 'path';
  * where each Python file becomes a string variable.
  * @param {string} pythonDir - Path to directory containing Python files
  */
-export function generatePythonTs(pythonDir) {
+export function generatePythonTs(pythonDir, outDir) {
   const absDir = path.resolve(pythonDir);
-  const outputTsFile = path.join(absDir, 'generatedPythonFiles.ts');
+  const absOutDir = path.resolve(outDir);
+  const outputTsFile = path.join(absOutDir, 'generatedPythonFiles.ts');
 
   if (!fs.existsSync(absDir)) {
     throw new Error(`Directory does not exist: ${absDir}`);
@@ -38,6 +39,7 @@ export function generatePythonTs(pythonDir) {
   console.log(`Generated ${outputTsFile} with ${files.length} Python files.`);
 }
 
-const STREAMLIT_PYTHON_DIR = 'src/pythonServer/streamlit';
+const STREAMLIT_PYTHON_DIR = 'src/pythonServer/streamlit/python';
+const STREAMLIT_OUT_DIR = 'src/pythonServer/streamlit';
 
-generatePythonTs(STREAMLIT_PYTHON_DIR);
+generatePythonTs(STREAMLIT_PYTHON_DIR, STREAMLIT_OUT_DIR);

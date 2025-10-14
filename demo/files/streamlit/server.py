@@ -8,3 +8,5 @@ def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
     ])
+
+app = make_app()

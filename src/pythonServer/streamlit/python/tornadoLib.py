@@ -1,6 +1,4 @@
-import base64
 import importlib.util
-import json
 import sys
 from types import ModuleType
 
@@ -23,26 +21,9 @@ def __jupyterpack_import_from_path(module_name: str, path: str) -> ModuleType:
     spec.loader.exec_module(module)
     return module
 
+if 'tornado.gen' in sys.modules:
+    del sys.modules['tornado.gen']
 
 tornado = __jupyterpack_import_from_path(
     "tornado", "/lib/python3.13/site-packages/tornado/__init__.py"
 )
-
-
-def __jupyterpack_streamlit_get_response(
-    method, url, headers, content=None, params=None
-):
-    response = {
-        "headers": dict(headers),
-        "content": "hello streamlit",
-        "status_code": 200,
-        "original_request": {
-            "method": method,
-            "url": url,
-            "params": params,
-            "headers": headers,
-        },
-    }
-    json_str = json.dumps(response)
-    b64_str = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
-    return b64_str

@@ -1,7 +1,7 @@
 import { stringOrNone } from '../../tools';
 import { IDict } from '../../type';
 import { KernelExecutor } from '../kernelExecutor';
-import { bootstrap } from './generatedPythonFiles';
+import { bootstrap, tornadoBridge, tornadoLib } from './generatedPythonFiles';
 export class StreamlitServer extends KernelExecutor {
   async init(options: {
     initCode?: string;
@@ -11,13 +11,14 @@ export class StreamlitServer extends KernelExecutor {
     const { initCode, instanceId, kernelClientId } = options;
 
     const baseURL = this.buildBaseURL({ instanceId, kernelClientId });
-    console.log('baseURL', baseURL);
-    await this.executeCode({ code: bootstrap });
+    await this.executeCode({ code: tornadoLib });
+    await this.executeCode({ code: tornadoBridge });
     if (initCode) {
       await this.executeCode({ code: initCode });
     }
-    const serverCode = '';
-    await this.executeCode({ code: serverCode });
+    await this.executeCode({
+      code: bootstrap.replaceAll('{{base_url}}', baseURL)
+    });
   }
 
   getResponseFunctionFactory(options: {
@@ -28,7 +29,7 @@ export class StreamlitServer extends KernelExecutor {
     content?: string;
   }) {
     const { method, urlPath, headers, params, content } = options;
-    const code = `${this.STREAMLIT_GET_RESPONSE_FUNCTION}("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
+    const code = `await ${this.STREAMLIT_GET_RESPONSE_FUNCTION}("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
     return code;
   }
 

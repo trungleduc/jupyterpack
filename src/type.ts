@@ -31,8 +31,9 @@ export interface IKernelExecutorParams {
 export interface IKernelExecutor extends IDisposable {
   getResponse(options: IKernelExecutorParams): Promise<IDict>;
   executeCode(
-    code: KernelMessage.IExecuteRequestMsg['content']
-  ): Promise<string>;
+    code: KernelMessage.IExecuteRequestMsg['content'],
+    waitForResult?: boolean
+  ): Promise<string | null>;
   init(options: {
     initCode?: string;
     instanceId: string;
