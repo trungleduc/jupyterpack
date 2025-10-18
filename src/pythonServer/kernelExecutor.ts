@@ -2,7 +2,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { arrayBufferToBase64 } from '../tools';
-import { IDict, IKernelExecutor } from '../type';
+import { IDict, IKernelExecutor, JupyterPackFramework } from '../type';
 
 export abstract class KernelExecutor implements IKernelExecutor {
   constructor(options: KernelExecutor.IOptions) {
@@ -12,6 +12,8 @@ export abstract class KernelExecutor implements IKernelExecutor {
   get isDisposed(): boolean {
     return this._isDisposed;
   }
+
+  abstract disposePythonServer(): Promise<void>;
 
   abstract getResponseFunctionFactory(options: {
     urlPath: string;
@@ -66,6 +68,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
       let executeResult = '';
       future.onIOPub = (msg: KernelMessage.IIOPubMessage): void => {
         const msgType = msg.header.msg_type;
+
         switch (msgType) {
           case 'execute_result': {
             if (waitForResult) {
@@ -77,8 +80,13 @@ export abstract class KernelExecutor implements IKernelExecutor {
             break;
           }
           case 'stream': {
-            const content = (msg as KernelMessage.IStreamMsg).content.text;
-            executeResult += content;
+            const content = (msg as KernelMessage.IStreamMsg).content;
+            if (content.name === 'stderr') {
+              console.error('Kernel operation failed', content.text);
+              reject(msg.content);
+            } else {
+              executeResult += content.text;
+            }
             break;
           }
           case 'error': {
@@ -108,14 +116,15 @@ export abstract class KernelExecutor implements IKernelExecutor {
   protected buildBaseURL(options: {
     instanceId: string;
     kernelClientId: string;
+    framework: JupyterPackFramework;
   }) {
-    const { instanceId, kernelClientId } = options;
+    const { instanceId, kernelClientId, framework } = options;
     const labBaseUrl = PageConfig.getOption('baseUrl');
     const baseURL = URLExt.join(
       labBaseUrl,
       'extensions/jupyterpack/static',
       instanceId,
-      'dash',
+      framework,
       kernelClientId,
       '/'
     );

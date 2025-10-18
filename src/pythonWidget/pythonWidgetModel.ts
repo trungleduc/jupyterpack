@@ -10,7 +10,12 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 
 import { PYTHON_SERVER } from '../pythonServer';
-import { IConnectionManager, IJupyterPackFileFormat } from '../type';
+import {
+  IConnectionManager,
+  IJupyterPackFileFormat,
+  IKernelExecutor,
+  JupyterPackFramework
+} from '../type';
 
 export class PythonWidgetModel implements IDisposable {
   constructor(options: PythonWidgetModel.IOptions) {
@@ -33,6 +38,7 @@ export class PythonWidgetModel implements IDisposable {
         instanceId: string;
         kernelClientId: string;
         rootUrl: string;
+        framework: JupyterPackFramework;
       }
     | { success: false; error: string }
   > {
@@ -83,9 +89,9 @@ export class PythonWidgetModel implements IDisposable {
         error: `Framework "${framework}" is not supported. Please check your .spk file.`
       };
     }
-    const executor = new ServerClass({
+    const executor = (this._executor = new ServerClass({
       sessionConnection: this._sessionConnection
-    });
+    }));
     const data = await this._connectionManager.registerConnection(executor);
     await executor.init({
       initCode: entryContent.content,
@@ -102,9 +108,13 @@ export class PythonWidgetModel implements IDisposable {
 
     await finish.promise;
     this._kernelStarted = true;
-    return { ...data, rootUrl, success: true };
+    return { ...data, rootUrl, framework, success: true };
   }
   dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    void this._executor?.disposePythonServer();
     this._isDisposed = true;
   }
 
@@ -116,6 +126,7 @@ export class PythonWidgetModel implements IDisposable {
   private _connectionManager: IConnectionManager;
   private _contentsManager: Contents.IManager;
   private _jpackModel: IJupyterPackFileFormat;
+  private _executor?: IKernelExecutor;
 }
 
 export namespace PythonWidgetModel {

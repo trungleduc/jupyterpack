@@ -40,6 +40,14 @@ export interface IKernelExecutor extends IDisposable {
     instanceId: string;
     kernelClientId: string;
   }): Promise<void>;
+  disposePythonServer(): Promise<void>;
+  getResponseFunctionFactory(options: {
+    urlPath: string;
+    method: string;
+    headers: IDict;
+    params?: string;
+    content?: string;
+  }): string;
 }
 
 export interface IConnectionManager {

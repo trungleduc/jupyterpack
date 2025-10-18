@@ -1,5 +1,5 @@
 import { stringOrNone } from '../tools';
-import { IDict } from '../type';
+import { IDict, JupyterPackFramework } from '../type';
 import { KernelExecutor } from './kernelExecutor';
 
 export class DashServer extends KernelExecutor {
@@ -10,7 +10,11 @@ export class DashServer extends KernelExecutor {
   }) {
     const { initCode, instanceId, kernelClientId } = options;
 
-    const baseURL = this.buildBaseURL({ instanceId, kernelClientId });
+    const baseURL = this.buildBaseURL({
+      instanceId,
+      kernelClientId,
+      framework: JupyterPackFramework.DASH
+    });
 
     const osCode = `
       import os
@@ -55,5 +59,8 @@ export class DashServer extends KernelExecutor {
     return code;
   }
 
+  async disposePythonServer(): Promise<void> {
+    //no-op
+  }
   private DASH_GET_RESPONSE_FUNCTION = '__jupyterpack_dash_get_response';
 }

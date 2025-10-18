@@ -1,5 +1,5 @@
 import { stringOrNone } from '../../tools';
-import { IDict } from '../../type';
+import { IDict, JupyterPackFramework } from '../../type';
 import { KernelExecutor } from '../kernelExecutor';
 import {
   bootstrap,
@@ -14,7 +14,11 @@ export class StreamlitServer extends KernelExecutor {
   }) {
     const { initCode, instanceId, kernelClientId } = options;
 
-    const baseURL = this.buildBaseURL({ instanceId, kernelClientId });
+    const baseURL = this.buildBaseURL({
+      instanceId,
+      kernelClientId,
+      framework: JupyterPackFramework.STREAMLIT
+    });
     await this.executeCode({ code: bootstrap });
     await this.executeCode({ code: tornadoBridge });
     if (initCode) {
@@ -38,6 +42,12 @@ export class StreamlitServer extends KernelExecutor {
     const { method, urlPath, headers, params, content } = options;
     const code = `await ${this.STREAMLIT_GET_RESPONSE_FUNCTION}("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
     return code;
+  }
+
+  async disposePythonServer(): Promise<void> {
+    await this.executeCode({
+      code: '__jupyterpack_streamlit_dispose()'
+    });
   }
 
   private STREAMLIT_GET_RESPONSE_FUNCTION =

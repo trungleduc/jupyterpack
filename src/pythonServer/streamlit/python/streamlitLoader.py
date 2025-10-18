@@ -1,46 +1,52 @@
-import tempfile
 import base64
 import json
 
+try:
+    # Check if __jupyterpack_streamlit_instance defined from previous run
+    __jupyterpack_streamlit_instance
+except NameError:
+    __jupyterpack_streamlit_instance = {
+        "tornado_bridge": None,
+        "streamlit_server": None,
+    }
 
-def create_app():
-    from streamlit import config
-    import streamlit.web.server.server as st_server
-    config.set_option("server.baseUrlPath", "{{base_url}}")
 
-    config.set_option("server.port", 3001)
-    config.set_option("server.enableCORS", False)
-    config.set_option("server.enableXsrfProtection", False)
+def __jupyterpack_streamlit_dispose():
+    global __jupyterpack_streamlit_instance
+    streamlit_server = __jupyterpack_streamlit_instance.get("streamlit_server", None)
+    if streamlit_server:
+        streamlit_server._runtime.stop()
 
-    st_script = '''
-    {{script_content}}
-    '''
+    __jupyterpack_streamlit_instance = {
+        "tornado_bridge": None,
+        "streamlit_server": None,
+    }
+    del streamlit_server
 
-    with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.py') as tmp:
-        tmp.write(st_script)
-        script_path = tmp.name 
-
-    streamlit_server = st_server.Server(script_path, True)
-
-    return streamlit_server
-
-__jupyterpack_tornado_bridge = None
 
 async def __jupyterpack_streamlit_get_response(
     method, url, headers, content=None, params=None
 ):
-
-    global __jupyterpack_tornado_bridge
-    if not __jupyterpack_tornado_bridge:
-        streamlit_server = create_app()
+    global __jupyterpack_streamlit_instance
+    if not __jupyterpack_streamlit_instance["streamlit_server"]:
+        streamlit_server = create_app("{{base_url}}", """{{script_content}}""")  # noqa
         app = streamlit_server._create_app()
         await streamlit_server._runtime.start()
-        __jupyterpack_tornado_bridge = TornadoBridge(app, "{{base_url}}") # noqa
+        __jupyterpack_streamlit_instance["streamlit_server"] = streamlit_server
+        __jupyterpack_streamlit_instance["tornado_bridge"] = TornadoBridge(
+            app, "{{base_url}}"
+        )
 
-    req_dict= {'method': method, 'url': url, 'headers': list(headers.items()), 'body': content}
-    
+    tornado_bridge = __jupyterpack_streamlit_instance["tornado_bridge"]
+    req_dict = {
+        "method": method,
+        "url": url,
+        "headers": list(headers.items()),
+        "body": content,
+    }
+
     try:
-        res_body, res_headers, res_status = await __jupyterpack_tornado_bridge.fetch(req_dict)
+        res_body, res_headers, res_status = await tornado_bridge.fetch(req_dict)
         response = {
             "headers": dict(res_headers),
             "content": res_body,

@@ -19,11 +19,13 @@ export class PythonWidget extends IFramePanel {
         fullLabextensionsUrl,
         'jupyterpack/static',
         connectionData.instanceId,
-        'dash',
+        connectionData.framework,
         connectionData.kernelClientId,
         connectionData.rootUrl
       );
+
       iframe.src = iframeUrl;
+
       iframe.addEventListener('load', () => {
         this.toggleSpinner(false);
       });
@@ -32,6 +34,10 @@ export class PythonWidget extends IFramePanel {
 
   get model(): PythonWidgetModel {
     return this._model;
+  }
+
+  dispose(): void {
+    this._model.dispose();
   }
 
   private _model: PythonWidgetModel;

@@ -2,11 +2,13 @@ import importlib.util
 import sys
 from types import ModuleType
 import os
-
+import tempfile
 
 import collections
-if not hasattr(collections, 'MutableSet'):
+
+if not hasattr(collections, "MutableSet"):
     import collections.abc
+
     collections.MutableSet = collections.abc.MutableSet
 
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
@@ -30,10 +32,34 @@ def __jupyterpack_import_from_path(module_name: str, path: str) -> ModuleType:
     spec.loader.exec_module(module)
     return module
 
-if 'tornado.gen' in sys.modules:
-    del sys.modules['tornado.gen']
+
+if "tornado.gen" in sys.modules:
+    del sys.modules["tornado.gen"]
 
 tornado = __jupyterpack_import_from_path(
     "tornado", "/lib/python3.13/site-packages/tornado/__init__.py"
 )
 
+
+def create_app(base_url, script_content):
+    from streamlit import config
+    import streamlit.web.server.server as st_server
+    from streamlit.runtime.runtime import Runtime
+    
+    if Runtime._instance is not None:
+        Runtime._instance.stop()
+        Runtime._instance = None
+    config.set_option("server.baseUrlPath", base_url)
+
+    config.set_option("server.port", 3001)
+    config.set_option("server.enableCORS", False)
+    config.set_option("server.enableXsrfProtection", False)
+
+    st_script = script_content
+
+    with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".py") as tmp:
+        tmp.write(st_script)
+        script_path = tmp.name
+
+    streamlit_server = st_server.Server(script_path, True)
+    return streamlit_server
