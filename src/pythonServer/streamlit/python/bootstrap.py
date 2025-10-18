@@ -1,40 +1,39 @@
-import base64
-import json
+import importlib.util
+import sys
+from types import ModuleType
+import os
 
 
-__jupyterpack_tornado_bridge = TornadoBridge(app, "{{base_url}}")
+import collections
+if not hasattr(collections, 'MutableSet'):
+    import collections.abc
+    collections.MutableSet = collections.abc.MutableSet
 
-async def __jupyterpack_streamlit_get_response(
-    method, url, headers, content=None, params=None
-):
-    
-    req_dict= {'method': method, 'url': url, 'headers': list(headers.items()), 'body': content}
-    
-    try:
-        res_body, res_headers, res_status = await __jupyterpack_tornado_bridge.fetch(req_dict)
-        response = {
-            "headers": dict(res_headers),
-            "content": res_body,
-            "status_code": res_status,
-            "original_request": {
-                "method": method,
-                "url": url,
-                "params": params,
-                "headers": headers,
-            },
-        }
-    except Exception as e:
-        response = {
-            "headers": {},
-            "content": str(e),
-            "status_code": 500,
-            "original_request": {
-                "method": method,
-                "url": url,
-                "params": params,
-                "headers": headers,
-            },
-        }
-    json_str = json.dumps(response)
-    b64_str = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
-    return b64_str
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+
+
+def __jupyterpack_import_from_path(module_name: str, path: str) -> ModuleType:
+    """
+    Import a Python module from a given file path.
+    Always reloads (does not use sys.modules cache).
+    """
+    # Remove from sys.modules if already loaded
+    if module_name in sys.modules:
+        del sys.modules[module_name]
+
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Cannot import module {module_name} from {path}")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+if 'tornado.gen' in sys.modules:
+    del sys.modules['tornado.gen']
+
+tornado = __jupyterpack_import_from_path(
+    "tornado", "/lib/python3.13/site-packages/tornado/__init__.py"
+)
+

@@ -32,6 +32,7 @@ export class PythonWidgetModel implements IDisposable {
         success: true;
         instanceId: string;
         kernelClientId: string;
+        rootUrl: string;
       }
     | { success: false; error: string }
   > {
@@ -45,7 +46,7 @@ export class PythonWidgetModel implements IDisposable {
     const spkContent = this._jpackModel;
 
     const entryPath = PathExt.join(PathExt.dirname(filePath), spkContent.entry);
-
+    const rootUrl = spkContent.rootUrl ?? '/';
     const entryContent = await this._contentsManager.get(entryPath, {
       content: true,
       format: 'text'
@@ -101,7 +102,7 @@ export class PythonWidgetModel implements IDisposable {
 
     await finish.promise;
     this._kernelStarted = true;
-    return { ...data, success: true };
+    return { ...data, rootUrl, success: true };
   }
   dispose(): void {
     this._isDisposed = true;

@@ -1,5 +1,5 @@
 import { PythonWidgetModel } from './pythonWidgetModel';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IFramePanel } from '../document/iframePanel';
 
 export class PythonWidget extends IFramePanel {
@@ -14,7 +14,16 @@ export class PythonWidget extends IFramePanel {
       }
       const iframe = this._iframe;
       const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
-      iframe.src = `${fullLabextensionsUrl}/jupyterpack/static/${connectionData.instanceId}/dash/${connectionData.kernelClientId}/`;
+
+      const iframeUrl = URLExt.join(
+        fullLabextensionsUrl,
+        'jupyterpack/static',
+        connectionData.instanceId,
+        'dash',
+        connectionData.kernelClientId,
+        connectionData.rootUrl
+      );
+      iframe.src = iframeUrl;
       iframe.addEventListener('load', () => {
         this.toggleSpinner(false);
       });

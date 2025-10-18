@@ -1,7 +1,11 @@
 import { stringOrNone } from '../../tools';
 import { IDict } from '../../type';
 import { KernelExecutor } from '../kernelExecutor';
-import { bootstrap, tornadoBridge, tornadoLib } from './generatedPythonFiles';
+import {
+  bootstrap,
+  tornadoBridge,
+  streamlitLoader
+} from './generatedPythonFiles';
 export class StreamlitServer extends KernelExecutor {
   async init(options: {
     initCode?: string;
@@ -11,10 +15,13 @@ export class StreamlitServer extends KernelExecutor {
     const { initCode, instanceId, kernelClientId } = options;
 
     const baseURL = this.buildBaseURL({ instanceId, kernelClientId });
-    await this.executeCode({ code: tornadoLib });
+    await this.executeCode({ code: bootstrap });
     await this.executeCode({ code: tornadoBridge });
     if (initCode) {
-      await this.executeCode({ code: initCode });
+      const stCode = streamlitLoader
+        .replaceAll('{{base_url}}', baseURL)
+        .replaceAll('{{script_content}}', initCode);
+      await this.executeCode({ code: stCode });
     }
     await this.executeCode({
       code: bootstrap.replaceAll('{{base_url}}', baseURL)

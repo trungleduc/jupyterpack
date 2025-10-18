@@ -1,12 +1,11 @@
-import tornado
+import streamlit as st
 
-class MainHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.write("Hello, world")
+st.title("Hello, Streamlit! 👋")
+st.write("Welcome to your first Streamlit app.")
+st.write("This text is rendered directly from Python code.")
 
-def make_app():
-    return tornado.web.Application([
-        (r"/", MainHandler),
-    ])
+st.title("Hello, Streamlit! 👋")
 
-app = make_app()
+name = st.text_input("What's your name?")
+if name:
+    st.success(f"Nice to meet you, {name}!")

@@ -5,7 +5,6 @@ import tornado
 from tornado.http1connection import HTTP1Connection, HTTP1ConnectionParameters
 from tornado.iostream import BaseIOStream, IOStream
 from tornado.httputil import HTTPHeaders, RequestStartLine, HTTPServerRequest
-from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 
@@ -140,10 +139,7 @@ class TornadoBridge:
         request_headers = convert_headers(request.get("headers", []))
         request_method = request.get("method", "GET").upper()
         request_url: str = request.get("url", "/")
-        if request_url.startswith(self.base_url):
-            request_url = request_url[len(self.base_url) :]
-            if request_url == '':
-                request_url = '/'
+
         request_body = request.get("body", None)
         stream = DumpStream()
 
@@ -170,7 +166,6 @@ class TornadoBridge:
         handler.execute()
         connection_state = connection.connection_state
         await connection_state.finish_future
-        await asyncio.sleep(5)
         return (
             connection_state.reply_body,
             connection_state.reply_headers,

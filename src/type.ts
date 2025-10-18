@@ -15,6 +15,7 @@ export interface IJupyterPackFileFormat {
   framework: JupyterPackFramework;
   name?: string;
   metadata?: IDict;
+  rootUrl?: string;
 }
 
 export enum MessageAction {

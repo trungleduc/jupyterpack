@@ -43,13 +43,14 @@ export abstract class KernelExecutor implements IKernelExecutor {
       params,
       content
     });
+    console.log('############# REQUESTING', method, urlPath, requestBody);
     const raw = await this.executeCode({ code }, true);
     if (!raw) {
       throw new Error(`Missing response for ${urlPath}`);
     }
     const jsonStr = atob(raw.slice(1, -1));
     const obj = JSON.parse(jsonStr);
-
+    console.log('$$$$$$$$$$$$ RESPONSE', obj);
     return obj;
   }
   async executeCode(
@@ -63,35 +64,35 @@ export abstract class KernelExecutor implements IKernelExecutor {
     return new Promise<string | null>((resolve, reject) => {
       const future = kernel.requestExecute(code, false, undefined);
       let executeResult = '';
+      future.onIOPub = (msg: KernelMessage.IIOPubMessage): void => {
+        const msgType = msg.header.msg_type;
+        switch (msgType) {
+          case 'execute_result': {
+            if (waitForResult) {
+              const content = (msg as KernelMessage.IExecuteResultMsg).content
+                .data['text/plain'] as string;
+              executeResult += content;
+              resolve(executeResult);
+            }
+            break;
+          }
+          case 'stream': {
+            const content = (msg as KernelMessage.IStreamMsg).content.text;
+            executeResult += content;
+            break;
+          }
+          case 'error': {
+            console.error('Kernel operation failed', msg.content);
+            reject(msg.content);
+            break;
+          }
+          default:
+            break;
+        }
+      };
       if (!waitForResult) {
         resolve(null);
-      } else {
-        future.onIOPub = (msg: KernelMessage.IIOPubMessage): void => {
-          const msgType = msg.header.msg_type;
-          switch (msgType) {
-            case 'execute_result': {
-              if (waitForResult) {
-                const content = (msg as KernelMessage.IExecuteResultMsg).content
-                  .data['text/plain'] as string;
-                executeResult += content;
-                resolve(executeResult);
-              }
-              break;
-            }
-            case 'stream': {
-              const content = (msg as KernelMessage.IStreamMsg).content.text;
-              executeResult += content;
-              break;
-            }
-            case 'error': {
-              console.error('Kernel operation failed', msg.content);
-              reject(msg.content);
-              break;
-            }
-            default:
-              break;
-          }
-        };
+        // future.dispose() # TODO
       }
     });
   }
