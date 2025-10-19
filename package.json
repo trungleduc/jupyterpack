@@ -103,7 +103,8 @@
     },
     "jupyterlab": {
         "extension": true,
-        "outputDir": "jupyterpack/labextension"
+        "outputDir": "jupyterpack/labextension",
+        "webpackConfig": "./extension.webpack.config.js"
     },
     "eslintIgnore": [
         "node_modules",

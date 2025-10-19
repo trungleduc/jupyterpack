@@ -3,10 +3,12 @@ import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { arrayBufferToBase64 } from '../tools';
 import { IDict, IKernelExecutor, JupyterPackFramework } from '../type';
+import websocketPatch from '../websocket/websocket.js?raw';
 
 export abstract class KernelExecutor implements IKernelExecutor {
   constructor(options: KernelExecutor.IOptions) {
     this._sessionConnection = options.sessionConnection;
+    this._wsPatch = websocketPatch.replaceAll('"use strict";', '');
   }
 
   get isDisposed(): boolean {
@@ -52,7 +54,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
     }
     const jsonStr = atob(raw.slice(1, -1));
     const obj = JSON.parse(jsonStr);
-    console.log('$$$$$$$$$$$$ RESPONSE', obj);
+    this._applyWsPatch(obj);
     return obj;
   }
   async executeCode(
@@ -82,7 +84,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
           case 'stream': {
             const content = (msg as KernelMessage.IStreamMsg).content;
             if (content.name === 'stderr') {
-              console.error('Kernel operation failed', content.text);
+              console.error('Kernel operation failed', code.code, content.text);
               reject(msg.content);
             } else {
               executeResult += content.text;
@@ -90,7 +92,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
             break;
           }
           case 'error': {
-            console.error('Kernel operation failed', msg.content);
+            console.error('Kernel operation failed', code.code, msg.content);
             reject(msg.content);
             break;
           }
@@ -132,8 +134,25 @@ export abstract class KernelExecutor implements IKernelExecutor {
     return baseURL;
   }
 
+  private _applyWsPatch(originalResponse: {
+    content: string;
+    headers: IDict<string>;
+  }) {
+    const { content, headers } = originalResponse;
+    const isHtml =
+      headers?.['Content-Type'] === 'text/html' ||
+      headers?.['content-type'] === 'text/html';
+    if (isHtml) {
+      originalResponse.content = content.replace(
+        '<head>',
+        `<head>\n<script>\n${this._wsPatch}\n</script>\n`
+      );
+    }
+  }
+
   private _isDisposed: boolean = false;
   private _sessionConnection: Session.ISessionConnection;
+  private _wsPatch: string;
 }
 
 export namespace KernelExecutor {

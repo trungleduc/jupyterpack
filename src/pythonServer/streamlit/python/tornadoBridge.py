@@ -45,7 +45,7 @@ class ConnectionState:
     @property
     def reply_body(self):
         if isinstance(self._reply_body, bytes):
-            return self._reply_body.decode('utf-8')
+            return self._reply_body.decode("utf-8")
         return self._reply_body
 
     @property
@@ -106,8 +106,6 @@ class PatchedConnection(HTTP1Connection):
         self._connection_state.append_reply_header(headers.get_all())
         if chunk:
             self._connection_state.append_reply_body(chunk)
-        # if any(v.lower().startswith("text/html") for _, v in reply_headers):
-        #     is_html = True
         f = asyncio.Future()
         f.set_result(None)
         return f
@@ -166,6 +164,7 @@ class TornadoBridge:
         handler.execute()
         connection_state = connection.connection_state
         await connection_state.finish_future
+
         return (
             connection_state.reply_body,
             connection_state.reply_headers,

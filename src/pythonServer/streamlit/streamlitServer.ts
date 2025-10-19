@@ -27,9 +27,6 @@ export class StreamlitServer extends KernelExecutor {
         .replaceAll('{{script_content}}', initCode);
       await this.executeCode({ code: stCode });
     }
-    await this.executeCode({
-      code: bootstrap.replaceAll('{{base_url}}', baseURL)
-    });
   }
 
   getResponseFunctionFactory(options: {
