@@ -66,7 +66,6 @@ export const swPlugin: JupyterFrontEndPlugin<IConnectionManager> = {
   autoStart: true,
   provides: IConnectionManagerToken,
   activate: async (app: JupyterFrontEnd): Promise<IConnectionManager> => {
-    console.log('Activating jupyterpack service worker');
     const serviceWorker = await initServiceWorker();
     if (!serviceWorker) {
       throw new Error(
@@ -75,6 +74,10 @@ export const swPlugin: JupyterFrontEndPlugin<IConnectionManager> = {
     }
 
     const instanceId = UUID.uuid4();
+    console.log(
+      'Activating jupyterpack service worker with instance id',
+      instanceId
+    );
     const { port1: mainToServiceWorker, port2: serviceWorkerToMain } =
       new MessageChannel();
 

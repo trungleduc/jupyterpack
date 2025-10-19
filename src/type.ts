@@ -5,6 +5,12 @@ export interface IDict<T = any> {
   [key: string]: T;
 }
 
+export interface IBroadcastMessage {
+  action: 'message' | 'open' | 'close' | 'error' | 'send' | 'connected';
+  dest: string;
+  payload?: any;
+}
+
 export enum JupyterPackFramework {
   REACT = 'react',
   DASH = 'dash',
