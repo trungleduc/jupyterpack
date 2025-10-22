@@ -1,4 +1,9 @@
-import { IConnectionManager, IDict, IKernelExecutor } from '../type';
+import {
+  IBroadcastMessage,
+  IConnectionManager,
+  IDict,
+  IKernelExecutor
+} from '../type';
 import { UUID } from '@lumino/coreutils';
 
 /**
@@ -53,24 +58,40 @@ export class ConnectionManager implements IConnectionManager {
   }
   private _initWsChannel() {
     this._wsBroadcastChannel.onmessage = event => {
-      const { action, dest, payload } = event.data;
+      const rawData = event.data;
+      let data: IBroadcastMessage;
+      if (typeof rawData === 'string') {
+        data = JSON.parse(rawData);
+      } else {
+        data = rawData;
+      }
+
+      const { action, dest, wsUrl, payload } = data;
       const executor = this._kernelExecutors.get(dest);
       if (!executor) {
-        console.error('Missing kernel handle for message', event.data);
+        console.error(
+          'Missing kernel handle for message',
+          data,
+          dest,
+          this._kernelExecutors
+        );
         return;
       }
 
       switch (action) {
         case 'open': {
-          console.log('dest', dest, payload);
-          this._wsBroadcastChannel.postMessage({
-            action: 'connected',
-            dest,
-            payload: null
+          executor.openWebsocket({
+            instanceId: this.instanceId,
+            kernelId: dest,
+            wsUrl,
+            protocol: payload.protocol
           });
           break;
         }
-
+        case 'send': {
+          console.log('sending data to', dest, wsUrl, payload);
+          break;
+        }
         default:
           break;
       }

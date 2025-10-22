@@ -11,8 +11,16 @@
   }
 
   interface IBroadcastMessage {
-    action: 'message' | 'open' | 'close' | 'error' | 'send' | 'connected';
+    action:
+      | 'message'
+      | 'open'
+      | 'close'
+      | 'error'
+      | 'send'
+      | 'connected'
+      | 'backend_message';
     dest: string;
+    wsUrl: string;
     payload?: any;
   }
 
@@ -24,9 +32,11 @@
 
   class BroadcastChannelWebSocket implements WebSocket {
     constructor(url: string | URL, protocols?: string | string[]) {
-      console.log('BroadcastChannelWebSocket constructor', url, protocols);
+      const urlObj = new URL(url);
+      // TODO: handle protocols
       // this._protocols = protocols;
-      this.url = url.toString();
+      this.url = urlObj.pathname + urlObj.search + urlObj.hash;
+      console.log('BroadcastChannelWebSocket constructor', this.url, protocols);
       if (protocols) {
         this.protocol = Array.isArray(protocols)
           ? protocols.join(',')
@@ -58,20 +68,34 @@
         console.log('BroadcastChannelWebSocket default onopen called');
       };
     close(code?: unknown, reason?: unknown): void {
+      if (this.readyState === this.CLOSED) {
+        return;
+      }
       console.log('BroadcastChannelWebSocket close called', code, reason);
-      sendTypedMessage({
-        action: 'close'
-      });
+      // sendTypedMessage({
+      //   action: 'close',
+      //   wsUrl: this.url
+      // });
       if (this.onclose) {
         this.onclose();
       }
-      this._eventHandlers['close'].forEach(handler => handler());
+      while (this._eventHandlers['close'].length) {
+        const cb = this._eventHandlers['close'].pop();
+        console.log('calling', cb);
+        cb();
+      }
+      // this._eventHandlers['close'].forEach(handler => handler());
+      this._eventHandlers['close'] = [];
+      bcWsChannel.removeEventListener('message', this._bcMessageHandler);
+
       this.readyState = this.CLOSED;
     }
     send(data: unknown): void {
+      console.log('SENDING DATA', data);
       sendTypedMessage({
         action: 'send',
-        payload: data
+        payload: data,
+        wsUrl: this.url
       });
     }
 
@@ -80,7 +104,6 @@
       listener: unknown,
       options?: unknown
     ): void {
-      console.log('addEventListener', type, listener, options);
       this._eventHandlers[type].push(listener);
     }
     removeEventListener(
@@ -116,45 +139,56 @@
       error: any[];
     } = { message: [], open: [], close: [], error: [] };
 
+    private _bcMessageHandler = async (event: MessageEvent) => {
+      console.log('BC RECEIVED', event.data);
+
+      const rawData = event.data;
+      let data: IBroadcastMessage;
+      if (typeof rawData === 'string') {
+        data = JSON.parse(rawData);
+      } else {
+        data = rawData;
+      }
+      const { action, dest, wsUrl, payload } = data;
+      if (dest !== kernelClientId || wsUrl !== this.url) {
+        return;
+      }
+      switch (action) {
+        case 'connected': {
+          this.readyState = this.OPEN;
+
+          if (this.onopen) {
+            this.onopen(event);
+          }
+          this._eventHandlers.open.forEach(handler =>
+            handler({ data: payload })
+          );
+          break;
+        }
+
+        case 'message': {
+          if (this.onmessage) {
+            this.onmessage({ data: payload });
+          }
+          this._eventHandlers.message.forEach(handler =>
+            handler({ data: payload })
+          );
+          break;
+        }
+        default:
+          break;
+      }
+    };
     private _open = () => {
       sendTypedMessage({
         action: 'open',
         payload: {
           protocol: this.protocol
-        }
+        },
+        wsUrl: this.url
       });
 
-      bcWsChannel.addEventListener('message', async event => {
-        const { action, dest, payload } = event.data as IBroadcastMessage;
-        if (dest !== kernelClientId) {
-          return;
-        }
-        switch (action) {
-          case 'connected': {
-            this.readyState = this.OPEN;
-
-            if (this.onopen) {
-              this.onopen(event);
-            }
-            this._eventHandlers.open.forEach(handler =>
-              handler({ data: payload })
-            );
-            break;
-          }
-
-          case 'message': {
-            if (this.onmessage) {
-              this.onmessage({ data: payload });
-            }
-            this._eventHandlers.message.forEach(handler =>
-              handler({ data: payload })
-            );
-            break;
-          }
-          default:
-            break;
-        }
-      });
+      bcWsChannel.addEventListener('message', this._bcMessageHandler);
     };
   }
 

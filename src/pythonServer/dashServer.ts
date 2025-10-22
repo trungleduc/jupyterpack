@@ -62,5 +62,15 @@ export class DashServer extends KernelExecutor {
   async disposePythonServer(): Promise<void> {
     //no-op
   }
+
+  async openWebsocket(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    protocol?: string;
+  }): Promise<void> {
+    //no-op
+  }
+
   private DASH_GET_RESPONSE_FUNCTION = '__jupyterpack_dash_get_response';
 }

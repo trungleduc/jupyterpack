@@ -3,7 +3,6 @@ import sys
 from types import ModuleType
 import os
 import tempfile
-
 import collections
 
 if not hasattr(collections, "MutableSet"):
@@ -41,11 +40,28 @@ tornado = __jupyterpack_import_from_path(
 )
 
 
-def create_app(base_url, script_content):
+class WatcherMock:
+    def __init__(
+        self,
+        path,
+        callback,
+        glob_pattern: str | None = None,
+        allow_nonexistent: bool = False,
+    ) -> None:
+        pass
+
+def __jupyterpack_create_streamlit_app(base_url, script_content):
     from streamlit import config
     import streamlit.web.server.server as st_server
     from streamlit.runtime.runtime import Runtime
-    
+    import streamlit.watcher.path_watcher
+
+    streamlit.watcher.path_watcher.watchdog_available = False
+    streamlit.watcher.path_watcher.EventBasedPathWatcher = WatcherMock
+    streamlit.watcher.path_watcher._is_watchdog_available = lambda: False
+    streamlit.watcher.path_watcher.get_path_watcher_class = lambda x: WatcherMock
+
+
     if Runtime._instance is not None:
         Runtime._instance.stop()
         Runtime._instance = None
@@ -63,3 +79,25 @@ def create_app(base_url, script_content):
 
     streamlit_server = st_server.Server(script_path, True)
     return streamlit_server
+
+
+# __jupyterpack_js_broadcast_message = pyjs.js.Function(
+#     "instanceId",
+#     "kernelId",
+#     "wsUrl",
+#     "b64Message",
+#     """
+#     if (!self.__jupyterpack__ws_broadcastChannel) {
+#         console.log('Creating broadcast channel in kernel worker');
+#         const channelName = '/jupyterpack/ws/' + instanceId;
+#         self.__jupyterpack__ws_broadcastChannel = new BroadcastChannel(channelName);
+#     }
+#     self.__jupyterpack__ws_broadcastChannel.postMessage({
+#         action: 'backend_message',
+#         dest: kernelId,
+#         wsUrl: wsUrl,
+#         payload: b64Message
+#     });
+# """,
+# )
+

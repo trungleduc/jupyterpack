@@ -47,6 +47,18 @@ export class StreamlitServer extends KernelExecutor {
     });
   }
 
+  async openWebsocket(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    protocol?: string;
+  }): Promise<void> {
+    const { instanceId, kernelId, wsUrl, protocol } = options;
+
+    const code = `await __jupyterpack_streamlit_open_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
+    await this.executeCode({ code });
+  }
+
   private STREAMLIT_GET_RESPONSE_FUNCTION =
     '__jupyterpack_streamlit_get_response';
 }

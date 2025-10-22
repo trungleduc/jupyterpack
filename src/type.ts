@@ -6,8 +6,16 @@ export interface IDict<T = any> {
 }
 
 export interface IBroadcastMessage {
-  action: 'message' | 'open' | 'close' | 'error' | 'send' | 'connected';
+  action:
+    | 'message'
+    | 'open'
+    | 'close'
+    | 'error'
+    | 'send'
+    | 'connected'
+    | 'backend_message';
   dest: string;
+  wsUrl: string;
   payload?: any;
 }
 
@@ -37,6 +45,12 @@ export interface IKernelExecutorParams {
 }
 export interface IKernelExecutor extends IDisposable {
   getResponse(options: IKernelExecutorParams): Promise<IDict>;
+  openWebsocket(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    protocol?: string;
+  }): Promise<void>;
   executeCode(
     code: KernelMessage.IExecuteRequestMsg['content'],
     waitForResult?: boolean

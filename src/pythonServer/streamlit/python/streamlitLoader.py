@@ -24,12 +24,34 @@ def __jupyterpack_streamlit_dispose():
     del streamlit_server
 
 
+async def __jupyterpack_streamlit_open_ws(
+    instance_id: str, kernel_client_id: str, ws_url: str, protocols_str: str | None
+):
+    tornado_bridge = __jupyterpack_streamlit_instance["tornado_bridge"]
+    if tornado_bridge is None:
+        raise Exception("Missing tornado instance")
+    await tornado_bridge.open_ws(instance_id, kernel_client_id, ws_url, protocols_str)
+
+
+async def __jupyterpack_streamlit_receive_ws_message(
+    instance_id: str, kernel_client_id: str, ws_url: str, payload_message: str
+):
+    tornado_bridge = __jupyterpack_streamlit_instance["tornado_bridge"]
+    if tornado_bridge is None:
+        raise Exception("Missing tornado instance")
+    await tornado_bridge.receive_ws_message_from_js(
+        instance_id, kernel_client_id, ws_url, payload_message
+    )
+
+
 async def __jupyterpack_streamlit_get_response(
     method, url, headers, content=None, params=None
 ):
     global __jupyterpack_streamlit_instance
     if not __jupyterpack_streamlit_instance["streamlit_server"]:
-        streamlit_server = create_app("{{base_url}}", """{{script_content}}""")  # noqa
+        streamlit_server = __jupyterpack_create_streamlit_app(
+            "{{base_url}}", """{{script_content}}"""
+        )  # noqa
         app = streamlit_server._create_app()
         await streamlit_server._runtime.start()
         __jupyterpack_streamlit_instance["streamlit_server"] = streamlit_server

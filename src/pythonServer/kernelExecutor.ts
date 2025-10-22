@@ -31,6 +31,13 @@ export abstract class KernelExecutor implements IKernelExecutor {
     kernelClientId: string;
   }): Promise<void>;
 
+  abstract openWebsocket(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    protocol?: string;
+  }): Promise<void>;
+
   async getResponse(options: {
     method: string;
     urlPath: string;
@@ -47,7 +54,6 @@ export abstract class KernelExecutor implements IKernelExecutor {
       params,
       content
     });
-    console.log('############# REQUESTING', method, urlPath, requestBody);
     const raw = await this.executeCode({ code }, true);
     if (!raw) {
       throw new Error(`Missing response for ${urlPath}`);
@@ -84,9 +90,10 @@ export abstract class KernelExecutor implements IKernelExecutor {
           case 'stream': {
             const content = (msg as KernelMessage.IStreamMsg).content;
             if (content.name === 'stderr') {
-              console.error('Kernel operation failed', code.code, content.text);
-              reject(msg.content);
+              console.error('Kernel operation failed', content.text);
+              // reject(msg.content);
             } else {
+              console.log('##', content.text);
               executeResult += content.text;
             }
             break;
