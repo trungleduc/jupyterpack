@@ -1,6 +1,6 @@
 // import { expose } from 'comlink';
 import { MessageAction } from '../type';
-import { CommManager } from './comm_manager';
+import { CommManager } from './swCommManager';
 
 const COMM_MANAGER = new CommManager();
 /**

@@ -5,15 +5,31 @@ export interface IDict<T = any> {
   [key: string]: T;
 }
 
+export interface IBroadcastMessage {
+  action:
+    | 'message'
+    | 'open'
+    | 'close'
+    | 'error'
+    | 'send'
+    | 'connected'
+    | 'backend_message';
+  dest: string;
+  wsUrl: string;
+  payload?: any;
+}
+
 export enum JupyterPackFramework {
   REACT = 'react',
-  DASH = 'dash'
+  DASH = 'dash',
+  STREAMLIT = 'streamlit'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
   framework: JupyterPackFramework;
   name?: string;
   metadata?: IDict;
+  rootUrl?: string;
 }
 
 export enum MessageAction {
@@ -29,9 +45,35 @@ export interface IKernelExecutorParams {
 }
 export interface IKernelExecutor extends IDisposable {
   getResponse(options: IKernelExecutorParams): Promise<IDict>;
+  openWebsocket(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    protocol?: string;
+  }): Promise<void>;
+  sendWebsocketMessage(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    message: string;
+  }): Promise<void>;
   executeCode(
-    code: KernelMessage.IExecuteRequestMsg['content']
-  ): Promise<string>;
+    code: KernelMessage.IExecuteRequestMsg['content'],
+    waitForResult?: boolean
+  ): Promise<string | null>;
+  init(options: {
+    initCode?: string;
+    instanceId: string;
+    kernelClientId: string;
+  }): Promise<void>;
+  disposePythonServer(): Promise<void>;
+  getResponseFunctionFactory(options: {
+    urlPath: string;
+    method: string;
+    headers: IDict;
+    params?: string;
+    content?: string;
+  }): string;
 }
 
 export interface IConnectionManager {

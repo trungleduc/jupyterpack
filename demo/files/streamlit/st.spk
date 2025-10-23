@@ -1,0 +1,5 @@
+{
+  "name": "Streamlit Example",
+  "entry": "server.py",
+  "framework": "streamlit"
+}

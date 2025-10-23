@@ -1,5 +1,5 @@
 import { PythonWidgetModel } from './pythonWidgetModel';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IFramePanel } from '../document/iframePanel';
 
 export class PythonWidget extends IFramePanel {
@@ -7,12 +7,25 @@ export class PythonWidget extends IFramePanel {
     super();
     this._model = options.model;
     this._model.initialize().then(connectionData => {
-      if (!connectionData) {
+      if (!connectionData.success) {
+        this.toggleSpinner(false);
+        this._iframe.contentDocument!.body.innerText = `Failed to start server: ${connectionData.error}`;
         return;
       }
       const iframe = this._iframe;
       const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
-      iframe.src = `${fullLabextensionsUrl}/jupyterpack/static/${connectionData.instanceId}/dash/${connectionData.kernelClientId}/`;
+
+      const iframeUrl = URLExt.join(
+        fullLabextensionsUrl,
+        'jupyterpack/static',
+        connectionData.instanceId,
+        connectionData.framework,
+        connectionData.kernelClientId,
+        connectionData.rootUrl
+      );
+
+      iframe.src = iframeUrl;
+
       iframe.addEventListener('load', () => {
         this.toggleSpinner(false);
       });
@@ -21,6 +34,10 @@ export class PythonWidget extends IFramePanel {
 
   get model(): PythonWidgetModel {
     return this._model;
+  }
+
+  dispose(): void {
+    this._model.dispose();
   }
 
   private _model: PythonWidgetModel;

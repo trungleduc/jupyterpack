@@ -1,5 +1,11 @@
 import { IConnectionManager, IDict } from '../type';
 import { wrap, transfer } from 'comlink';
+
+/**
+ * Manages communication between different components using Comlink's MessagePort-based communication.
+ * This class handles registration of communication channels and processing of requests.
+ * It's running on the service worker thread
+ */
 export class CommManager {
   constructor() {}
   registerComm(instanceId: string, port: MessagePort): void {

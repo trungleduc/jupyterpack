@@ -9,5 +9,10 @@ dependencies:
   - httpx
   - numpy
   - pandas
+  - tornado
+  - blinker>=1.5.0,<2
+  - cachetools>=4.0,<7
+  - protobuf
   - pip:
+    - streamlit==1.50.0
     - pyodide_http
