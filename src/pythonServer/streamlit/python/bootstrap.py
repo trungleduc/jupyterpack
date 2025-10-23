@@ -87,7 +87,6 @@ class MockedThread(threading.Thread):
         try:
             self.run()
         except Exception as e:
-            print("EXCEPTION", e)
             raise e
 
 threading.Thread = MockedThread

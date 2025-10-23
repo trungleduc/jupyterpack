@@ -126,9 +126,8 @@ export abstract class KernelExecutor implements IKernelExecutor {
             const content = (msg as KernelMessage.IStreamMsg).content;
             if (content.name === 'stderr') {
               console.error('Kernel operation failed', content.text);
-              // reject(msg.content);
+              reject(msg.content);
             } else {
-              console.log('##', content.text);
               executeResult += content.text;
             }
             break;

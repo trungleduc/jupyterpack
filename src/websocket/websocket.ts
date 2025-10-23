@@ -67,7 +67,7 @@
       // TODO: handle protocols
       // this._protocols = protocols;
       this.url = urlObj.pathname + urlObj.search + urlObj.hash;
-      console.log('BroadcastChannelWebSocket constructor', this.url, protocols);
+
       if (protocols) {
         this.protocol = Array.isArray(protocols)
           ? protocols.join(',')
@@ -84,45 +84,38 @@
     }
 
     onclose: ((this: WebSocket, ev?: CloseEvent) => any) | null = () => {
-      console.log('BroadcastChannelWebSocket default onclose called');
+      // no-op
     };
     onerror: ((this: WebSocket, ev: Event) => any) | null = () => {
-      console.log('BroadcastChannelWebSocket default onerror called');
+      // no-op
     };
     onmessage:
       | ((this: WebSocket, ev: MessageEvent | { data: any }) => any)
       | null = () => {
-      console.log('BroadcastChannelWebSocket default onmessage called');
+      // no-op
     };
     onopen: ((this: WebSocket, ev: Event | { data: any }) => any) | null =
       () => {
-        console.log('BroadcastChannelWebSocket default onopen called');
+        // no-op
       };
     close(code?: unknown, reason?: unknown): void {
       if (this.readyState === this.CLOSED) {
         return;
       }
-      console.log('BroadcastChannelWebSocket close called', code, reason);
-      // sendTypedMessage({
-      //   action: 'close',
-      //   wsUrl: this.url
-      // });
+
       if (this.onclose) {
         this.onclose();
       }
       while (this._eventHandlers['close'].length) {
         const cb = this._eventHandlers['close'].pop();
-        console.log('calling', cb);
         cb();
       }
-      // this._eventHandlers['close'].forEach(handler => handler());
       this._eventHandlers['close'] = [];
       bcWsChannel.removeEventListener('message', this._bcMessageHandler);
 
       this.readyState = this.CLOSED;
     }
     send(data: unknown): void {
-      console.log('SENDING DATA', data);
       sendTypedMessage({
         action: 'send',
         payload: data,
@@ -171,8 +164,6 @@
     } = { message: [], open: [], close: [], error: [] };
 
     private _bcMessageHandler = async (event: MessageEvent) => {
-      console.log('BC RECEIVED', event.data);
-
       const rawData = event.data;
       let data: IBroadcastMessage;
       if (typeof rawData === 'string') {
@@ -199,7 +190,6 @@
 
         case 'backend_message': {
           const decoded = decodeServerMessage(payload, this.binaryType);
-          console.log('dispatching', decoded);
           if (this.onmessage) {
             this.onmessage({ data: decoded });
           }
@@ -226,5 +216,4 @@
   }
 
   window.WebSocket = BroadcastChannelWebSocket as any;
-  console.log('[iframe patch injected]');
 })();

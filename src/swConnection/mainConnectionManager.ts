@@ -92,7 +92,6 @@ export class ConnectionManager implements IConnectionManager {
         case 'send': {
           let serializedData: string;
           let isBinary: boolean;
-          console.log('payload', payload);
           if (payload instanceof ArrayBuffer || ArrayBuffer.isView(payload)) {
             // Convert data to base64 string
             serializedData = arrayBufferToBase64(payload as any);
@@ -104,7 +103,6 @@ export class ConnectionManager implements IConnectionManager {
             console.error('Unknown message type', payload);
             return;
           }
-          console.log('sending data to', dest, wsUrl, isBinary, serializedData);
           executor.sendWebsocketMessage({
             instanceId: this.instanceId,
             kernelId: dest,
