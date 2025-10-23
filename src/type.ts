@@ -51,6 +51,12 @@ export interface IKernelExecutor extends IDisposable {
     wsUrl: string;
     protocol?: string;
   }): Promise<void>;
+  sendWebsocketMessage(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    message: string;
+  }): Promise<void>;
   executeCode(
     code: KernelMessage.IExecuteRequestMsg['content'],
     waitForResult?: boolean

@@ -1,3 +1,4 @@
+import { arrayBufferToBase64 } from '../tools';
 import {
   IBroadcastMessage,
   IConnectionManager,
@@ -89,7 +90,27 @@ export class ConnectionManager implements IConnectionManager {
           break;
         }
         case 'send': {
-          console.log('sending data to', dest, wsUrl, payload);
+          let serializedData: string;
+          let isBinary: boolean;
+          console.log('payload', payload);
+          if (payload instanceof ArrayBuffer || ArrayBuffer.isView(payload)) {
+            // Convert data to base64 string
+            serializedData = arrayBufferToBase64(payload as any);
+            isBinary = true;
+          } else if (typeof payload === 'string') {
+            serializedData = payload;
+            isBinary = false;
+          } else {
+            console.error('Unknown message type', payload);
+            return;
+          }
+          console.log('sending data to', dest, wsUrl, isBinary, serializedData);
+          executor.sendWebsocketMessage({
+            instanceId: this.instanceId,
+            kernelId: dest,
+            wsUrl,
+            message: JSON.stringify({ isBinary, data: serializedData })
+          });
           break;
         }
         default:

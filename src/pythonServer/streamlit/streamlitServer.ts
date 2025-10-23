@@ -37,7 +37,30 @@ export class StreamlitServer extends KernelExecutor {
     content?: string;
   }) {
     const { method, urlPath, headers, params, content } = options;
-    const code = `await ${this.STREAMLIT_GET_RESPONSE_FUNCTION}("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
+    const code = `await ${this._GET_RESPONSE_FUNCTION}("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
+    return code;
+  }
+
+  openWebsocketFunctionFactory(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    protocol?: string;
+  }): string {
+    const { instanceId, kernelId, wsUrl, protocol } = options;
+
+    const code = `await ${this._OPEN_WEBSOCKET_FUNCTION}("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
+    return code;
+  }
+
+  sendWebsocketMessageFunctionFactory(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    message: string;
+  }): string {
+    const { instanceId, kernelId, wsUrl, message } = options;
+    const code = `await ${this._SEND_WEBSOCKET_FUNCTION}("${instanceId}", "${kernelId}", "${wsUrl}", '''${message}''')`;
     return code;
   }
 
@@ -47,18 +70,9 @@ export class StreamlitServer extends KernelExecutor {
     });
   }
 
-  async openWebsocket(options: {
-    instanceId: string;
-    kernelId: string;
-    wsUrl: string;
-    protocol?: string;
-  }): Promise<void> {
-    const { instanceId, kernelId, wsUrl, protocol } = options;
+  private _GET_RESPONSE_FUNCTION = '__jupyterpack_streamlit_get_response';
+  private _OPEN_WEBSOCKET_FUNCTION = '__jupyterpack_streamlit_open_ws';
 
-    const code = `await __jupyterpack_streamlit_open_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
-    await this.executeCode({ code });
-  }
-
-  private STREAMLIT_GET_RESPONSE_FUNCTION =
-    '__jupyterpack_streamlit_get_response';
+  private _SEND_WEBSOCKET_FUNCTION =
+    '__jupyterpack_streamlit_receive_ws_message';
 }

@@ -31,12 +31,47 @@ export abstract class KernelExecutor implements IKernelExecutor {
     kernelClientId: string;
   }): Promise<void>;
 
-  abstract openWebsocket(options: {
+  openWebsocketFunctionFactory(options: {
     instanceId: string;
     kernelId: string;
     wsUrl: string;
     protocol?: string;
-  }): Promise<void>;
+  }): string | undefined {
+    return undefined;
+  }
+
+  sendWebsocketMessageFunctionFactory(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    message: string;
+  }): string | undefined {
+    return undefined;
+  }
+
+  async openWebsocket(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    protocol?: string;
+  }): Promise<void> {
+    const code = this.openWebsocketFunctionFactory(options);
+    if (code) {
+      await this.executeCode({ code });
+    }
+  }
+
+  async sendWebsocketMessage(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    message: string;
+  }): Promise<void> {
+    const code = this.sendWebsocketMessageFunctionFactory(options);
+    if (code) {
+      await this.executeCode({ code });
+    }
+  }
 
   async getResponse(options: {
     method: string;

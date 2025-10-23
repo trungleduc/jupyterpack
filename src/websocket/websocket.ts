@@ -28,6 +28,37 @@
     bcWsChannel.postMessage({ ...msg, dest: kernelClientId });
   };
 
+  function base64ToBinary(base64: string, dataType: BinaryType) {
+    const binary = atob(base64); // decode base64
+    const len = binary.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    if (dataType === 'arraybuffer') {
+      return bytes.buffer;
+    } else if (dataType === 'blob') {
+      return new Blob([bytes], { type: 'application/octet-stream' });
+    } else {
+      throw new Error("Unsupported type: use 'arraybuffer' or 'blob'");
+    }
+  }
+
+  const decodeServerMessage = (
+    payload: {
+      data: string;
+      isBinary: boolean;
+    },
+    binaryType: BinaryType
+  ) => {
+    const { data, isBinary } = payload;
+    if (isBinary) {
+      // Decode base64 string to array buffer or blob
+
+      return base64ToBinary(data, binaryType);
+    }
+    return data;
+  };
   const bcWsChannel = new BroadcastChannel(`/jupyterpack/ws/${instanceId}`);
 
   class BroadcastChannelWebSocket implements WebSocket {
@@ -166,12 +197,14 @@
           break;
         }
 
-        case 'message': {
+        case 'backend_message': {
+          const decoded = decodeServerMessage(payload, this.binaryType);
+          console.log('dispatching', decoded);
           if (this.onmessage) {
-            this.onmessage({ data: payload });
+            this.onmessage({ data: decoded });
           }
           this._eventHandlers.message.forEach(handler =>
-            handler({ data: payload })
+            handler({ data: decoded })
           );
           break;
         }

@@ -4,7 +4,7 @@ from types import ModuleType
 import os
 import tempfile
 import collections
-
+import threading
 if not hasattr(collections, "MutableSet"):
     import collections.abc
 
@@ -81,23 +81,13 @@ def __jupyterpack_create_streamlit_app(base_url, script_content):
     return streamlit_server
 
 
-# __jupyterpack_js_broadcast_message = pyjs.js.Function(
-#     "instanceId",
-#     "kernelId",
-#     "wsUrl",
-#     "b64Message",
-#     """
-#     if (!self.__jupyterpack__ws_broadcastChannel) {
-#         console.log('Creating broadcast channel in kernel worker');
-#         const channelName = '/jupyterpack/ws/' + instanceId;
-#         self.__jupyterpack__ws_broadcastChannel = new BroadcastChannel(channelName);
-#     }
-#     self.__jupyterpack__ws_broadcastChannel.postMessage({
-#         action: 'backend_message',
-#         dest: kernelId,
-#         wsUrl: wsUrl,
-#         payload: b64Message
-#     });
-# """,
-# )
+class MockedThread(threading.Thread):
+    def start(self):
+        threading.current_thread = lambda: self
+        try:
+            self.run()
+        except Exception as e:
+            print("EXCEPTION", e)
+            raise e
 
+threading.Thread = MockedThread
