@@ -9,6 +9,9 @@ import path from 'path';
  */
 export function generatePythonTs(pythonDir, outDir) {
   const absDir = path.resolve(pythonDir);
+  if (!outDir) {
+    outDir = path.resolve(absDir, '..');
+  }
   const absOutDir = path.resolve(outDir);
   const outputTsFile = path.join(absOutDir, 'generatedPythonFiles.ts');
 
@@ -39,7 +42,11 @@ export function generatePythonTs(pythonDir, outDir) {
   console.log(`Generated ${outputTsFile} with ${files.length} Python files.`);
 }
 
-const STREAMLIT_PYTHON_DIR = 'src/pythonServer/streamlit/python';
-const STREAMLIT_OUT_DIR = 'src/pythonServer/streamlit';
+const COMMON_PYTHON_DIR = 'src/pythonServer/common/python';
+generatePythonTs(COMMON_PYTHON_DIR);
 
-generatePythonTs(STREAMLIT_PYTHON_DIR, STREAMLIT_OUT_DIR);
+const STREAMLIT_PYTHON_DIR = 'src/pythonServer/streamlit/python';
+generatePythonTs(STREAMLIT_PYTHON_DIR);
+
+const TORNADO_PYTHON_DIR = 'src/pythonServer/tornado/python';
+generatePythonTs(TORNADO_PYTHON_DIR);

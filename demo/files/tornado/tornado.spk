@@ -1,0 +1,5 @@
+{
+  "name": "Tornado Example",
+  "entry": "server.py",
+  "framework": "tornado"
+}

@@ -1,6 +1,6 @@
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { KernelMessage, Session } from '@jupyterlab/services';
-
+import stripAnsi from 'strip-ansi';
 import { arrayBufferToBase64 } from '../tools';
 import { IDict, IKernelExecutor, JupyterPackFramework } from '../type';
 import websocketPatch from '../websocket/websocket.js?raw';
@@ -126,14 +126,20 @@ export abstract class KernelExecutor implements IKernelExecutor {
             const content = (msg as KernelMessage.IStreamMsg).content;
             if (content.name === 'stderr') {
               console.error('Kernel operation failed', content.text);
-              reject(msg.content);
             } else {
               executeResult += content.text;
             }
             break;
           }
           case 'error': {
-            console.error('Kernel operation failed', code.code, msg.content);
+            console.error(
+              'Kernel operation failed',
+              code.code,
+              (msg.content as any).traceback
+                .map((it: string) => stripAnsi(it))
+                .join('\n')
+            );
+
             reject(msg.content);
             break;
           }

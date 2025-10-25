@@ -1,6 +1,6 @@
-import { stringOrNone } from '../tools';
-import { IDict, JupyterPackFramework } from '../type';
-import { KernelExecutor } from './kernelExecutor';
+import { stringOrNone } from '../../tools';
+import { IDict, JupyterPackFramework } from '../../type';
+import { KernelExecutor } from '../kernelExecutor';
 
 export class DashServer extends KernelExecutor {
   async init(options: {

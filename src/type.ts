@@ -22,7 +22,8 @@ export interface IBroadcastMessage {
 export enum JupyterPackFramework {
   REACT = 'react',
   DASH = 'dash',
-  STREAMLIT = 'streamlit'
+  STREAMLIT = 'streamlit',
+  TORNADO = 'tornado'
 }
 export interface IJupyterPackFileFormat {
   entry: string;

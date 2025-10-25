@@ -62,7 +62,8 @@
     "dependencies": {
         "@codesandbox/sandpack-client": "^2.19.8",
         "@jupyterlab/application": "^4.0.0",
-        "comlink": "^4.4.2"
+        "comlink": "^4.4.2",
+        "strip-ansi": "^7.1.2"
     },
     "devDependencies": {
         "@jupyterlab/builder": "^4.0.0",
