@@ -1,11 +1,13 @@
 import { stringOrNone } from '../../tools';
 import { IDict, JupyterPackFramework } from '../../type';
+import { tools } from '../common/generatedPythonFiles';
 import { KernelExecutor } from '../kernelExecutor';
 import {
-  bootstrap,
-  tornadoBridge,
-  streamlitLoader
-} from './generatedPythonFiles';
+  bootstrap as tornadoBootstrap,
+  tornadoBridge
+} from '../tornado/generatedPythonFiles';
+import { bootstrap, streamlitLoader } from './generatedPythonFiles';
+
 export class StreamlitServer extends KernelExecutor {
   async init(options: {
     initCode?: string;
@@ -19,8 +21,10 @@ export class StreamlitServer extends KernelExecutor {
       kernelClientId,
       framework: JupyterPackFramework.STREAMLIT
     });
-    await this.executeCode({ code: bootstrap });
+    await this.executeCode({ code: tools.replaceAll('{{base_url}}', baseURL) });
+    await this.executeCode({ code: tornadoBootstrap });
     await this.executeCode({ code: tornadoBridge });
+    await this.executeCode({ code: bootstrap });
     if (initCode) {
       const stCode = streamlitLoader
         .replaceAll('{{base_url}}', baseURL)
@@ -72,7 +76,6 @@ export class StreamlitServer extends KernelExecutor {
 
   private _GET_RESPONSE_FUNCTION = '__jupyterpack_streamlit_get_response';
   private _OPEN_WEBSOCKET_FUNCTION = '__jupyterpack_streamlit_open_ws';
-
   private _SEND_WEBSOCKET_FUNCTION =
     '__jupyterpack_streamlit_receive_ws_message';
 }
