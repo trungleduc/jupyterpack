@@ -78,13 +78,12 @@ class ConnectionState:
 
     @property
     def reply_body(self):
-        if isinstance(self._reply_body, bytes):
-            return self._reply_body.decode("utf-8")
-        return self._reply_body
+        return base64.b64encode(self._reply_body).decode("ascii")
 
     @property
     def reply_headers(self):
-        return self._reply_headers
+        reply_headers = json.dumps(dict(self._reply_headers)).encode("utf-8")
+        return base64.b64encode(reply_headers).decode("ascii")
 
     @property
     def status(self):
@@ -230,17 +229,23 @@ class TornadoBridge:
             body=request_body,
             connection=connection,
         )
+        try:
+            handler = self.tornado_app.find_handler(request)
+            handler.execute()
+            connection_state = connection.connection_state
+            await connection_state.finish_future
 
-        handler = self.tornado_app.find_handler(request)
-        handler.execute()
-        connection_state = connection.connection_state
-        await connection_state.finish_future
-
-        return (
-            connection_state.reply_body,
-            connection_state.reply_headers,
-            connection_state.status,
-        )
+            return {
+                "content": connection_state.reply_body,
+                "headers": connection_state.reply_headers,
+                "status_code": connection_state.status,
+            }
+        except Exception as e:
+            return {
+                "headers": "e30=",  # {}
+                "content": base64.b64encode(str(e).encode("utf-8")).decode("ascii"),
+                "status_code": 500,
+            }
 
     # ---------------------------
     # Websocket Handling
@@ -252,10 +257,6 @@ class TornadoBridge:
         ws_url: str,
         protocols_str: str | None,
     ):
-        # reply_body = b""
-        # reply_headers = []
-        # status = 200
-
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
         broadcast_channel = self._ws_broadcast_channels.get(handler_key, None)
 
@@ -270,7 +271,8 @@ class TornadoBridge:
                 ("X-Sec-WebSocket-Protocol", protocols_str),
                 ("Upgrade", "websocket"),
                 ("Connection", "Upgrade"),
-                ("Sec-WebSocket-Key", "lala"),  # TODO
+                ("Sec-WebSocket-Key", ""),
+                ("Sec-WebSocket-Version", "13"),
             ]
         )
         protocols = []
@@ -317,7 +319,7 @@ class TornadoBridge:
                 try:
                     await ret
                 except Exception:
-                    raise ("websocket open await failed")
+                    raise ("Failed to open websocket")
 
         self._ws_handlers[handler_key] = handler
 

@@ -1,5 +1,9 @@
-import base64
 import json
+import tempfile
+from streamlit import config
+import streamlit.web.server.server as st_server
+from streamlit.runtime.runtime import Runtime
+
 
 try:
     # Check if __jupyterpack_streamlit_instance defined from previous run
@@ -9,6 +13,26 @@ except NameError:
         "tornado_bridge": None,
         "streamlit_server": None,
     }
+
+
+def __jupyterpack_create_streamlit_app(base_url, script_content):
+    if Runtime._instance is not None:
+        Runtime._instance.stop()
+        Runtime._instance = None
+    config.set_option("server.baseUrlPath", base_url)
+
+    config.set_option("server.port", 6789)
+    config.set_option("server.enableCORS", False)
+    config.set_option("server.enableXsrfProtection", False)
+
+    st_script = script_content
+
+    with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".py") as tmp:
+        tmp.write(st_script)
+        script_path = tmp.name
+
+    streamlit_server = st_server.Server(script_path, True)
+    return streamlit_server
 
 
 def __jupyterpack_streamlit_dispose():
@@ -67,31 +91,6 @@ async def __jupyterpack_streamlit_get_response(
         "body": content,
     }
 
-    try:
-        res_body, res_headers, res_status = await tornado_bridge.fetch(req_dict)
-        response = {
-            "headers": dict(res_headers),
-            "content": res_body,
-            "status_code": res_status,
-            "original_request": {
-                "method": method,
-                "url": url,
-                "params": params,
-                "headers": headers,
-            },
-        }
-    except Exception as e:
-        response = {
-            "headers": {},
-            "content": str(e),
-            "status_code": 500,
-            "original_request": {
-                "method": method,
-                "url": url,
-                "params": params,
-                "headers": headers,
-            },
-        }
+    response = await tornado_bridge.fetch(req_dict)
     json_str = json.dumps(response)
-    b64_str = base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
-    return b64_str
+    return json_str
