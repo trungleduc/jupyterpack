@@ -108,7 +108,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
     const responseHeaders: IDict<string> = JSON.parse(atob(obj.headers));
     const contentType: string | undefined =
       responseHeaders?.['Content-Type'] ?? responseHeaders?.['content-type'];
-
+    console.log('responseHeaders', responseHeaders);
     let responseContent: string | Uint8Array;
 
     if (isBinaryContentType(contentType)) {
