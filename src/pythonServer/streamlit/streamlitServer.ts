@@ -1,6 +1,6 @@
 import { stringOrNone } from '../../tools';
 import { IDict, JupyterPackFramework } from '../../type';
-import { tools } from '../common/generatedPythonFiles';
+import { patch, tools } from '../common/generatedPythonFiles';
 import { KernelExecutor } from '../kernelExecutor';
 import {
   bootstrap as tornadoBootstrap,
@@ -10,27 +10,32 @@ import { bootstrap, streamlitLoader } from './generatedPythonFiles';
 
 export class StreamlitServer extends KernelExecutor {
   async init(options: {
+    entryPath?: string;
     initCode?: string;
     instanceId: string;
     kernelClientId: string;
   }) {
-    const { initCode, instanceId, kernelClientId } = options;
-
+    const { instanceId, kernelClientId, entryPath } = options;
+    if (!entryPath) {
+      throw new Error(
+        'Missing streamlit entry path, please check your SPK file'
+      );
+    }
     const baseURL = this.buildBaseURL({
       instanceId,
       kernelClientId,
       framework: JupyterPackFramework.STREAMLIT
     });
+    await this.executeCode({ code: patch });
     await this.executeCode({ code: tools.replaceAll('{{base_url}}', baseURL) });
     await this.executeCode({ code: tornadoBootstrap });
     await this.executeCode({ code: tornadoBridge });
     await this.executeCode({ code: bootstrap });
-    if (initCode) {
-      const stCode = streamlitLoader
-        .replaceAll('{{base_url}}', baseURL)
-        .replaceAll('{{script_content}}', initCode);
-      await this.executeCode({ code: stCode });
-    }
+
+    const stCode = streamlitLoader
+      .replaceAll('{{base_url}}', baseURL)
+      .replaceAll('{{script_path}}', entryPath);
+    await this.executeCode({ code: stCode });
   }
 
   getResponseFunctionFactory(options: {

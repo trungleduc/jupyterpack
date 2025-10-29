@@ -1,9 +1,7 @@
 import json
-import tempfile
 from streamlit import config
 import streamlit.web.server.server as st_server
 from streamlit.runtime.runtime import Runtime
-
 
 try:
     # Check if __jupyterpack_streamlit_instance defined from previous run
@@ -15,7 +13,7 @@ except NameError:
     }
 
 
-def __jupyterpack_create_streamlit_app(base_url, script_content):
+def __jupyterpack_create_streamlit_app(base_url, script_path):
     if Runtime._instance is not None:
         Runtime._instance.stop()
         Runtime._instance = None
@@ -24,12 +22,6 @@ def __jupyterpack_create_streamlit_app(base_url, script_content):
     config.set_option("server.port", 6789)
     config.set_option("server.enableCORS", False)
     config.set_option("server.enableXsrfProtection", False)
-
-    st_script = script_content
-
-    with tempfile.NamedTemporaryFile(delete=False, mode="w", suffix=".py") as tmp:
-        tmp.write(st_script)
-        script_path = tmp.name
 
     streamlit_server = st_server.Server(script_path, True)
     return streamlit_server
@@ -74,7 +66,7 @@ async def __jupyterpack_streamlit_get_response(
     global __jupyterpack_streamlit_instance
     if not __jupyterpack_streamlit_instance["streamlit_server"]:
         streamlit_server = __jupyterpack_create_streamlit_app(
-            "{{base_url}}", """{{script_content}}"""
+            "{{base_url}}", "{{script_path}}"
         )  # noqa
         app = streamlit_server._create_app()
         await streamlit_server._runtime.start()

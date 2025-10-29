@@ -43,7 +43,7 @@ async def __jupyterpack_tornado_get_response(
     method, url, headers, content=None, params=None
 ):
     global __jupyterpack_tornado_instance
-    if not __jupyterpack_tornado_instance["tornado_server"]:
+    if __jupyterpack_tornado_instance["tornado_server"] is None:
         __jupyterpack_tornado_instance["tornado_server"] = app # noqa
         __jupyterpack_tornado_instance["tornado_bridge"] = TornadoBridge( # noqa
             app, "{{base_url}}" # noqa

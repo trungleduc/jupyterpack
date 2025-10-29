@@ -63,6 +63,7 @@ export interface IKernelExecutor extends IDisposable {
     waitForResult?: boolean
   ): Promise<string | null>;
   init(options: {
+    entryPath?: string;
     initCode?: string;
     instanceId: string;
     kernelClientId: string;

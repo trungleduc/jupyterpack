@@ -31,6 +31,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
   }): string;
 
   abstract init(options: {
+    entryPath?: string;
     initCode?: string;
     instanceId: string;
     kernelClientId: string;
@@ -182,7 +183,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
       };
       if (!waitForResult) {
         resolve(null);
-        future.dispose();
+        // future.dispose() # TODO
       }
     });
   }

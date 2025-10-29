@@ -95,6 +95,7 @@ export class PythonWidgetModel implements IDisposable {
     const data = await this._connectionManager.registerConnection(executor);
     await executor.init({
       initCode: entryContent.content,
+      entryPath: spkContent.entry,
       ...data
     });
     const finish = new PromiseDelegate<void>();
