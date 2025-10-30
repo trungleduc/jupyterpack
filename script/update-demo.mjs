@@ -68,3 +68,4 @@ const jsonPath = 'demo/_output/jupyter-lite.json';
 
 updateFederatedExtension(`${inputPath}/static`, jsonPath);
 cleanAndCopy(inputPath, outputPath);
+cleanAndCopy('demo/files', 'demo/_output/files')

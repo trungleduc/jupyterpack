@@ -22,7 +22,8 @@ export interface IBroadcastMessage {
 export enum JupyterPackFramework {
   REACT = 'react',
   DASH = 'dash',
-  STREAMLIT = 'streamlit'
+  STREAMLIT = 'streamlit',
+  TORNADO = 'tornado'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
@@ -62,6 +63,7 @@ export interface IKernelExecutor extends IDisposable {
     waitForResult?: boolean
   ): Promise<string | null>;
   init(options: {
+    entryPath?: string;
     initCode?: string;
     instanceId: string;
     kernelClientId: string;

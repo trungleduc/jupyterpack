@@ -1,42 +1,35 @@
 import { stringOrNone } from '../../tools';
 import { IDict, JupyterPackFramework } from '../../type';
-import { patch, tools } from '../common/generatedPythonFiles';
+import { tools } from '../common/generatedPythonFiles';
 import { KernelExecutor } from '../kernelExecutor';
 import {
-  bootstrap as tornadoBootstrap,
-  tornadoBridge
-} from '../tornado/generatedPythonFiles';
-import { bootstrap, streamlitLoader } from './generatedPythonFiles';
-
-export class StreamlitServer extends KernelExecutor {
+  bootstrap,
+  tornadoBridge,
+  tornadoLoader
+} from './generatedPythonFiles';
+export class TornadoServer extends KernelExecutor {
   async init(options: {
-    entryPath?: string;
     initCode?: string;
     instanceId: string;
     kernelClientId: string;
   }) {
     await super.init(options);
-    const { instanceId, kernelClientId, entryPath } = options;
-    if (!entryPath) {
-      throw new Error(
-        'Missing streamlit entry path, please check your SPK file'
-      );
-    }
+    const { initCode, instanceId, kernelClientId } = options;
+
     const baseURL = this.buildBaseURL({
       instanceId,
       kernelClientId,
-      framework: JupyterPackFramework.STREAMLIT
+      framework: JupyterPackFramework.TORNADO
     });
-    await this.executeCode({ code: patch });
     await this.executeCode({ code: tools.replaceAll('{{base_url}}', baseURL) });
-    await this.executeCode({ code: tornadoBootstrap });
-    await this.executeCode({ code: tornadoBridge });
     await this.executeCode({ code: bootstrap });
-
-    const stCode = streamlitLoader
-      .replaceAll('{{base_url}}', baseURL)
-      .replaceAll('{{script_path}}', entryPath);
-    await this.executeCode({ code: stCode });
+    await this.executeCode({ code: tornadoBridge });
+    if (initCode) {
+      const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
+      await this.executeCode({ code: initCodeWithUrl });
+      const torCode = tornadoLoader.replaceAll('{{base_url}}', baseURL);
+      await this.executeCode({ code: torCode });
+    }
   }
 
   getResponseFunctionFactory(options: {
@@ -76,12 +69,12 @@ export class StreamlitServer extends KernelExecutor {
 
   async disposePythonServer(): Promise<void> {
     await this.executeCode({
-      code: '__jupyterpack_streamlit_dispose()'
+      code: '__jupyterpack_tornado_dispose()'
     });
   }
 
-  private _GET_RESPONSE_FUNCTION = '__jupyterpack_streamlit_get_response';
-  private _OPEN_WEBSOCKET_FUNCTION = '__jupyterpack_streamlit_open_ws';
-  private _SEND_WEBSOCKET_FUNCTION =
-    '__jupyterpack_streamlit_receive_ws_message';
+  private _GET_RESPONSE_FUNCTION = '__jupyterpack_tornado_get_response';
+  private _OPEN_WEBSOCKET_FUNCTION = '__jupyterpack_tornado_open_ws';
+
+  private _SEND_WEBSOCKET_FUNCTION = '__jupyterpack_tornado_receive_ws_message';
 }

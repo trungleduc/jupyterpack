@@ -1,9 +1,15 @@
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { KernelMessage, Session } from '@jupyterlab/services';
-
-import { arrayBufferToBase64 } from '../tools';
+import stripAnsi from 'strip-ansi';
+import {
+  arrayBufferToBase64,
+  base64ToArrayBuffer,
+  base64ToString,
+  isBinaryContentType
+} from '../tools';
 import { IDict, IKernelExecutor, JupyterPackFramework } from '../type';
 import websocketPatch from '../websocket/websocket.js?raw';
+import { patch } from './common/generatedPythonFiles';
 
 export abstract class KernelExecutor implements IKernelExecutor {
   constructor(options: KernelExecutor.IOptions) {
@@ -25,11 +31,14 @@ export abstract class KernelExecutor implements IKernelExecutor {
     content?: string;
   }): string;
 
-  abstract init(options: {
+  async init(options: {
+    entryPath?: string;
     initCode?: string;
     instanceId: string;
     kernelClientId: string;
-  }): Promise<void>;
+  }): Promise<void> {
+    await this.executeCode({ code: patch });
+  }
 
   openWebsocketFunctionFactory(options: {
     instanceId: string;
@@ -93,10 +102,37 @@ export abstract class KernelExecutor implements IKernelExecutor {
     if (!raw) {
       throw new Error(`Missing response for ${urlPath}`);
     }
-    const jsonStr = atob(raw.slice(1, -1));
-    const obj = JSON.parse(jsonStr);
-    this._applyWsPatch(obj);
-    return obj;
+    const jsonStr = raw.replaceAll("'", '');
+    const obj: {
+      headers: string;
+      status_code: number;
+      content: string;
+    } = JSON.parse(jsonStr);
+    const responseHeaders: IDict<string> = JSON.parse(atob(obj.headers));
+    const contentType: string | undefined =
+      responseHeaders?.['Content-Type'] ?? responseHeaders?.['content-type'];
+    let responseContent: string | Uint8Array;
+
+    if (isBinaryContentType(contentType)) {
+      responseContent = base64ToArrayBuffer(obj.content);
+    } else {
+      responseContent = base64ToString(obj.content);
+    }
+
+    if (contentType && contentType.toLowerCase() === 'text/html') {
+      responseContent = (responseContent as string).replace(
+        '<head>',
+        `<head>\n<script>\n${this._wsPatch}\n</script>\n`
+      );
+    }
+
+    const decodedObj = {
+      status_code: obj.status_code,
+      headers: responseHeaders,
+      content: responseContent
+    };
+
+    return decodedObj;
   }
   async executeCode(
     code: KernelMessage.IExecuteRequestMsg['content'],
@@ -125,15 +161,21 @@ export abstract class KernelExecutor implements IKernelExecutor {
           case 'stream': {
             const content = (msg as KernelMessage.IStreamMsg).content;
             if (content.name === 'stderr') {
-              console.error('Kernel operation failed', content.text);
-              reject(msg.content);
+              console.error('Kernel stream', content.text);
             } else {
-              executeResult += content.text;
+              console.log('Kernel stream', content.text);
             }
             break;
           }
           case 'error': {
-            console.error('Kernel operation failed', code.code, msg.content);
+            console.error(
+              'Kernel operation failed',
+              code.code,
+              (msg.content as any).traceback
+                .map((it: string) => stripAnsi(it))
+                .join('\n')
+            );
+
             reject(msg.content);
             break;
           }
@@ -173,22 +215,6 @@ export abstract class KernelExecutor implements IKernelExecutor {
     );
 
     return baseURL;
-  }
-
-  private _applyWsPatch(originalResponse: {
-    content: string;
-    headers: IDict<string>;
-  }) {
-    const { content, headers } = originalResponse;
-    const isHtml =
-      headers?.['Content-Type'] === 'text/html' ||
-      headers?.['content-type'] === 'text/html';
-    if (isHtml) {
-      originalResponse.content = content.replace(
-        '<head>',
-        `<head>\n<script>\n${this._wsPatch}\n</script>\n`
-      );
-    }
   }
 
   private _isDisposed: boolean = false;

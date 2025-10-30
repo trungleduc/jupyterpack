@@ -64,8 +64,6 @@
   class BroadcastChannelWebSocket implements WebSocket {
     constructor(url: string | URL, protocols?: string | string[]) {
       const urlObj = new URL(url);
-      // TODO: handle protocols
-      // this._protocols = protocols;
       this.url = urlObj.pathname + urlObj.search + urlObj.hash;
 
       if (protocols) {
@@ -155,7 +153,6 @@
     readonly CLOSING = 2;
     readonly CLOSED = 3;
 
-    // private _protocols: string | string[] | undefined;
     private _eventHandlers: {
       message: any[];
       open: any[];

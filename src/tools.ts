@@ -17,6 +17,71 @@ export function arrayBufferToBase64(buffer: ArrayBuffer) {
   return btoa(binary);
 }
 
+export function base64ToArrayBuffer(base64: string): Uint8Array {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+export function base64ToString(base64: string): string {
+  const bytes = base64ToArrayBuffer(base64);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+
 export function stringOrNone(content?: string) {
   return content ? `"${content}"` : 'None';
+}
+
+export function isBinaryContentType(contentType?: string) {
+  if (!contentType) {
+    // no Content-Type → assume binary for safety
+    return true;
+  }
+
+  contentType = contentType.toLowerCase().trim();
+
+  const textTypes = [
+    'text/',
+    'application/json',
+    'application/javascript',
+    'application/xml',
+    'application/xhtml+xml',
+    'application/x-www-form-urlencoded',
+    'application/sql',
+    'application/graphql',
+    'application/yaml'
+  ];
+
+  const binaryIndicators = [
+    'image/',
+    'audio/',
+    'video/',
+    'font/',
+    'application/octet-stream',
+    'application/pdf',
+    'application/zip',
+    'application/x-protobuf',
+    'application/vnd'
+  ];
+
+  // Starts with text/ or one of the textual types
+  if (textTypes.some(t => contentType.startsWith(t))) {
+    return false;
+  }
+
+  // Starts with binary-indicating prefix
+  if (binaryIndicators.some(t => contentType.startsWith(t))) {
+    return true;
+  }
+
+  // If charset is specified → text
+  if (contentType.includes('charset=')) {
+    return false;
+  }
+
+  // Default: assume binary
+  return true;
 }
