@@ -2,6 +2,23 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.3.0
+
+([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.2.1...62cb3868d828e99753b72dc9e770aa99b38a6c1c))
+
+### Enhancements made
+
+- Refactor python code [#8](https://github.com/trungleduc/jupyterpack/pull/8) ([@trungleduc](https://github.com/trungleduc))
+- streamlit [#7](https://github.com/trungleduc/jupyterpack/pull/7) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2025-10-01&to=2025-10-30&type=c))
+
+[@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2025-10-01..2025-10-30&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.2.1
 
 ([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.2.0...5fb3882b63c2497b1d485e04031e259cdabae36c))
@@ -15,8 +32,6 @@
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2025-10-01&to=2025-10-01&type=c))
 
 [@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2025-10-01..2025-10-01&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.2.0
 
