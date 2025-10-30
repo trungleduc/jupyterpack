@@ -15,6 +15,7 @@ export class StreamlitServer extends KernelExecutor {
     instanceId: string;
     kernelClientId: string;
   }) {
+    await super.init(options);
     const { instanceId, kernelClientId, entryPath } = options;
     if (!entryPath) {
       throw new Error(

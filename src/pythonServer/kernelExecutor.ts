@@ -9,6 +9,7 @@ import {
 } from '../tools';
 import { IDict, IKernelExecutor, JupyterPackFramework } from '../type';
 import websocketPatch from '../websocket/websocket.js?raw';
+import { patch } from './common/generatedPythonFiles';
 
 export abstract class KernelExecutor implements IKernelExecutor {
   constructor(options: KernelExecutor.IOptions) {
@@ -30,12 +31,14 @@ export abstract class KernelExecutor implements IKernelExecutor {
     content?: string;
   }): string;
 
-  abstract init(options: {
+  async init(options: {
     entryPath?: string;
     initCode?: string;
     instanceId: string;
     kernelClientId: string;
-  }): Promise<void>;
+  }): Promise<void> {
+    await this.executeCode({ code: patch });
+  }
 
   openWebsocketFunctionFactory(options: {
     instanceId: string;
@@ -108,7 +111,6 @@ export abstract class KernelExecutor implements IKernelExecutor {
     const responseHeaders: IDict<string> = JSON.parse(atob(obj.headers));
     const contentType: string | undefined =
       responseHeaders?.['Content-Type'] ?? responseHeaders?.['content-type'];
-    console.log('responseHeaders', responseHeaders);
     let responseContent: string | Uint8Array;
 
     if (isBinaryContentType(contentType)) {

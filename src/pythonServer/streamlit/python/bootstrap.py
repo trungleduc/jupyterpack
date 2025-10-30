@@ -1,15 +1,9 @@
 import os
 
-import collections
 import threading
 import streamlit.watcher.path_watcher
 import contextlib
 import streamlit.elements.spinner
-
-if not hasattr(collections, "MutableSet"):
-    import collections.abc
-
-    collections.MutableSet = collections.abc.MutableSet
 
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 

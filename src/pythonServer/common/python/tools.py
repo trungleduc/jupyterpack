@@ -1,18 +1,13 @@
 import importlib.util
 import sys
 from types import ModuleType
-import collections
+
 import tempfile
 from pathlib import Path
 from typing import List
 import os
 
 os.environ.setdefault("JUPYTERPACK_BASE_URL", "{{base_url}}")
-
-if not hasattr(collections, "MutableSet"):
-    import collections.abc
-
-    collections.MutableSet = collections.abc.MutableSet
 
 
 def __jupyterpack_import_from_path(module_name: str, path: str) -> ModuleType:

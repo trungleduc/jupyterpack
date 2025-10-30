@@ -10,6 +10,7 @@ export class DashServer extends KernelExecutor {
     instanceId: string;
     kernelClientId: string;
   }) {
+    await super.init(options);
     const { initCode, instanceId, kernelClientId } = options;
 
     const baseURL = this.buildBaseURL({
