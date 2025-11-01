@@ -40,6 +40,10 @@ export class PythonWidget extends IFramePanel {
     return this._model;
   }
 
+  async reload(): Promise<void> {
+    await this._model.reload();
+  }
+
   dispose(): void {
     this._model.dispose();
   }

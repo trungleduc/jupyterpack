@@ -1,7 +1,8 @@
 import { ReactiveToolbar, ToolbarButton } from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 
-import { IJupyterpackDocTracker, IPythonWidgetModel } from '../type';
+import { IJupyterpackDocTracker } from '../type';
+import { IFramePanel } from './iframePanel';
 
 export class ToolbarWidget extends ReactiveToolbar {
   constructor(options: { tracker: IJupyterpackDocTracker }) {
@@ -24,13 +25,12 @@ export class ToolbarWidget extends ReactiveToolbar {
     if (!current) {
       return;
     }
-    const model = (current.widgets[0] as any)?.model as
-      | IPythonWidgetModel
-      | undefined;
-    if (!model) {
+    const widget = current.widgets[0] as IFramePanel | undefined;
+    if (!widget) {
       return;
     }
-    await model.reload();
+
+    await widget.reload();
   };
   private _tracker: IJupyterpackDocTracker;
 }

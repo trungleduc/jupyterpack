@@ -43,7 +43,7 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
     app.docRegistry.addFileType({
       name: CONTENT_TYPE,
       displayName: 'SPK',
-      mimeTypes: ['text/json'],
+      mimeTypes: ['application/json'],
       extensions: ['.spk', '.SPK'],
       fileFormat: 'json',
       contentType: CONTENT_TYPE,

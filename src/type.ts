@@ -32,7 +32,9 @@ export interface IJupyterPackFileFormat {
   entry: string;
   framework: JupyterPackFramework;
   name?: string;
-  metadata?: IDict;
+  metadata?: {
+    autoreload?: boolean;
+  };
   rootUrl?: string;
 }
 

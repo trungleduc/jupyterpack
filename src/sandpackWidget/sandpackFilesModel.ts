@@ -11,8 +11,8 @@ export class SandpackFilesModel {
     this._contentManager.fileChanged.connect(this._onFileChanged, this);
   }
 
-  async getAllFiles(): Promise<IDict<{ code: string }>> {
-    if (!this._allFiles) {
+  async getAllFiles(force = false): Promise<IDict<{ code: string }>> {
+    if (!this._allFiles || force) {
       const files = await this._contentManager.get(this._path, {
         content: true
       });
