@@ -72,6 +72,7 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
         }
       }
     });
+
     return new JupyterPackDocWidget({
       context,
       content

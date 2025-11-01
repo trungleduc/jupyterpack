@@ -1,5 +1,7 @@
+import { DocumentWidget } from '@jupyterlab/docregistry';
 import { KernelMessage } from '@jupyterlab/services';
 import { IDisposable } from '@lumino/disposable';
+import { IWidgetTracker } from '@jupyterlab/apputils';
 
 export interface IDict<T = any> {
   [key: string]: T;
@@ -86,3 +88,5 @@ export interface IConnectionManager {
     option: { kernelClientId: string } & IKernelExecutorParams
   ): Promise<IDict | null>;
 }
+
+export type IJupyterpackDocTracker = IWidgetTracker<DocumentWidget>;

@@ -4,20 +4,27 @@ import {
 } from '@jupyterlab/application';
 
 import { JupyterPackWidgetFactory } from './widgetFactory';
-import { IConnectionManager } from '../type';
-import { IConnectionManagerToken } from '../token';
+import { IConnectionManager, IJupyterpackDocTracker } from '../type';
+import { IConnectionManagerToken, IJupyterpackDocTrackerToken } from '../token';
+import { WidgetTracker } from '@jupyterlab/apputils';
+import { DocumentWidget } from '@jupyterlab/docregistry';
+import { logoIcon } from '../tools';
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
 
-export const spkPlugin: JupyterFrontEndPlugin<void> = {
+export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
   id: 'jupyterpack:spkplugin',
   requires: [IConnectionManagerToken],
   autoStart: true,
+  provides: IJupyterpackDocTrackerToken,
   activate: (
     app: JupyterFrontEnd,
     connectionManager: IConnectionManager
-  ): void => {
+  ): IJupyterpackDocTracker => {
+    const tracker = new WidgetTracker<DocumentWidget>({
+      namespace: FACTORY
+    });
     const widgetFactory = new JupyterPackWidgetFactory({
       name: FACTORY,
       modelName: 'text',
@@ -38,7 +45,18 @@ export const spkPlugin: JupyterFrontEndPlugin<void> = {
       mimeTypes: ['text/json'],
       extensions: ['.spk', '.SPK'],
       fileFormat: 'json',
-      contentType: CONTENT_TYPE
+      contentType: CONTENT_TYPE,
+      icon: logoIcon
     });
+
+    widgetFactory.widgetCreated.connect((_, widget) => {
+      widget.title.icon = logoIcon;
+      widget.context.pathChanged.connect(() => {
+        tracker.save(widget);
+      });
+      tracker.add(widget);
+    });
+
+    return tracker;
   }
 };

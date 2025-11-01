@@ -1,3 +1,11 @@
+import logoStr from '../style/icons/box.svg';
+import { LabIcon } from '@jupyterlab/ui-components';
+
+export const logoIcon = new LabIcon({
+  name: 'jupyterpack:logo',
+  svgstr: logoStr
+});
+
 export function removePrefix(path: string, prefix: string): string {
   if (path.startsWith(prefix)) {
     return path.slice(prefix.length);
