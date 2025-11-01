@@ -44,6 +44,13 @@ export class DashServer extends KernelExecutor {
     //no-op
   }
 
+  async reloadPythonServer(options: {
+    entryPath?: string;
+    initCode?: string;
+  }): Promise<void> {
+    //
+  }
+
   async openWebsocket(options: {
     instanceId: string;
     kernelId: string;

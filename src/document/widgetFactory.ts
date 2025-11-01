@@ -5,6 +5,7 @@ import { Panel } from '@lumino/widgets';
 
 import {
   IConnectionManager,
+  IJupyterpackDocTracker,
   IJupyterPackFileFormat,
   JupyterPackFramework
 } from '../type';
@@ -13,11 +14,13 @@ import { JupyterPackDocWidget } from './jupyterpackDocWidget';
 import { PythonWidgetModel } from '../pythonWidget/pythonWidgetModel';
 import { UUID } from '@lumino/coreutils';
 import { PythonWidget } from '../pythonWidget/pythonWidget';
+import { ToolbarWidget } from './toolbar';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
   manager: ServiceManager.IManager;
   connectionManager: IConnectionManager;
+  tracker: IJupyterpackDocTracker;
 }
 
 export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWidget> {
@@ -72,10 +75,11 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
         }
       }
     });
-
+    const toolbar = new ToolbarWidget({ tracker: this.options.tracker });
     return new JupyterPackDocWidget({
       context,
-      content
+      content,
+      toolbar
     });
   }
 

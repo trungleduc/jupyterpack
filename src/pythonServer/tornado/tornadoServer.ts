@@ -73,6 +73,13 @@ export class TornadoServer extends KernelExecutor {
     });
   }
 
+  async reloadPythonServer(options: {
+    entryPath?: string;
+    initCode?: string;
+  }): Promise<void> {
+    //
+  }
+
   private _GET_RESPONSE_FUNCTION = '__jupyterpack_tornado_get_response';
   private _OPEN_WEBSOCKET_FUNCTION = '__jupyterpack_tornado_open_ws';
 

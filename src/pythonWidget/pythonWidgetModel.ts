@@ -7,17 +7,18 @@ import {
   Session
 } from '@jupyterlab/services';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { IDisposable } from '@lumino/disposable';
 
 import { PYTHON_SERVER } from '../pythonServer';
+import { Signal } from '@lumino/signaling';
 import {
   IConnectionManager,
   IJupyterPackFileFormat,
   IKernelExecutor,
+  IPythonWidgetModel,
   JupyterPackFramework
 } from '../type';
 
-export class PythonWidgetModel implements IDisposable {
+export class PythonWidgetModel implements IPythonWidgetModel {
   constructor(options: PythonWidgetModel.IOptions) {
     this._context = options.context;
     this._manager = options.manager;
@@ -32,6 +33,22 @@ export class PythonWidgetModel implements IDisposable {
   get connectionManager(): IConnectionManager {
     return this._connectionManager;
   }
+  get serverReloaded() {
+    return this._serverReloaded;
+  }
+
+  async reload() {
+    if (!this._kernelStarted) {
+      return;
+    }
+    const { spkContent, entryContent } = await this._loadData();
+    await this._executor?.reloadPythonServer({
+      entryPath: spkContent.entry,
+      initCode: entryContent.content
+    });
+    this._serverReloaded.emit();
+  }
+
   async initialize(): Promise<
     | {
         success: true;
@@ -48,15 +65,9 @@ export class PythonWidgetModel implements IDisposable {
         error: 'Server is called twice'
       };
     }
-    const filePath = this._context.localPath;
-    const spkContent = this._jpackModel;
 
-    const entryPath = PathExt.join(PathExt.dirname(filePath), spkContent.entry);
-    const rootUrl = spkContent.rootUrl ?? '/';
-    const entryContent = await this._contentsManager.get(entryPath, {
-      content: true,
-      format: 'text'
-    });
+    const { filePath, spkContent, rootUrl, entryContent } =
+      await this._loadData();
     const sessionManager = this._manager.sessions;
     await sessionManager.ready;
     await this._manager.kernelspecs.ready;
@@ -119,6 +130,19 @@ export class PythonWidgetModel implements IDisposable {
     this._isDisposed = true;
   }
 
+  private async _loadData() {
+    const filePath = this._context.localPath;
+    const spkContent = this._jpackModel;
+
+    const entryPath = PathExt.join(PathExt.dirname(filePath), spkContent.entry);
+    const rootUrl = spkContent.rootUrl ?? '/';
+    const entryContent = await this._contentsManager.get(entryPath, {
+      content: true,
+      format: 'text'
+    });
+    return { filePath, spkContent, rootUrl, entryContent };
+  }
+
   private _isDisposed = false;
   private _kernelStarted = false;
   private _sessionConnection: Session.ISessionConnection | undefined;
@@ -128,6 +152,11 @@ export class PythonWidgetModel implements IDisposable {
   private _contentsManager: Contents.IManager;
   private _jpackModel: IJupyterPackFileFormat;
   private _executor?: IKernelExecutor;
+
+  private _serverReloaded: Signal<IPythonWidgetModel, void> = new Signal<
+    IPythonWidgetModel,
+    void
+  >(this);
 }
 
 export namespace PythonWidgetModel {

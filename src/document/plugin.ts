@@ -32,7 +32,8 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
       defaultFor: [CONTENT_TYPE],
       commands: app.commands,
       manager: app.serviceManager,
-      connectionManager
+      connectionManager,
+      tracker
     });
 
     // Registering the widget factory

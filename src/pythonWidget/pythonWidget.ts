@@ -29,6 +29,10 @@ export class PythonWidget extends IFramePanel {
       iframe.addEventListener('load', () => {
         this.toggleSpinner(false);
       });
+      this._model.serverReloaded.connect(() => {
+        console.log('reload iframe');
+        this._iframe?.contentWindow?.location?.reload();
+      });
     });
   }
 

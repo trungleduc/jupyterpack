@@ -2,6 +2,7 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 import { KernelMessage } from '@jupyterlab/services';
 import { IDisposable } from '@lumino/disposable';
 import { IWidgetTracker } from '@jupyterlab/apputils';
+import { ISignal } from '@lumino/signaling';
 
 export interface IDict<T = any> {
   [key: string]: T;
@@ -71,6 +72,10 @@ export interface IKernelExecutor extends IDisposable {
     kernelClientId: string;
   }): Promise<void>;
   disposePythonServer(): Promise<void>;
+  reloadPythonServer(options: {
+    entryPath?: string;
+    initCode?: string;
+  }): Promise<void>;
   getResponseFunctionFactory(options: {
     urlPath: string;
     method: string;
@@ -90,3 +95,19 @@ export interface IConnectionManager {
 }
 
 export type IJupyterpackDocTracker = IWidgetTracker<DocumentWidget>;
+
+export interface IPythonWidgetModel extends IDisposable {
+  connectionManager: IConnectionManager;
+  serverReloaded: ISignal<IPythonWidgetModel, void>;
+  reload(): Promise<void>;
+  initialize(): Promise<
+    | {
+        success: true;
+        instanceId: string;
+        kernelClientId: string;
+        rootUrl: string;
+        framework: JupyterPackFramework;
+      }
+    | { success: false; error: string }
+  >;
+}
