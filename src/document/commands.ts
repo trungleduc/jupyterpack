@@ -1,13 +1,19 @@
+import { refreshIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { IJupyterpackDocTracker } from '../type';
 import { Panel } from '@lumino/widgets';
+
+import { autoReloadIcon, linkIcon } from '../tools';
+import { IJupyterpackDocTracker } from '../type';
 import { IFramePanel } from './iframePanel';
-import { autoReloadIcon } from '../tools';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 export const CommandIDs = {
   RELOAD: 'jupyterpack:reload',
-  TOGGLE_AUTORELOAD: 'jupyterpack:toggleAutoreload'
+  TOGGLE_AUTORELOAD: 'jupyterpack:toggleAutoreload',
+  OPEN_SPECTA: 'jupyterpack:openInSpecta'
 };
+
+const labBaseUrl = PageConfig.getOption('baseUrl');
 
 function getCurrentIframPanel(
   tracker: IJupyterpackDocTracker
@@ -27,10 +33,11 @@ export function addCommands(
   tracker: IJupyterpackDocTracker
 ) {
   commands.addCommand(CommandIDs.RELOAD, {
-    label: 'Reload',
+    caption: 'Reload',
     isEnabled: () => {
       return tracker.currentWidget !== null;
     },
+    icon: refreshIcon,
     execute: async () => {
       const widget = getCurrentIframPanel(tracker);
       if (widget) {
@@ -60,6 +67,25 @@ export function addCommands(
 
         commands.notifyCommandChanged(CommandIDs.TOGGLE_AUTORELOAD);
       }
+    }
+  });
+  commands.addCommand(CommandIDs.OPEN_SPECTA, {
+    caption: 'Open in Specta',
+    isEnabled: () => {
+      return tracker.currentWidget !== null;
+    },
+    icon: linkIcon,
+    execute: async () => {
+      const context = tracker.currentWidget?.context;
+      if (!context) {
+        return;
+      }
+      const spectaUrl = new URL(
+        URLExt.join(labBaseUrl, 'specta'),
+        window.location.origin
+      );
+      spectaUrl.searchParams.set('path', context.path);
+      window.open(spectaUrl.toString(), '_blank');
     }
   });
 }

@@ -1,13 +1,10 @@
 import {
   CommandToolbarButton,
-  ReactiveToolbar,
-  ToolbarButton
+  ReactiveToolbar
 } from '@jupyterlab/ui-components';
-import { Panel } from '@lumino/widgets';
+import { CommandRegistry } from '@lumino/commands';
 
 import { IJupyterpackDocTracker } from '../type';
-import { IFramePanel } from './iframePanel';
-import { CommandRegistry } from '@lumino/commands';
 import { CommandIDs } from './commands';
 
 export class ToolbarWidget extends ReactiveToolbar {
@@ -16,14 +13,12 @@ export class ToolbarWidget extends ReactiveToolbar {
     commands: CommandRegistry;
   }) {
     super();
-    this._tracker = options.tracker;
     this.addClass('jupyterpack-toolbar');
     this.addItem(
       'Reload',
-      new ToolbarButton({
-        icon: 'refresh',
-        tooltip: 'Reload',
-        onClick: this._reload
+      new CommandToolbarButton({
+        commands: options.commands,
+        id: CommandIDs.RELOAD
       })
     );
     this.addItem(
@@ -33,19 +28,12 @@ export class ToolbarWidget extends ReactiveToolbar {
         commands: options.commands
       })
     );
+    this.addItem(
+      'Open Specta',
+      new CommandToolbarButton({
+        id: CommandIDs.OPEN_SPECTA,
+        commands: options.commands
+      })
+    );
   }
-
-  private _reload = async () => {
-    const current = this._tracker.currentWidget?.content as Panel | undefined;
-    if (!current) {
-      return;
-    }
-    const widget = current.widgets[0] as IFramePanel | undefined;
-    if (!widget) {
-      return;
-    }
-
-    await widget.reload();
-  };
-  private _tracker: IJupyterpackDocTracker;
 }
