@@ -9,7 +9,6 @@ import {
 } from '../tools';
 import { IDict, IKernelExecutor, JupyterPackFramework } from '../type';
 import websocketPatch from '../websocket/websocket.js?raw';
-import { patch } from './common/generatedPythonFiles';
 
 export abstract class KernelExecutor implements IKernelExecutor {
   constructor(options: KernelExecutor.IOptions) {
@@ -41,7 +40,11 @@ export abstract class KernelExecutor implements IKernelExecutor {
     instanceId: string;
     kernelClientId: string;
   }): Promise<void> {
-    await this.executeCode({ code: patch });
+    const patchCode = `
+    from jupyterpack.common import patch_all
+    patch_all()
+    `;
+    await this.executeCode({ code: patchCode });
   }
 
   openWebsocketFunctionFactory(options: {

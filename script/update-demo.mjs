@@ -1,6 +1,8 @@
 import fs from 'fs';
-import path from 'path';
 import fse from 'fs-extra';
+import os from 'os';
+import path from 'path';
+import * as tar from 'tar';
 
 function updateFederatedExtension(inputDir, jsonFilePath) {
   // 1. Find the remoteEntry.<hash>.js file
@@ -41,7 +43,7 @@ function updateFederatedExtension(inputDir, jsonFilePath) {
   console.log(`Updated "load" value to: static/${remoteEntryFile}`);
 }
 
-async function cleanAndCopy(sourceDir, targetDir ) {
+async function cleanAndCopy(sourceDir, targetDir) {
   try {
     if (fs.existsSync(targetDir)) {
       const entries = fs.readdirSync(targetDir);
@@ -62,10 +64,68 @@ async function cleanAndCopy(sourceDir, targetDir ) {
   }
 }
 
+function listAllFiles(dir, baseDir = dir) {
+  const entries = [];
+  for (const entry of fse.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    const relativePath = path.relative(baseDir, fullPath);
+    if (entry.isDirectory()) {
+      entries.push(...listAllFiles(fullPath, baseDir));
+    } else {
+      entries.push(relativePath);
+    }
+  }
+  return entries;
+}
+
+function buildJupyterpackArchive() {
+  const sourceDir = 'jupyterpack';
+  const destDir = 'demo/_output/xeus/xeus-kernels/kernel_packages';
+  const prefix = 'lib/python3.13/site-packages/jupyterpack/';
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jupyterpack-'));
+
+  const existing = fs
+    .readdirSync(destDir)
+    .find(f => f.startsWith('jupyterpack'));
+  if (!existing) {
+    throw new Error('Please run build:demo first');
+  }
+
+  const archivePath = path.join(destDir, existing);
+
+  const targetPackDir = path.join(tempDir, prefix);
+  fse.ensureDirSync(targetPackDir);
+
+  // Copy everything except labextension
+  for (const entry of fse.readdirSync(sourceDir)) {
+    if (entry === 'labextension') continue;
+    fse.copySync(path.join(sourceDir, entry), path.join(targetPackDir, entry), {
+      overwrite: true
+    });
+  }
+
+  fs.unlinkSync(archivePath);
+  tar
+    .c(
+      {
+        gzip: true,
+        file: archivePath,
+        cwd: tempDir,
+        portable: true
+      },
+      listAllFiles(tempDir)
+    )
+    .then(() => {
+      fse.removeSync(tempDir);
+      console.log(`✅ Archive updated in place: ${archivePath}`);
+    });
+}
+
 const inputPath = 'jupyterpack/labextension';
 const outputPath = 'demo/_output/extensions/jupyterpack';
 const jsonPath = 'demo/_output/jupyter-lite.json';
 
 updateFederatedExtension(`${inputPath}/static`, jsonPath);
 cleanAndCopy(inputPath, outputPath);
-cleanAndCopy('demo/files', 'demo/_output/files')
+cleanAndCopy('demo/files', 'demo/_output/files');
+buildJupyterpackArchive();
