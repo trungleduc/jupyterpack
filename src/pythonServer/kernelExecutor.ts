@@ -22,6 +22,10 @@ export abstract class KernelExecutor implements IKernelExecutor {
   }
 
   abstract disposePythonServer(): Promise<void>;
+  abstract reloadPythonServer(options: {
+    entryPath?: string;
+    initCode?: string;
+  }): Promise<void>;
 
   abstract getResponseFunctionFactory(options: {
     urlPath: string;
@@ -213,9 +217,12 @@ export abstract class KernelExecutor implements IKernelExecutor {
       kernelClientId,
       '/'
     );
+    this._baseUrl = baseURL;
 
     return baseURL;
   }
+
+  protected _baseUrl: string | undefined;
 
   private _isDisposed: boolean = false;
   private _sessionConnection: Session.ISessionConnection;

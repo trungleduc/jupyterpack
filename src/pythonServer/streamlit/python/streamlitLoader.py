@@ -86,3 +86,17 @@ async def __jupyterpack_streamlit_get_response(
     response = await tornado_bridge.fetch(req_dict)
     json_str = json.dumps(response)
     return json_str
+
+
+async def __jupyterpack_reload_streamlit_app():
+    __jupyterpack_streamlit_dispose()
+    streamlit_server = __jupyterpack_create_streamlit_app(
+        "{{base_url}}", "{{script_path}}"
+    )  # noqa
+    app = streamlit_server._create_app()
+    await streamlit_server._runtime.start()
+    __jupyterpack_streamlit_instance["streamlit_server"] = streamlit_server
+    __jupyterpack_streamlit_instance["tornado_bridge"] = TornadoBridge(
+        app, "{{base_url}}"
+    )
+    return True

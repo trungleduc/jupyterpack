@@ -49,3 +49,10 @@
       0 0 0 0 rgb(212 72 13 / 100%);
   }
 }
+
+.specta-main-content-panel .jupyterpack-toolbar {
+  display: none;
+  height: 0 !important;
+  width: 0 !important;
+  min-height: 0 !important;
+}

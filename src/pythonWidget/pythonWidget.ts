@@ -1,6 +1,7 @@
 import { PythonWidgetModel } from './pythonWidgetModel';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { IFramePanel } from '../document/iframePanel';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 export class PythonWidget extends IFramePanel {
   constructor(options: PythonWidget.IOptions) {
@@ -12,6 +13,7 @@ export class PythonWidget extends IFramePanel {
         this._iframe.contentDocument!.body.innerText = `Failed to start server: ${connectionData.error}`;
         return;
       }
+      this._isReady.resolve();
       const iframe = this._iframe;
       const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
 
@@ -29,11 +31,27 @@ export class PythonWidget extends IFramePanel {
       iframe.addEventListener('load', () => {
         this.toggleSpinner(false);
       });
+      this._model.serverReloaded.connect(() => {
+        this._iframe?.contentWindow?.location?.reload();
+      });
     });
   }
 
+  get autoreload() {
+    return this._model.autoreload;
+  }
+  set autoreload(value: boolean) {
+    this._model.autoreload = value;
+  }
+  get isReady(): Promise<void> {
+    return this._isReady.promise;
+  }
   get model(): PythonWidgetModel {
     return this._model;
+  }
+
+  async reload(): Promise<void> {
+    await this._model.reload();
   }
 
   dispose(): void {
@@ -41,6 +59,7 @@ export class PythonWidget extends IFramePanel {
   }
 
   private _model: PythonWidgetModel;
+  private _isReady = new PromiseDelegate<void>();
 }
 
 export namespace PythonWidget {

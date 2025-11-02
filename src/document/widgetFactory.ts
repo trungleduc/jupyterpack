@@ -1,23 +1,26 @@
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents, ServiceManager } from '@jupyterlab/services';
 import { CommandRegistry } from '@lumino/commands';
+import { UUID } from '@lumino/coreutils';
 import { Panel } from '@lumino/widgets';
 
+import { PythonWidget } from '../pythonWidget/pythonWidget';
+import { PythonWidgetModel } from '../pythonWidget/pythonWidgetModel';
+import { SandpackPanel } from '../sandpackWidget/sandpackPanel';
 import {
   IConnectionManager,
+  IJupyterpackDocTracker,
   IJupyterPackFileFormat,
   JupyterPackFramework
 } from '../type';
-import { SandpackPanel } from '../sandpackWidget/sandpackPanel';
 import { JupyterPackDocWidget } from './jupyterpackDocWidget';
-import { PythonWidgetModel } from '../pythonWidget/pythonWidgetModel';
-import { UUID } from '@lumino/coreutils';
-import { PythonWidget } from '../pythonWidget/pythonWidget';
+import { ToolbarWidget } from './toolbar';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
   manager: ServiceManager.IManager;
   connectionManager: IConnectionManager;
+  tracker: IJupyterpackDocTracker;
 }
 
 export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWidget> {
@@ -72,9 +75,14 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
         }
       }
     });
+    const toolbar = new ToolbarWidget({
+      tracker: this.options.tracker,
+      commands: this.options.commands
+    });
     return new JupyterPackDocWidget({
       context,
-      content
+      content,
+      toolbar
     });
   }
 

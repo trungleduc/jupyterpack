@@ -74,6 +74,22 @@ export class StreamlitServer extends KernelExecutor {
     return code;
   }
 
+  async reloadPythonServer(options: {
+    entryPath?: string;
+    initCode?: string;
+  }): Promise<void> {
+    const { entryPath } = options;
+    if (!entryPath || !this._baseUrl) {
+      return;
+    }
+    await this.executeCode(
+      {
+        code: 'await __jupyterpack_reload_streamlit_app()'
+      },
+      true
+    );
+  }
+
   async disposePythonServer(): Promise<void> {
     await this.executeCode({
       code: '__jupyterpack_streamlit_dispose()'

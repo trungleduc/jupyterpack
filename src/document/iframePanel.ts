@@ -1,6 +1,6 @@
 import { Widget } from '@lumino/widgets';
 
-export class IFramePanel extends Widget {
+export abstract class IFramePanel extends Widget {
   constructor() {
     super();
     this.addClass('jupyterpack-iframe-panel');
@@ -20,6 +20,9 @@ export class IFramePanel extends Widget {
     }
   }
 
+  abstract reload(): Promise<void>;
+  abstract autoreload: boolean;
+  abstract isReady: Promise<void>;
   protected _iframe: HTMLIFrameElement;
   protected _spinner: HTMLDivElement;
 }

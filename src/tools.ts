@@ -1,3 +1,23 @@
+import logoStr from '../style/icons/box.svg';
+import autoReloadStr from '../style/icons/autoreload.svg';
+import linkStr from '../style/icons/externallink.svg';
+import { LabIcon } from '@jupyterlab/ui-components';
+
+export const logoIcon = new LabIcon({
+  name: 'jupyterpack:logo',
+  svgstr: logoStr
+});
+
+export const autoReloadIcon = new LabIcon({
+  name: 'jupyterpack:autoReload',
+  svgstr: autoReloadStr
+});
+
+export const linkIcon = new LabIcon({
+  name: 'jupyterpack:externalLink',
+  svgstr: linkStr
+});
+
 export function removePrefix(path: string, prefix: string): string {
   if (path.startsWith(prefix)) {
     return path.slice(prefix.length);
