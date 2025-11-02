@@ -3,8 +3,9 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDict } from '../type';
 import { removePrefix } from '../tools';
+import { IDisposable } from '@lumino/disposable';
 
-export class SandpackFilesModel {
+export class SandpackFilesModel implements IDisposable {
   constructor(options: { contentsManager: Contents.IManager; path: string }) {
     this._contentManager = options.contentsManager;
     this._path = options.path;
@@ -21,12 +22,23 @@ export class SandpackFilesModel {
 
     return this._allFiles;
   }
+  get isDisposed(): boolean {
+    return this._isDisposed;
+  }
 
   get fileChanged(): ISignal<
     SandpackFilesModel,
     { allFiles: IDict<{ code: string }> }
   > {
     return this._fileChanged;
+  }
+
+  dispose(): void {
+    if (this._isDisposed) {
+      return;
+    }
+    this._isDisposed = true;
+    this._contentManager.fileChanged.disconnect(this._onFileChanged);
   }
 
   async flattenDirectory(
@@ -138,4 +150,6 @@ export class SandpackFilesModel {
   private _contentManager: Contents.IManager;
 
   private _allFiles?: IDict<{ code: string }>;
+
+  private _isDisposed = false;
 }

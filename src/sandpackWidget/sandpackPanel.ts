@@ -25,6 +25,13 @@ export class SandpackPanel extends IFramePanel {
     });
   }
 
+  dispose(): void {
+    this._fileModel?.fileChanged.disconnect(this._onFileChanged);
+    this._fileModel?.dispose();
+    this._spClient?.destroy();
+    super.dispose();
+  }
+
   async init(localPath: string, jpackModel: IJupyterPackFileFormat) {
     if (jpackModel?.metadata?.autoreload === true) {
       this._autoreload = true;

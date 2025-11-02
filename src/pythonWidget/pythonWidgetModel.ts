@@ -25,6 +25,10 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     this._connectionManager = options.connectionManager;
     this._contentsManager = options.contentsManager;
     this._jpackModel = options.jpackModel;
+    this._localPath = PathExt.dirname(this._context.localPath);
+    if (this._jpackModel?.metadata?.autoreload) {
+      this._contentsManager.fileChanged.connect(this._onFileChanged, this);
+    }
   }
 
   get isDisposed(): boolean {
@@ -127,6 +131,7 @@ export class PythonWidgetModel implements IPythonWidgetModel {
       return;
     }
     void this._executor?.disposePythonServer();
+    this._contentsManager.fileChanged.disconnect(this._onFileChanged);
     this._isDisposed = true;
   }
 
@@ -143,6 +148,20 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     return { filePath, spkContent, rootUrl, entryContent };
   }
 
+  private async _onFileChanged(
+    sender: Contents.IManager,
+    args: Contents.IChangedArgs
+  ) {
+    if (args.type === 'save') {
+      if (
+        args.newValue?.path &&
+        args.newValue.path.startsWith(this._localPath)
+      ) {
+        await this.reload();
+      }
+    }
+  }
+
   private _isDisposed = false;
   private _kernelStarted = false;
   private _sessionConnection: Session.ISessionConnection | undefined;
@@ -152,6 +171,7 @@ export class PythonWidgetModel implements IPythonWidgetModel {
   private _contentsManager: Contents.IManager;
   private _jpackModel: IJupyterPackFileFormat;
   private _executor?: IKernelExecutor;
+  private _localPath: string;
 
   private _serverReloaded: Signal<IPythonWidgetModel, void> = new Signal<
     IPythonWidgetModel,

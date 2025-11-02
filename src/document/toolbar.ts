@@ -8,7 +8,6 @@ export class ToolbarWidget extends ReactiveToolbar {
   constructor(options: { tracker: IJupyterpackDocTracker }) {
     super();
     this._tracker = options.tracker;
-    console.log('tracker', this._tracker);
     this.addClass('jupyterpack-toolbar');
     this.addItem(
       'Reload',
