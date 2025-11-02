@@ -9,6 +9,7 @@ import { IConnectionManagerToken, IJupyterpackDocTrackerToken } from '../token';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { logoIcon } from '../tools';
+import { addCommands } from './commands';
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
@@ -25,6 +26,7 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
     const tracker = new WidgetTracker<DocumentWidget>({
       namespace: FACTORY
     });
+    addCommands(app.commands, tracker);
     const widgetFactory = new JupyterPackWidgetFactory({
       name: FACTORY,
       modelName: 'text',

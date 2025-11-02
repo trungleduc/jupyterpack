@@ -21,7 +21,8 @@ export abstract class IFramePanel extends Widget {
   }
 
   abstract reload(): Promise<void>;
-
+  abstract autoreload: boolean;
+  abstract isReady: Promise<void>;
   protected _iframe: HTMLIFrameElement;
   protected _spinner: HTMLDivElement;
 }

@@ -26,11 +26,18 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     this._contentsManager = options.contentsManager;
     this._jpackModel = options.jpackModel;
     this._localPath = PathExt.dirname(this._context.localPath);
-    if (this._jpackModel?.metadata?.autoreload) {
-      this._contentsManager.fileChanged.connect(this._onFileChanged, this);
-    }
+    this._autoreload = Boolean(this._jpackModel?.metadata?.autoreload);
+
+    this._contentsManager.fileChanged.connect(this._onFileChanged, this);
   }
 
+  get autoreload() {
+    return this._autoreload;
+  }
+
+  set autoreload(val: boolean) {
+    this._autoreload = val;
+  }
   get isDisposed(): boolean {
     return this._isDisposed;
   }
@@ -152,7 +159,7 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     sender: Contents.IManager,
     args: Contents.IChangedArgs
   ) {
-    if (args.type === 'save') {
+    if (this._autoreload && args.type === 'save') {
       if (
         args.newValue?.path &&
         args.newValue.path.startsWith(this._localPath)
@@ -177,6 +184,7 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     IPythonWidgetModel,
     void
   >(this);
+  private _autoreload: boolean;
 }
 
 export namespace PythonWidgetModel {

@@ -9,6 +9,7 @@ import { Contents } from '@jupyterlab/services';
 import { IFramePanel } from '../document/iframePanel';
 import { IDict, IJupyterPackFileFormat } from '../type';
 import { SandpackFilesModel } from './sandpackFilesModel';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 export class SandpackPanel extends IFramePanel {
   constructor(options: {
@@ -30,6 +31,18 @@ export class SandpackPanel extends IFramePanel {
     this._fileModel?.dispose();
     this._spClient?.destroy();
     super.dispose();
+  }
+
+  get isReady() {
+    return this._isReady.promise;
+  }
+
+  get autoreload(): boolean {
+    return this._autoreload;
+  }
+
+  set autoreload(val: boolean) {
+    this._autoreload = val;
   }
 
   async init(localPath: string, jpackModel: IJupyterPackFileFormat) {
@@ -58,6 +71,7 @@ export class SandpackPanel extends IFramePanel {
       options
     );
     await this.connectSignals(filesModel, this._spClient);
+    this._isReady.resolve();
   }
 
   async connectSignals(
@@ -105,4 +119,5 @@ export class SandpackPanel extends IFramePanel {
   private _contentsManager: Contents.IManager;
   private _fileModel: SandpackFilesModel | undefined;
   private _autoreload = false;
+  private _isReady = new PromiseDelegate<void>();
 }
