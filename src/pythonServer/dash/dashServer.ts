@@ -36,29 +36,22 @@ export class DashServer extends KernelExecutor {
     content?: string;
   }) {
     const { method, urlPath, headers, params, content } = options;
-    const code = `${this.DASH_GET_RESPONSE_FUNCTION}("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
+    const code = `__jupyterpack_dash_get_response("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
     return code;
   }
 
   async disposePythonServer(): Promise<void> {
-    //no-op
+    await this.executeCode({ code: '__jupyterpack_dash_dispose()' });
   }
 
   async reloadPythonServer(options: {
     entryPath?: string;
     initCode?: string;
   }): Promise<void> {
-    //
+    const { initCode } = options;
+    if (initCode) {
+      await this.executeCode({ code: initCode });
+    }
+    await this.executeCode({ code: '__jupyterpack_reload_dash_app()' }, true);
   }
-
-  async openWebsocket(options: {
-    instanceId: string;
-    kernelId: string;
-    wsUrl: string;
-    protocol?: string;
-  }): Promise<void> {
-    //no-op
-  }
-
-  private DASH_GET_RESPONSE_FUNCTION = '__jupyterpack_dash_get_response';
 }

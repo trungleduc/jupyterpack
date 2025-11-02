@@ -1,12 +1,15 @@
 import httpx, json, base64
+
 __jupyterpack_dash_transport = httpx.WSGITransport(app=app.server)  # noqa
 
 
 def __jupyterpack_dash_get_response(method, url, headers, content=None, params=None):
+    global __jupyterpack_dash_transport
     decoded_content = None
     if content is not None:
         decoded_content = base64.b64decode(content)
-        # decoded_content = content.decode()
+    if __jupyterpack_dash_transport is None:
+        __jupyterpack_dash_transport = httpx.WSGITransport(app=app.server)  # noqa
     with httpx.Client(
         transport=__jupyterpack_dash_transport, base_url="http://testserver"
     ) as client:
@@ -21,3 +24,15 @@ def __jupyterpack_dash_get_response(method, url, headers, content=None, params=N
         }
         json_str = json.dumps(response)
         return json_str
+
+
+def __jupyterpack_dash_dispose():
+    global __jupyterpack_dash_transport
+    __jupyterpack_dash_transport = None
+
+
+def __jupyterpack_reload_dash_app():
+    global __jupyterpack_dash_transport
+    __jupyterpack_dash_dispose()
+    __jupyterpack_dash_transport = httpx.WSGITransport(app=app.server)
+    return True
