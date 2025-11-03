@@ -47,9 +47,3 @@ generatePythonTs(COMMON_PYTHON_DIR);
 
 const STREAMLIT_PYTHON_DIR = 'src/pythonServer/streamlit/python';
 generatePythonTs(STREAMLIT_PYTHON_DIR);
-
-const TORNADO_PYTHON_DIR = 'src/pythonServer/tornado/python';
-generatePythonTs(TORNADO_PYTHON_DIR);
-
-const DASH_PYTHON_DIR = 'src/pythonServer/dash/python';
-generatePythonTs(DASH_PYTHON_DIR);

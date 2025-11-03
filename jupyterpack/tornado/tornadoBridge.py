@@ -1,185 +1,24 @@
-import asyncio
 import base64
-import json
 import logging
 import tornado
-
-from tornado.http1connection import HTTP1Connection, HTTP1ConnectionParameters
-from tornado.iostream import BaseIOStream, IOStream
-from tornado.httputil import HTTPHeaders, RequestStartLine, HTTPServerRequest
+from tornado.httputil import HTTPServerRequest
 from tornado.websocket import WebSocketHandler
-import tornado.escape
+
+from .wsConnection import WSConnection
+
+from .patchedConnection import PatchedConnection
+from .tools import (
+    DumpStream,
+    convert_headers,
+    decode_broadcast_message,
+    encode_broadcast_message,
+)
 import pyjs
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARN)
-
-
-def convert_headers(
-    headers: List[Tuple[str, str]],
-) -> HTTPHeaders:
-    tornado_headers = HTTPHeaders()
-    for k, v in headers:
-        tornado_headers.add(k, v)
-    return tornado_headers
-
-
-def encode_broadcast_message(
-    kernel_client_id: str,
-    ws_url: str,
-    msg: str | bytes,
-    action: str = "backend_message",
-):
-    if isinstance(msg, bytes):
-        is_binary = True
-        b64_msg = base64.b64encode(msg).decode("ascii")
-    elif isinstance(msg, str):
-        is_binary = False
-        b64_msg = msg
-
-    return json.dumps(
-        {
-            "action": action,
-            "dest": kernel_client_id,
-            "wsUrl": ws_url,
-            "payload": {"isBinary": is_binary, "data": b64_msg},
-        }
-    )
-
-
-def decode_broadcast_message(payload_message: str):
-    msg_object = json.loads(payload_message)
-    is_binary = msg_object["isBinary"]
-    data = msg_object["data"]
-    if is_binary:
-        return base64.b64decode(data)
-    else:
-        return data
-
-
-class DumpStream(BaseIOStream):
-    max_buffer_size = 1048576000
-
-    def close_fd(*args, **kwargs):
-        pass
-
-    def write_to_fd(self, buf):
-        raise NotImplementedError("Not supported!")
-
-
-class ConnectionState:
-    def __init__(self):
-        self._reply_body = b""
-        self._finish_future = asyncio.Future()
-        self._reply_headers = []
-        self._status: Optional[int] = None
-
-    @property
-    def reply_body(self):
-        return base64.b64encode(self._reply_body).decode("ascii")
-
-    @property
-    def reply_headers(self):
-        reply_headers = json.dumps(dict(self._reply_headers)).encode("utf-8")
-        return base64.b64encode(reply_headers).decode("ascii")
-
-    @property
-    def status(self):
-        return self._status
-
-    @property
-    def finish_future(self):
-        return self._finish_future
-
-    def append_reply_body(self, chunk: bytes):
-        self._reply_body += chunk
-
-    def append_reply_header(self, headers: List[Tuple[str, str]]):
-        self._reply_headers.extend(headers)
-
-    def set_status(self, status: int):
-        self._status = status
-
-    def finish(self):
-        self._finish_future.set_result(None)
-
-
-class PatchedConnection(HTTP1Connection):
-    def __init__(
-        self,
-        stream: IOStream,
-        is_client: bool,
-        params: Optional[HTTP1ConnectionParameters] = None,
-        context: Optional[object] = None,
-        initial_request_data: Optional[Dict] = None,
-    ) -> None:
-        super().__init__(stream, is_client, params, context)
-        self._connection_state = ConnectionState()
-        if initial_request_data is not None:
-            self._request_start_line = RequestStartLine(
-                initial_request_data.get("request_method"),
-                initial_request_data.get("request_url"),
-                "HTTP/1.1",
-            )
-
-    @property
-    def connection_state(self):
-        return self._connection_state
-
-    def write(self, chunk: bytes):
-        self._connection_state.append_reply_body(chunk)
-        f = asyncio.Future()
-        f.set_result(None)
-        return f
-
-    def write_headers(self, start_line, headers, chunk=None):
-        self._connection_state.set_status(int(start_line.code))
-        self._connection_state.append_reply_header(headers.get_all())
-        if chunk is not None:
-            self._connection_state.append_reply_body(chunk)
-        f = asyncio.Future()
-        f.set_result(None)
-        return f
-
-    def finish(self):
-        self._connection_state.finish()
-
-
-class WSConnection:
-    def __init__(
-        self,
-        instance_id: str,
-        kernel_client_id: str,
-        ws_url: str,
-        broadcast_channel: Any,
-    ):
-        self.instance_id = instance_id
-        self.kernel_client_id = kernel_client_id
-        self.ws_url = ws_url
-        self.broadcast_channel = broadcast_channel
-
-    client_terminated = False
-
-    def is_closing(self):
-        return False
-
-    def write_message(self, msg, binary=False):
-        if isinstance(msg, dict):
-            msg = tornado.escape.json_encode(msg)
-        self.broadcast_channel.postMessage(
-            encode_broadcast_message(self.kernel_client_id, self.ws_url, msg)
-        )
-        f = asyncio.Future()
-        f.set_result(None)
-        return f
-
-    def write_ping(self, data):
-        pass
-
-    def close(self, code, reason=None):
-        pass
 
 
 class TornadoBridge:
