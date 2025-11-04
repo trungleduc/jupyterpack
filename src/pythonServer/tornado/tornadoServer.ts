@@ -89,5 +89,5 @@ export class TornadoServer extends KernelExecutor {
     }
   }
 
-  private _SERVER_VAR = '__jupyterpack_tornado_server';
+  protected _SERVER_VAR = '__jupyterpack_tornado_server';
 }

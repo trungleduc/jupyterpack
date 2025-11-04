@@ -1,4 +1,3 @@
-import base64
 import json
 from typing import Dict
 from .tornadoBridge import TornadoBridge
@@ -18,6 +17,8 @@ class TornadoServer:
         self.dispose()
         self._tornado_server = app
         self._tornado_bridge = TornadoBridge(app, self._base_url)
+
+        return True
 
     async def open_ws(
         self,

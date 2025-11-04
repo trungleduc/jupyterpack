@@ -42,8 +42,3 @@ export function generatePythonTs(pythonDir, outDir) {
   console.log(`Generated ${outputTsFile} with ${files.length} Python files.`);
 }
 
-const COMMON_PYTHON_DIR = 'src/pythonServer/common/python';
-generatePythonTs(COMMON_PYTHON_DIR);
-
-const STREAMLIT_PYTHON_DIR = 'src/pythonServer/streamlit/python';
-generatePythonTs(STREAMLIT_PYTHON_DIR);
