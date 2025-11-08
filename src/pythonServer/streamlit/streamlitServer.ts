@@ -36,8 +36,8 @@ export class StreamlitServer extends TornadoServer {
 
     const stCode = `
       from jupyterpack.streamlit import StreamlitServer, create_streamlit_app
-      __jupyterpack_streamlit_server, __jupyterpack_tornado_app = await create_streamlit_app("${entryPath}", "${baseURL}")
-      ${this._SERVER_VAR} = StreamlitServer(__jupyterpack_tornado_app, "${baseURL}", __jupyterpack_streamlit_server)
+      __jupyterpack_st_server, __jupyterpack_tor_app = await create_streamlit_app("${entryPath}", "${baseURL}")
+      ${this._SERVER_VAR} = StreamlitServer(__jupyterpack_tor_app, "${baseURL}", __jupyterpack_st_server)
       `;
     await this.executeCode({ code: stCode });
   }
@@ -51,8 +51,9 @@ export class StreamlitServer extends TornadoServer {
       return;
     }
     const reloadCode = `
-      __jupyterpack_streamlit_server, __jupyterpack_tornado_app = await create_streamlit_app("${entryPath}", "${this._baseUrl}")
-      ${this._SERVER_VAR}.reload(__jupyterpack_tornado_app, __jupyterpack_streamlit_server)
+      ${this._SERVER_VAR}.dispose()
+      __jupyterpack_st_server, __jupyterpack_tor_app = await create_streamlit_app("${entryPath}", "${this._baseUrl}")
+      ${this._SERVER_VAR}.reload(__jupyterpack_tor_app, __jupyterpack_st_server)
       `;
     await this.executeCode(
       {

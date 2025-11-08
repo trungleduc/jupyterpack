@@ -54,4 +54,3 @@ def patch_streamlit():
         streamlit.watcher.path_watcher.EventBasedPathWatcher = WatcherMock
 
     streamlit.elements.spinner.threading = MockThreading
-

@@ -19,7 +19,6 @@ async def create_streamlit_app(script_path: str, base_url: str):
 
     tornado_app = streamlit_server._create_app()
     await streamlit_server._runtime.start()
-
     return streamlit_server, tornado_app
 
 
@@ -36,6 +35,7 @@ class StreamlitServer(TornadoServer):
     def dispose(self):
         if self._streamlit_server is not None:
             self._streamlit_server._runtime.stop()
+            del self._streamlit_server
             self._streamlit_server = None
         super().dispose()
 

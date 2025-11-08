@@ -19,9 +19,7 @@ app.layout = html.Div(
 )
 
 
-@app.callback(
-    Output("graph", "figure"), Input("selection", "value")
-)
+@app.callback(Output("graph", "figure"), Input("selection", "value"))
 def display_animated_graph(selection):
     animations = {
         "GDP - Scatter": px.scatter(

@@ -85,7 +85,11 @@ export class TornadoServer extends KernelExecutor {
       await this.executeCode({
         code: initCode.replaceAll('{{base_url}}', this._baseUrl ?? '')
       });
-      await this.executeCode({ code: `${this._SERVER_VAR}.reload(app)` }, true);
+      const reloadCode = `
+      ${this._SERVER_VAR}.dispose()
+      ${this._SERVER_VAR}.reload(app)
+      `;
+      await this.executeCode({ code: reloadCode }, true);
     }
   }
 

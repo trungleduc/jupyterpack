@@ -14,7 +14,6 @@ class TornadoServer:
         self._tornado_bridge = None
 
     def reload(self, app):
-        self.dispose()
         self._tornado_server = app
         self._tornado_bridge = TornadoBridge(app, self._base_url)
 

@@ -1,7 +1,3 @@
-from pyodide_http import patch_all
-
-patch_all()
-
 import dash
 import pandas as pd
 import plotly.express as px

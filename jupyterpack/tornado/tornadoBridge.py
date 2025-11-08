@@ -68,12 +68,12 @@ class TornadoBridge:
             body=request_body,
             connection=connection,
         )
+
         try:
             handler = self.tornado_app.find_handler(request)
             handler.execute()
             connection_state = connection.connection_state
             await connection_state.finish_future
-
             return {
                 "content": connection_state.reply_body,
                 "headers": connection_state.reply_headers,
