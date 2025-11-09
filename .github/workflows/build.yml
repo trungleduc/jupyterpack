@@ -123,7 +123,9 @@ jobs:
         shell: bash -l {0}
         run: |
           set -eux
-          python -m pip install jupyterpack*.whl
+          mkdir dist
+          cp jupyterpack*.whl dist
+          python -m pip install dist/jupyterpack*.whl
 
       - name: Build the lite site
         shell: bash -l {0}
