@@ -18,6 +18,7 @@ import {
   JupyterPackFramework
 } from '../type';
 import { CommBroadcastManager } from './comm';
+import { IS_LITE } from '../tools';
 
 export class PythonWidgetModel implements IPythonWidgetModel {
   constructor(options: PythonWidgetModel.IOptions) {
@@ -152,9 +153,12 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     this._kernelStarted = true;
     return { ...data, rootUrl, framework, success: true };
   }
-  dispose(): void {
+  async dispose(): Promise<void> {
     if (this._isDisposed) {
       return;
+    }
+    if (!IS_LITE) {
+      this._sessionConnection?.kernel?.shutdown();
     }
     void this._executor?.disposePythonServer();
     this._contentsManager.fileChanged.disconnect(this._onFileChanged);

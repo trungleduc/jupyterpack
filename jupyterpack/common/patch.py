@@ -10,7 +10,6 @@ else:
 
 
 def patch_all():
-    register_comm_target()
     if IS_WASM:
         import collections
 
@@ -24,6 +23,8 @@ def patch_all():
             pyodide_http.patch_all()
         except ImportError:
             pass
+    else:
+        register_comm_target()
 
 
 def patch_tornado():
