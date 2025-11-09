@@ -1,13 +1,15 @@
 import json
 from typing import Dict
+
+from ..common import BaseServer
 from .tornadoBridge import TornadoBridge
 
 
-class TornadoServer:
+class TornadoServer(BaseServer):
     def __init__(self, tornado_app, base_url: str):
+        super().__init__(base_url)
         self._tornado_server = tornado_app
         self._tornado_bridge = TornadoBridge(tornado_app, base_url)
-        self._base_url = base_url
 
     def dispose(self):
         self._tornado_server = None
@@ -15,7 +17,7 @@ class TornadoServer:
 
     def reload(self, app):
         self._tornado_server = app
-        self._tornado_bridge = TornadoBridge(app, self._base_url)
+        self._tornado_bridge = TornadoBridge(app, self.base_url)
 
         return True
 
