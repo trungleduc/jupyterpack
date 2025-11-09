@@ -214,10 +214,11 @@ export abstract class KernelExecutor implements IKernelExecutor {
     framework: JupyterPackFramework;
   }) {
     const { instanceId, kernelClientId, framework } = options;
-    const labBaseUrl = PageConfig.getOption('baseUrl');
+    const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
+
     const baseURL = URLExt.join(
-      labBaseUrl,
-      'extensions/jupyterpack/static',
+      fullLabextensionsUrl,
+      'jupyterpack/static',
       instanceId,
       framework,
       kernelClientId,

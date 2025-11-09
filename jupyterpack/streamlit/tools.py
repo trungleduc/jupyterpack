@@ -5,6 +5,8 @@ import streamlit.watcher.path_watcher
 import contextlib
 import streamlit.elements.spinner
 
+from ..common.patch import IS_WASM
+
 
 class MockedThread(threading.Thread):
     def start(self):
@@ -41,16 +43,19 @@ class MockThreading:
 
 
 def patch_streamlit():
-    os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+    if IS_WASM:
+        os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
-    threading.Thread = MockedThread
+        threading.Thread = MockedThread
 
-    st_version = version.parse(streamlit.__version__)
-    if st_version >= version.parse("1.32.0"):
-        streamlit.watcher.path_watcher._is_watchdog_available = lambda: False
-        streamlit.watcher.path_watcher.get_path_watcher_class = lambda x: WatcherMock
-    else:
-        streamlit.watcher.path_watcher.watchdog_available = False
-        streamlit.watcher.path_watcher.EventBasedPathWatcher = WatcherMock
+        st_version = version.parse(streamlit.__version__)
+        if st_version >= version.parse("1.32.0"):
+            streamlit.watcher.path_watcher._is_watchdog_available = lambda: False
+            streamlit.watcher.path_watcher.get_path_watcher_class = (
+                lambda x: WatcherMock
+            )
+        else:
+            streamlit.watcher.path_watcher.watchdog_available = False
+            streamlit.watcher.path_watcher.EventBasedPathWatcher = WatcherMock
 
-    streamlit.elements.spinner.threading = MockThreading
+        streamlit.elements.spinner.threading = MockThreading

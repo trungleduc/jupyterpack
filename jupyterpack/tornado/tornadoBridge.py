@@ -4,6 +4,8 @@ import tornado
 from tornado.httputil import HTTPServerRequest
 from tornado.websocket import WebSocketHandler
 
+from ..js.broadcastChannel import BroadcastChannel
+
 from .wsConnection import WSConnection
 
 from .patchedConnection import PatchedConnection
@@ -13,12 +15,16 @@ from .tools import (
     decode_broadcast_message,
     encode_broadcast_message,
 )
-import pyjs
 from typing import Dict
 
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARN)
+
+# Keep track of all broadcast channels outside of the TornadoBridge
+# so that reloading the tornado server does not create duplicated
+# broadcast channels
+ALL_BROADCAST_CHANNEL: Dict[str, BroadcastChannel] = {}
 
 
 class TornadoBridge:
@@ -97,13 +103,12 @@ class TornadoBridge:
         protocols_str: str | None,
     ):
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
-        broadcast_channel = self._ws_broadcast_channels.get(handler_key, None)
+        broadcast_channel_key = f"/jupyterpack/ws/{instance_id}"
+        broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
 
         if broadcast_channel is None:
-            broadcast_channel = pyjs.js.BroadcastChannel.new(
-                f"/jupyterpack/ws/{instance_id}"
-            )
-            self._ws_broadcast_channels[handler_key] = broadcast_channel
+            broadcast_channel = BroadcastChannel(broadcast_channel_key)
+            ALL_BROADCAST_CHANNEL[broadcast_channel_key] = broadcast_channel
 
         headers = convert_headers(
             [
@@ -174,8 +179,8 @@ class TornadoBridge:
         msg: str | bytes,
         action: str = "backend_message",
     ):
-        handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
-        broadcast_channel = self._ws_broadcast_channels.get(handler_key, None)
+        broadcast_channel_key = f"/jupyterpack/ws/{instance_id}"
+        broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
         if broadcast_channel is not None:
             broadcast_channel.postMessage(
                 encode_broadcast_message(kernel_client_id, ws_url, msg, action)
