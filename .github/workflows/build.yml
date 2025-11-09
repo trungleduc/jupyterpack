@@ -124,7 +124,7 @@ jobs:
         run: |
           set -eux
           mkdir dist
-          cp jupyterpack*.whl dist
+          mv jupyterpack*.whl dist/jupyterpack-0.0.0-py3-none-any.whl
           python -m pip install dist/jupyterpack*.whl
 
       - name: Build the lite site
