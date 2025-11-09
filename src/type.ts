@@ -101,6 +101,7 @@ export type IJupyterpackDocTracker = IWidgetTracker<DocumentWidget>;
 export interface IPythonWidgetModel extends IDisposable {
   connectionManager: IConnectionManager;
   serverReloaded: ISignal<IPythonWidgetModel, void>;
+  kernelStatusChanged: ISignal<IPythonWidgetModel, 'started' | 'stopped'>;
   reload(): Promise<void>;
   initialize(): Promise<
     | {

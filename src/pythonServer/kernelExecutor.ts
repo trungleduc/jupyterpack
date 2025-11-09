@@ -9,7 +9,6 @@ import {
 } from '../tools';
 import { IDict, IKernelExecutor, JupyterPackFramework } from '../type';
 import websocketPatch from '../websocket/websocket.js?raw';
-import { patch } from './common/generatedPythonFiles';
 
 export abstract class KernelExecutor implements IKernelExecutor {
   constructor(options: KernelExecutor.IOptions) {
@@ -41,7 +40,11 @@ export abstract class KernelExecutor implements IKernelExecutor {
     instanceId: string;
     kernelClientId: string;
   }): Promise<void> {
-    await this.executeCode({ code: patch });
+    const patchCode = `
+    from jupyterpack.common import patch_all
+    patch_all()
+    `;
+    await this.executeCode({ code: patchCode });
   }
 
   openWebsocketFunctionFactory(options: {
@@ -164,10 +167,13 @@ export abstract class KernelExecutor implements IKernelExecutor {
           }
           case 'stream': {
             const content = (msg as KernelMessage.IStreamMsg).content;
+            if (content.text.length === 0) {
+              break;
+            }
             if (content.name === 'stderr') {
-              console.error('Kernel stream', content.text);
+              console.error('Kernel stream:', content.text);
             } else {
-              console.log('Kernel stream', content.text);
+              console.log('Kernel stream:', content.text);
             }
             break;
           }
@@ -208,10 +214,11 @@ export abstract class KernelExecutor implements IKernelExecutor {
     framework: JupyterPackFramework;
   }) {
     const { instanceId, kernelClientId, framework } = options;
-    const labBaseUrl = PageConfig.getOption('baseUrl');
+    const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
+
     const baseURL = URLExt.join(
-      labBaseUrl,
-      'extensions/jupyterpack/static',
+      fullLabextensionsUrl,
+      'jupyterpack/static',
       instanceId,
       framework,
       kernelClientId,

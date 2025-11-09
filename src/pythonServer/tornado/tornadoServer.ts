@@ -1,12 +1,7 @@
 import { stringOrNone } from '../../tools';
 import { IDict, JupyterPackFramework } from '../../type';
-import { tools } from '../common/generatedPythonFiles';
 import { KernelExecutor } from '../kernelExecutor';
-import {
-  bootstrap,
-  tornadoBridge,
-  tornadoLoader
-} from './generatedPythonFiles';
+
 export class TornadoServer extends KernelExecutor {
   async init(options: {
     initCode?: string;
@@ -21,14 +16,22 @@ export class TornadoServer extends KernelExecutor {
       kernelClientId,
       framework: JupyterPackFramework.TORNADO
     });
-    await this.executeCode({ code: tools.replaceAll('{{base_url}}', baseURL) });
-    await this.executeCode({ code: bootstrap });
-    await this.executeCode({ code: tornadoBridge });
+    const bootstrapCode = `
+    from jupyterpack.common import set_base_url_env, patch_tornado
+    set_base_url_env("${baseURL}")
+    patch_tornado()
+
+    `;
+    await this.executeCode({ code: bootstrapCode });
     if (initCode) {
       const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
       await this.executeCode({ code: initCodeWithUrl });
-      const torCode = tornadoLoader.replaceAll('{{base_url}}', baseURL);
-      await this.executeCode({ code: torCode });
+      const loaderCode = `
+      from jupyterpack.tornado import TornadoServer
+      ${this._SERVER_VAR} = TornadoServer(app, "${baseURL}")
+      `;
+
+      await this.executeCode({ code: loaderCode });
     }
   }
 
@@ -40,7 +43,7 @@ export class TornadoServer extends KernelExecutor {
     content?: string;
   }) {
     const { method, urlPath, headers, params, content } = options;
-    const code = `await ${this._GET_RESPONSE_FUNCTION}("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
+    const code = `await ${this._SERVER_VAR}.get_response("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
     return code;
   }
 
@@ -52,7 +55,7 @@ export class TornadoServer extends KernelExecutor {
   }): string {
     const { instanceId, kernelId, wsUrl, protocol } = options;
 
-    const code = `await ${this._OPEN_WEBSOCKET_FUNCTION}("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
+    const code = `await ${this._SERVER_VAR}.open_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
     return code;
   }
 
@@ -63,13 +66,13 @@ export class TornadoServer extends KernelExecutor {
     message: string;
   }): string {
     const { instanceId, kernelId, wsUrl, message } = options;
-    const code = `await ${this._SEND_WEBSOCKET_FUNCTION}("${instanceId}", "${kernelId}", "${wsUrl}", '''${message}''')`;
+    const code = `await ${this._SERVER_VAR}.receive_ws_message("${instanceId}", "${kernelId}", "${wsUrl}", '''${message}''')`;
     return code;
   }
 
   async disposePythonServer(): Promise<void> {
     await this.executeCode({
-      code: '__jupyterpack_tornado_dispose()'
+      code: `${this._SERVER_VAR}.dispose()`
     });
   }
 
@@ -77,11 +80,18 @@ export class TornadoServer extends KernelExecutor {
     entryPath?: string;
     initCode?: string;
   }): Promise<void> {
-    //
+    const { initCode } = options;
+    if (initCode) {
+      await this.executeCode({
+        code: initCode.replaceAll('{{base_url}}', this._baseUrl ?? '')
+      });
+      const reloadCode = `
+      ${this._SERVER_VAR}.dispose()
+      ${this._SERVER_VAR}.reload(app)
+      `;
+      await this.executeCode({ code: reloadCode }, true);
+    }
   }
 
-  private _GET_RESPONSE_FUNCTION = '__jupyterpack_tornado_get_response';
-  private _OPEN_WEBSOCKET_FUNCTION = '__jupyterpack_tornado_open_ws';
-
-  private _SEND_WEBSOCKET_FUNCTION = '__jupyterpack_tornado_receive_ws_message';
+  protected _SERVER_VAR = '__jupyterpack_tornado_server';
 }

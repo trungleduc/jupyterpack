@@ -3,6 +3,8 @@ import autoReloadStr from '../style/icons/autoreload.svg';
 import linkStr from '../style/icons/externallink.svg';
 import { LabIcon } from '@jupyterlab/ui-components';
 
+export const IS_LITE = !!document.getElementById('jupyter-lite-main');
+
 export const logoIcon = new LabIcon({
   name: 'jupyterpack:logo',
   svgstr: logoStr

@@ -7,10 +7,12 @@ from pathlib import Path
 from typing import List
 import os
 
-os.environ.setdefault("JUPYTERPACK_BASE_URL", "{{base_url}}")
+
+def set_base_url_env(base_url: str):
+    os.environ["JUPYTERPACK_BASE_URL"] = base_url
 
 
-def __jupyterpack_import_from_path(module_name: str, path: str) -> ModuleType:
+def import_from_path(module_name: str, path: str) -> ModuleType:
     """
     Import a Python module from a given file path.
     Always reloads (does not use sys.modules cache).
@@ -29,9 +31,7 @@ def __jupyterpack_import_from_path(module_name: str, path: str) -> ModuleType:
     return module
 
 
-def __jupyterpack_create_mock_module(
-    module_names: List[str], mock_content: str, patch_parent=True
-):
+def create_mock_module(module_names: List[str], mock_content: str, patch_parent=True):
     tmpdir = tempfile.TemporaryDirectory()
     package_dir = Path(tmpdir.name) / "__jupyterpack_mock_module"
     package_dir.mkdir()

@@ -1,8 +1,6 @@
 import { stringOrNone } from '../../tools';
 import { IDict, JupyterPackFramework } from '../../type';
-import { patch } from '../common/generatedPythonFiles';
 import { KernelExecutor } from '../kernelExecutor';
-import { bootstrap, dashLoader } from './generatedPythonFiles';
 
 export class DashServer extends KernelExecutor {
   async init(options: {
@@ -18,14 +16,20 @@ export class DashServer extends KernelExecutor {
       kernelClientId,
       framework: JupyterPackFramework.DASH
     });
-    await this.executeCode({ code: patch });
     await this.executeCode({
-      code: bootstrap.replaceAll('{{base_url}}', baseURL)
+      code: `
+      import os
+      os.environ["DASH_URL_BASE_PATHNAME"] = "${baseURL}"
+      `
     });
     if (initCode) {
       await this.executeCode({ code: initCode });
     }
-    await this.executeCode({ code: dashLoader });
+    const loaderCode = `
+      from jupyterpack.dash import DashServer
+      ${this._DASH_SERVER_VAR} = DashServer(app, "${baseURL}")
+      `;
+    await this.executeCode({ code: loaderCode });
   }
 
   getResponseFunctionFactory(options: {
@@ -36,12 +40,12 @@ export class DashServer extends KernelExecutor {
     content?: string;
   }) {
     const { method, urlPath, headers, params, content } = options;
-    const code = `__jupyterpack_dash_get_response("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
+    const code = `${this._DASH_SERVER_VAR}.get_response("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
     return code;
   }
 
   async disposePythonServer(): Promise<void> {
-    await this.executeCode({ code: '__jupyterpack_dash_dispose()' });
+    await this.executeCode({ code: `${this._DASH_SERVER_VAR}.dispose()` });
   }
 
   async reloadPythonServer(options: {
@@ -52,6 +56,11 @@ export class DashServer extends KernelExecutor {
     if (initCode) {
       await this.executeCode({ code: initCode });
     }
-    await this.executeCode({ code: '__jupyterpack_reload_dash_app()' }, true);
+    await this.executeCode(
+      { code: `${this._DASH_SERVER_VAR}.reload(app)` },
+      true
+    );
   }
+
+  private _DASH_SERVER_VAR = '__jupyterpack_dash_server';
 }

@@ -25,7 +25,6 @@ export class PythonWidget extends IFramePanel {
         connectionData.kernelClientId,
         connectionData.rootUrl
       );
-
       iframe.src = iframeUrl;
 
       iframe.addEventListener('load', () => {

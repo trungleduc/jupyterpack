@@ -17,6 +17,8 @@ import {
   IPythonWidgetModel,
   JupyterPackFramework
 } from '../type';
+import { CommBroadcastManager } from './comm';
+import { IS_LITE } from '../tools';
 
 export class PythonWidgetModel implements IPythonWidgetModel {
   constructor(options: PythonWidgetModel.IOptions) {
@@ -46,6 +48,9 @@ export class PythonWidgetModel implements IPythonWidgetModel {
   }
   get serverReloaded() {
     return this._serverReloaded;
+  }
+  get kernelStatusChanged() {
+    return this._kernelStatusChanged;
   }
 
   async reload() {
@@ -95,14 +100,29 @@ export class PythonWidgetModel implements IPythonWidgetModel {
       kernelName = specs.default;
     }
 
-    this._sessionConnection = await sessionManager.startNew({
-      name: filePath,
-      path: filePath,
-      kernel: {
-        name: kernelName
+    this._sessionConnection = await sessionManager.startNew(
+      {
+        name: filePath,
+        path: filePath,
+        kernel: {
+          name: kernelName
+        },
+        type: 'notebook'
       },
-      type: 'notebook'
-    });
+      {
+        kernelConnectionOptions: { handleComms: true }
+      }
+    );
+    const kernel = this._sessionConnection.kernel;
+    if (kernel) {
+      this._kernelStatusChanged.emit('started');
+      this._commBroadcastManager.registerKernel(kernel);
+      kernel.disposed.connect(() => {
+        this._kernelStatusChanged.emit('stopped');
+        this._commBroadcastManager.unregisterKernel(kernel.id);
+      });
+    }
+
     const framework = spkContent.framework;
     const ServerClass = PYTHON_SERVER.get(framework);
     if (!ServerClass) {
@@ -133,12 +153,16 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     this._kernelStarted = true;
     return { ...data, rootUrl, framework, success: true };
   }
-  dispose(): void {
+  async dispose(): Promise<void> {
     if (this._isDisposed) {
       return;
     }
+    if (!IS_LITE) {
+      this._sessionConnection?.kernel?.shutdown();
+    }
     void this._executor?.disposePythonServer();
     this._contentsManager.fileChanged.disconnect(this._onFileChanged);
+    this._commBroadcastManager.dispose();
     this._isDisposed = true;
   }
 
@@ -169,6 +193,8 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     }
   }
 
+  private _commBroadcastManager = new CommBroadcastManager();
+
   private _isDisposed = false;
   private _kernelStarted = false;
   private _sessionConnection: Session.ISessionConnection | undefined;
@@ -184,6 +210,10 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     IPythonWidgetModel,
     void
   >(this);
+  private _kernelStatusChanged: Signal<
+    IPythonWidgetModel,
+    'started' | 'stopped'
+  > = new Signal(this);
   private _autoreload: boolean;
 }
 
