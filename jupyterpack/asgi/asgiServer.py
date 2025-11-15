@@ -6,18 +6,18 @@ import base64
 from ..common import BaseServer
 
 
-class WsgiServer(BaseServer):
+class AsgiServer(BaseServer):
     def __init__(self, app, base_url: str):
         """
         Args:
-            app : WSGIApplication instance
-            base_url : base url for the applicatio
+            app : ASGI application instance
+            base_url : base url for the application
         """
         super().__init__(base_url)
         self._app = app
-        self._wsgi_transport = httpx.WSGITransport(app=app)
+        self._asgi_transport = httpx.ASGITransport(app=app)
 
-    def get_response(
+    async def get_response(
         self,
         method: str,
         url: str,
@@ -29,10 +29,10 @@ class WsgiServer(BaseServer):
         if content is not None:
             decoded_content = base64.b64decode(content)
 
-        with httpx.Client(
-            transport=self._wsgi_transport, base_url="http://testserver"
+        async with httpx.AsyncClient(
+            transport=self._asgi_transport, base_url="http://testserver"
         ) as client:
-            r = client.request(
+            r = await client.request(
                 method, url, headers=headers, content=decoded_content, params=params
             )
             reply_headers = json.dumps(dict(r.headers)).encode("utf-8")
@@ -44,16 +44,16 @@ class WsgiServer(BaseServer):
             json_str = json.dumps(response)
             return json_str
 
-    def dispose(self):
-        self._wsgi_transport.close()
-        self._wsgi_transport = None
+    async def dispose(self):
+        await self._asgi_transport.aclose()
+        self._asgi_transport = None
 
-    def reload(self, app):
+    async def reload(self, app):
         """
         Args:
             app : WSGIApplication instance
         """
-        self.dispose()
+        await self.dispose()
         self._app = app
-        self._wsgi_transport = httpx.WSGITransport(app=app)
+        self._asgi_transport = httpx.ASGITransport(app=app)
         return True

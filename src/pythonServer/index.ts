@@ -1,6 +1,7 @@
 import { IKernelExecutor, JupyterPackFramework } from '../type';
 import { DashServer } from './dash/dashServer';
 import { KernelExecutor } from './kernelExecutor';
+import { ShinyServer } from './shiny/shinyServer';
 import { StreamlitServer } from './streamlit/streamlitServer';
 import { TornadoServer } from './tornado/tornadoServer';
 
@@ -14,5 +15,6 @@ export const PYTHON_SERVER = new Map<
 >([
   [JupyterPackFramework.DASH, DashServer],
   [JupyterPackFramework.STREAMLIT, StreamlitServer],
-  [JupyterPackFramework.TORNADO, TornadoServer]
+  [JupyterPackFramework.TORNADO, TornadoServer],
+  [JupyterPackFramework.SHINY, ShinyServer]
 ]);

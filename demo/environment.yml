@@ -15,7 +15,9 @@ dependencies:
   - protobuf
   - altair
   - pyarrow
+  - starlette
   - pip:
+    - shiny
     - vega_datasets
     - streamlit==1.50.0
     - pyodide_http
