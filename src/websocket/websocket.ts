@@ -109,6 +109,10 @@
         cb();
       }
       this._eventHandlers['close'] = [];
+      sendTypedMessage({
+        action: 'close',
+        wsUrl: this.url
+      });
       bcWsChannel.removeEventListener('message', this._bcMessageHandler);
 
       this.readyState = this.CLOSED;

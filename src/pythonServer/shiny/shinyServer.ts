@@ -22,7 +22,6 @@ export class ShinyServer extends KernelExecutor {
     await this.executeCode({ code: bootstrapCode });
     if (initCode) {
       const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
-      console.log('init shiny', initCodeWithUrl);
       await this.executeCode({ code: initCodeWithUrl });
       const loaderCode = `
       from jupyterpack.asgi import AsgiServer
@@ -52,8 +51,17 @@ export class ShinyServer extends KernelExecutor {
     protocol?: string;
   }): string {
     const { instanceId, kernelId, wsUrl, protocol } = options;
-
     const code = `await ${this._SERVER_VAR}.open_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
+    return code;
+  }
+
+  closeWebsocketFunctionFactory(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+  }): string {
+    const { instanceId, kernelId, wsUrl } = options;
+    const code = `await ${this._SERVER_VAR}.close_ws("${instanceId}", "${kernelId}", "${wsUrl}")`;
     return code;
   }
 
@@ -72,6 +80,9 @@ export class ShinyServer extends KernelExecutor {
     await this.executeCode({
       code: `${this._SERVER_VAR}.dispose()`
     });
+    for (const element of this._openedWebsockets) {
+      await this.closeWebsocket(element);
+    }
   }
 
   async reloadPythonServer(options: {
@@ -84,7 +95,7 @@ export class ShinyServer extends KernelExecutor {
         code: initCode.replaceAll('{{base_url}}', this._baseUrl ?? '')
       });
       const reloadCode = `
-      ${this._SERVER_VAR}.dispose()
+      await ${this._SERVER_VAR}.dispose()
       ${this._SERVER_VAR}.reload(app)
       `;
       await this.executeCode({ code: reloadCode }, true);

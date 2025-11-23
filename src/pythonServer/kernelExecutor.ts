@@ -56,6 +56,15 @@ export abstract class KernelExecutor implements IKernelExecutor {
     return undefined;
   }
 
+  closeWebsocketFunctionFactory(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+    protocol?: string;
+  }): string | undefined {
+    return undefined;
+  }
+
   sendWebsocketMessageFunctionFactory(options: {
     instanceId: string;
     kernelId: string;
@@ -73,7 +82,27 @@ export abstract class KernelExecutor implements IKernelExecutor {
   }): Promise<void> {
     const code = this.openWebsocketFunctionFactory(options);
     if (code) {
+      try {
+        await this.executeCode({ code });
+        this._openedWebsockets.push(options);
+      } catch (e) {
+        console.error('Failed to open websocket', e);
+      }
+    } else {
+      throw new Error('Missing websocket open code');
+    }
+  }
+
+  async closeWebsocket(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+  }): Promise<void> {
+    const code = this.closeWebsocketFunctionFactory(options);
+    if (code) {
       await this.executeCode({ code });
+    } else {
+      throw new Error('Missing websocket close code');
     }
   }
 
@@ -86,6 +115,8 @@ export abstract class KernelExecutor implements IKernelExecutor {
     const code = this.sendWebsocketMessageFunctionFactory(options);
     if (code) {
       await this.executeCode({ code });
+    } else {
+      throw new Error('Missing websocket send code');
     }
   }
 
@@ -126,7 +157,7 @@ export abstract class KernelExecutor implements IKernelExecutor {
       responseContent = base64ToString(obj.content);
     }
 
-    if (contentType && contentType.toLowerCase() === 'text/html') {
+    if (contentType && contentType.toLowerCase().includes('text/html')) {
       responseContent = (responseContent as string).replace(
         '<head>',
         `<head>\n<script>\n${this._wsPatch}\n</script>\n`
@@ -234,6 +265,11 @@ export abstract class KernelExecutor implements IKernelExecutor {
   private _isDisposed: boolean = false;
   private _sessionConnection: Session.ISessionConnection;
   private _wsPatch: string;
+  protected _openedWebsockets: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+  }[] = [];
 }
 
 export namespace KernelExecutor {

@@ -89,6 +89,14 @@ export class ConnectionManager implements IConnectionManager {
           });
           break;
         }
+        case 'close': {
+          executor.closeWebsocket({
+            instanceId: this.instanceId,
+            kernelId: dest,
+            wsUrl
+          });
+          break;
+        }
         case 'send': {
           let serializedData: string;
           let isBinary: boolean;

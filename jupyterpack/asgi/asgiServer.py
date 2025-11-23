@@ -1,21 +1,22 @@
-from typing import Dict, Optional
-import httpx
 import json
-import base64
+from typing import Dict, Optional
+
+
+from jupyterpack.asgi.asgiBridge import ASGIBridge
 
 from ..common import BaseServer
 
 
 class AsgiServer(BaseServer):
-    def __init__(self, app, base_url: str):
+    def __init__(self, asgi_app, base_url: str):
         """
         Args:
             app : ASGI application instance
             base_url : base url for the application
         """
         super().__init__(base_url)
-        self._app = app
-        self._asgi_transport = httpx.ASGITransport(app=app)
+        self._app = asgi_app
+        self._asgi_bridge = ASGIBridge(asgi_app, base_url)
 
     async def get_response(
         self,
@@ -25,35 +26,60 @@ class AsgiServer(BaseServer):
         content: Optional[str] = None,
         params: Optional[str] = None,
     ) -> str:
-        decoded_content = None
-        if content is not None:
-            decoded_content = base64.b64decode(content)
+        asgi_bridge = self._asgi_bridge
+        if asgi_bridge is None:
+            raise Exception("Missing tornado instance")
+        req_dict = {
+            "method": method,
+            "url": url,
+            "headers": list(headers.items()),
+            "body": content,
+        }
 
-        async with httpx.AsyncClient(
-            transport=self._asgi_transport, base_url="http://testserver"
-        ) as client:
-            r = await client.request(
-                method, url, headers=headers, content=decoded_content, params=params
-            )
-            reply_headers = json.dumps(dict(r.headers)).encode("utf-8")
-            response = {
-                "headers": base64.b64encode(reply_headers).decode("ascii"),
-                "content": base64.b64encode(r.content).decode("ascii"),
-                "status_code": r.status_code,
-            }
-            json_str = json.dumps(response)
-            return json_str
+        response = await asgi_bridge.fetch(req_dict)
+        json_str = json.dumps(response)
+        return json_str
+
+    @property
+    def asgi_bridge(self):
+        if self._asgi_bridge is None:
+            raise Exception("Missing ASGI instance")
+        return self._asgi_bridge
 
     async def dispose(self):
-        await self._asgi_transport.aclose()
-        self._asgi_transport = None
+        self._app = None
+        self._asgi_bridge = None
 
-    async def reload(self, app):
+    def reload(self, app):
         """
         Args:
             app : WSGIApplication instance
         """
-        await self.dispose()
         self._app = app
-        self._asgi_transport = httpx.ASGITransport(app=app)
+        self._asgi_bridge = ASGIBridge(app, self.base_url)
         return True
+
+    async def open_ws(
+        self,
+        instance_id: str,
+        kernel_client_id: str,
+        ws_url: str,
+        protocols_str: str | None,
+    ):
+        """ """
+        try:
+            await self.asgi_bridge.open_ws(
+                instance_id, kernel_client_id, ws_url, protocols_str
+            )
+        except Exception:
+            raise
+
+    async def close_ws(self, instance_id: str, kernel_client_id: str, ws_url: str):
+        await self.asgi_bridge.close_ws(instance_id, kernel_client_id, ws_url)
+
+    async def receive_ws_message(
+        self, instance_id: str, kernel_client_id: str, ws_url: str, payload_message: str
+    ):
+        await self.asgi_bridge.receive_ws_message_from_js(
+            instance_id, kernel_client_id, ws_url, payload_message
+        )

@@ -1,22 +1,16 @@
 import base64
 import logging
+from typing import Dict
+
 import tornado
 from tornado.httputil import HTTPServerRequest
 from tornado.websocket import WebSocketHandler
 
-from ..js.broadcastChannel import BroadcastChannel
-
-from .wsConnection import WSConnection
-
+from jupyterpack.common.tools import decode_broadcast_message, encode_broadcast_message
+from jupyterpack.js.broadcastChannel import BroadcastChannel
 from .patchedConnection import PatchedConnection
-from .tools import (
-    DumpStream,
-    convert_headers,
-    decode_broadcast_message,
-    encode_broadcast_message,
-)
-from typing import Dict
-
+from .tools import DumpStream, convert_headers
+from .wsConnection import WSConnection
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARN)
