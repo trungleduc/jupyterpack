@@ -4,14 +4,19 @@ from typing import Dict, List, Optional, Tuple
 
 from httpx import ASGITransport, AsyncClient
 
+from jupyterpack.common import (
+    BaseBridge,
+    decode_broadcast_message,
+    encode_broadcast_message,
+)
+from jupyterpack.js import BroadcastChannel
+
 from .websocketHandler import WebSocketAdapter
-from jupyterpack.common.tools import decode_broadcast_message, encode_broadcast_message
-from jupyterpack.js.broadcastChannel import BroadcastChannel
 
 ALL_BROADCAST_CHANNEL: Dict[str, BroadcastChannel] = {}
 
 
-class ASGIBridge:
+class ASGIBridge(BaseBridge):
     def __init__(self, asgi_app, base_url: str):
         self.base_url = base_url
         self.asgi_app = asgi_app
@@ -31,12 +36,15 @@ class ASGIBridge:
         url = request.get("url", "/")
         headers = dict(request.get("headers", []))
         body = request.get("body", None)
+        params = request.get("params", None)
 
         async with AsyncClient(
             transport=self._http_transport, base_url="http://testserver"
         ) as client:
             try:
-                r = await client.request(method, url, headers=headers, content=body)
+                r = await client.request(
+                    method, url, headers=headers, content=body, params=params
+                )
                 content_b64 = base64.b64encode(r.content).decode("ascii")
 
                 # encode headers like ConnectionState
@@ -53,10 +61,6 @@ class ASGIBridge:
                     "content": base64.b64encode(str(e).encode()).decode("ascii"),
                     "status_code": 500,
                 }
-
-    # ---------------------------
-    # WebSocket
-    # ---------------------------
 
     async def open_ws(
         self,
