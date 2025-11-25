@@ -11,9 +11,9 @@ import { PromiseDelegate } from '@lumino/coreutils';
 import { PYTHON_SERVER } from '../pythonServer';
 import { Signal } from '@lumino/signaling';
 import {
+  IBasePythonServer,
   IConnectionManager,
   IJupyterPackFileFormat,
-  IKernelExecutor,
   IPythonWidgetModel,
   JupyterPackFramework
 } from '../type';
@@ -203,7 +203,7 @@ export class PythonWidgetModel implements IPythonWidgetModel {
   private _connectionManager: IConnectionManager;
   private _contentsManager: Contents.IManager;
   private _jpackModel: IJupyterPackFileFormat;
-  private _executor?: IKernelExecutor;
+  private _executor?: IBasePythonServer;
   private _localPath: string;
 
   private _serverReloaded: Signal<IPythonWidgetModel, void> = new Signal<

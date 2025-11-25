@@ -1,17 +1,17 @@
-import { IKernelExecutor, JupyterPackFramework } from '../type';
+import { IBasePythonServer, JupyterPackFramework } from '../type';
 import { DashServer } from './dash/dashServer';
 import { KernelExecutor } from './kernelExecutor';
 import { ShinyServer } from './shiny/shinyServer';
 import { StreamlitServer } from './streamlit/streamlitServer';
 import { TornadoServer } from './tornado/tornadoServer';
 
-type KernelExecutorConstructor = new (
+type BasePythonServerConstructor = new (
   options: KernelExecutor.IOptions
-) => IKernelExecutor;
+) => IBasePythonServer;
 
 export const PYTHON_SERVER = new Map<
   JupyterPackFramework,
-  KernelExecutorConstructor
+  BasePythonServerConstructor
 >([
   [JupyterPackFramework.DASH, DashServer],
   [JupyterPackFramework.STREAMLIT, StreamlitServer],

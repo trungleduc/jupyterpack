@@ -1,9 +1,9 @@
 import { arrayBufferToBase64 } from '../tools';
 import {
+  IBasePythonServer,
   IBroadcastMessage,
   IConnectionManager,
-  IDict,
-  IKernelExecutor
+  IDict
 } from '../type';
 import { UUID } from '@lumino/coreutils';
 
@@ -24,11 +24,11 @@ export class ConnectionManager implements IConnectionManager {
   }
 
   async registerConnection(
-    kernelExecutor: IKernelExecutor
+    pythonServer: IBasePythonServer
   ): Promise<{ instanceId: string; kernelClientId: string }> {
     const uuid = UUID.uuid4();
 
-    this._kernelExecutors.set(uuid, kernelExecutor);
+    this._pythonServers.set(uuid, pythonServer);
 
     return { instanceId: this.instanceId, kernelClientId: uuid };
   }
@@ -43,7 +43,7 @@ export class ConnectionManager implements IConnectionManager {
   }): Promise<IDict | null> {
     const { urlPath, kernelClientId, method, params, requestBody, headers } =
       options;
-    const executor = this._kernelExecutors.get(kernelClientId);
+    const executor = this._pythonServers.get(kernelClientId);
     if (!executor) {
       return null;
     }
@@ -68,13 +68,13 @@ export class ConnectionManager implements IConnectionManager {
       }
 
       const { action, dest, wsUrl, payload } = data;
-      const executor = this._kernelExecutors.get(dest);
+      const executor = this._pythonServers.get(dest);
       if (!executor) {
         console.error(
           'Missing kernel handle for message',
           data,
           dest,
-          this._kernelExecutors
+          this._pythonServers
         );
         return;
       }
@@ -124,6 +124,6 @@ export class ConnectionManager implements IConnectionManager {
       }
     };
   }
-  private _kernelExecutors = new Map<string, IKernelExecutor>();
+  private _pythonServers = new Map<string, IBasePythonServer>();
   private _wsBroadcastChannel: BroadcastChannel;
 }

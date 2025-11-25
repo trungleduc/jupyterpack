@@ -1,8 +1,7 @@
-import { stringOrNone } from '../../tools';
-import { IDict, JupyterPackFramework } from '../../type';
-import { KernelExecutor } from '../kernelExecutor';
+import { JupyterPackFramework } from '../../type';
+import { BasePythonServer } from '../baseServer';
 
-export class ShinyServer extends KernelExecutor {
+export class ShinyServer extends BasePythonServer {
   async init(options: {
     initCode?: string;
     instanceId: string;
@@ -19,66 +18,22 @@ export class ShinyServer extends KernelExecutor {
     from jupyterpack.common import set_base_url_env
     set_base_url_env("${baseURL}")
     `;
-    await this.executeCode({ code: bootstrapCode });
+    await this.kernelExecutor.executeCode({ code: bootstrapCode });
     if (initCode) {
       const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
-      await this.executeCode({ code: initCodeWithUrl });
+      await this.kernelExecutor.executeCode({ code: initCodeWithUrl });
       const loaderCode = `
       from jupyterpack.asgi import AsgiServer
-      ${this._SERVER_VAR} = AsgiServer(app, "${baseURL}")
+      ${this._server_var} = AsgiServer(app, "${baseURL}")
       `;
 
-      await this.executeCode({ code: loaderCode });
+      await this.kernelExecutor.executeCode({ code: loaderCode });
     }
   }
 
-  getResponseFunctionFactory(options: {
-    urlPath: string;
-    method: string;
-    headers: IDict;
-    params?: string;
-    content?: string;
-  }) {
-    const { method, urlPath, headers, params, content } = options;
-    const code = `await ${this._SERVER_VAR}.get_response("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
-    return code;
-  }
-
-  openWebsocketFunctionFactory(options: {
-    instanceId: string;
-    kernelId: string;
-    wsUrl: string;
-    protocol?: string;
-  }): string {
-    const { instanceId, kernelId, wsUrl, protocol } = options;
-    const code = `await ${this._SERVER_VAR}.open_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
-    return code;
-  }
-
-  closeWebsocketFunctionFactory(options: {
-    instanceId: string;
-    kernelId: string;
-    wsUrl: string;
-  }): string {
-    const { instanceId, kernelId, wsUrl } = options;
-    const code = `await ${this._SERVER_VAR}.close_ws("${instanceId}", "${kernelId}", "${wsUrl}")`;
-    return code;
-  }
-
-  sendWebsocketMessageFunctionFactory(options: {
-    instanceId: string;
-    kernelId: string;
-    wsUrl: string;
-    message: string;
-  }): string {
-    const { instanceId, kernelId, wsUrl, message } = options;
-    const code = `await ${this._SERVER_VAR}.receive_ws_message("${instanceId}", "${kernelId}", "${wsUrl}", '''${message}''')`;
-    return code;
-  }
-
   async disposePythonServer(): Promise<void> {
-    await this.executeCode({
-      code: `${this._SERVER_VAR}.dispose()`
+    await this.kernelExecutor.executeCode({
+      code: `${this._server_var}.dispose()`
     });
     for (const element of this._openedWebsockets) {
       await this.closeWebsocket(element);
@@ -91,16 +46,14 @@ export class ShinyServer extends KernelExecutor {
   }): Promise<void> {
     const { initCode } = options;
     if (initCode) {
-      await this.executeCode({
+      await this.kernelExecutor.executeCode({
         code: initCode.replaceAll('{{base_url}}', this._baseUrl ?? '')
       });
       const reloadCode = `
-      await ${this._SERVER_VAR}.dispose()
-      ${this._SERVER_VAR}.reload(app)
+      await ${this._server_var}.dispose()
+      ${this._server_var}.reload(app)
       `;
-      await this.executeCode({ code: reloadCode }, true);
+      await this.kernelExecutor.executeCode({ code: reloadCode }, true);
     }
   }
-
-  protected _SERVER_VAR = '__jupyterpack_asgi_server';
 }

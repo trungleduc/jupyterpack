@@ -1,8 +1,7 @@
-import { stringOrNone } from '../../tools';
-import { IDict, JupyterPackFramework } from '../../type';
-import { KernelExecutor } from '../kernelExecutor';
+import { JupyterPackFramework } from '../../type';
+import { BasePythonServer } from '../baseServer';
 
-export class TornadoServer extends KernelExecutor {
+export class TornadoServer extends BasePythonServer {
   async init(options: {
     initCode?: string;
     instanceId: string;
@@ -22,58 +21,17 @@ export class TornadoServer extends KernelExecutor {
     patch_tornado()
 
     `;
-    await this.executeCode({ code: bootstrapCode });
+    await this.kernelExecutor.executeCode({ code: bootstrapCode });
     if (initCode) {
       const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
-      await this.executeCode({ code: initCodeWithUrl });
+      await this.kernelExecutor.executeCode({ code: initCodeWithUrl });
       const loaderCode = `
       from jupyterpack.tornado import TornadoServer
-      ${this._SERVER_VAR} = TornadoServer(app, "${baseURL}")
+      ${this._server_var} = TornadoServer(app, "${baseURL}")
       `;
 
-      await this.executeCode({ code: loaderCode });
+      await this.kernelExecutor.executeCode({ code: loaderCode });
     }
-  }
-
-  getResponseFunctionFactory(options: {
-    urlPath: string;
-    method: string;
-    headers: IDict;
-    params?: string;
-    content?: string;
-  }) {
-    const { method, urlPath, headers, params, content } = options;
-    const code = `await ${this._SERVER_VAR}.get_response("${method}", "${urlPath}", headers=${JSON.stringify(headers)} , content=${stringOrNone(content)}, params=${stringOrNone(params)})`;
-    return code;
-  }
-
-  openWebsocketFunctionFactory(options: {
-    instanceId: string;
-    kernelId: string;
-    wsUrl: string;
-    protocol?: string;
-  }): string {
-    const { instanceId, kernelId, wsUrl, protocol } = options;
-
-    const code = `await ${this._SERVER_VAR}.open_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
-    return code;
-  }
-
-  sendWebsocketMessageFunctionFactory(options: {
-    instanceId: string;
-    kernelId: string;
-    wsUrl: string;
-    message: string;
-  }): string {
-    const { instanceId, kernelId, wsUrl, message } = options;
-    const code = `await ${this._SERVER_VAR}.receive_ws_message("${instanceId}", "${kernelId}", "${wsUrl}", '''${message}''')`;
-    return code;
-  }
-
-  async disposePythonServer(): Promise<void> {
-    await this.executeCode({
-      code: `${this._SERVER_VAR}.dispose()`
-    });
   }
 
   async reloadPythonServer(options: {
@@ -82,16 +40,14 @@ export class TornadoServer extends KernelExecutor {
   }): Promise<void> {
     const { initCode } = options;
     if (initCode) {
-      await this.executeCode({
+      await this.kernelExecutor.executeCode({
         code: initCode.replaceAll('{{base_url}}', this._baseUrl ?? '')
       });
       const reloadCode = `
-      ${this._SERVER_VAR}.dispose()
-      ${this._SERVER_VAR}.reload(app)
+      ${this._server_var}.dispose()
+      ${this._server_var}.reload(app)
       `;
-      await this.executeCode({ code: reloadCode }, true);
+      await this.kernelExecutor.executeCode({ code: reloadCode }, true);
     }
   }
-
-  protected _SERVER_VAR = '__jupyterpack_tornado_server';
 }
