@@ -1,0 +1,5 @@
+{
+  "name": "Starlette Example",
+  "entry": "server.py",
+  "framework": "starlette"
+}

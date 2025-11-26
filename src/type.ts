@@ -27,7 +27,8 @@ export enum JupyterPackFramework {
   DASH = 'dash',
   STREAMLIT = 'streamlit',
   TORNADO = 'tornado',
-  SHINY = 'shiny'
+  SHINY = 'shiny',
+  STARLETTE = 'starlette'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
