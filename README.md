@@ -7,7 +7,7 @@
 
 ## Features
 
-- **Python Web Apps**: Serve Python web applications directly in the browser using JupyterLite's in-browser Python kernel. `jupyterpack` currently supports Dash.
+- **Python Web Apps**: Serve Python web applications directly in the browser using JupyterLite's in-browser Python kernel. `jupyterpack` currently supports Dash and Streamlit.
 - **JavaScript Web Apps**: Bundle and serve JavaScript web applications using in-browser bundlers.
 
 ![Image](https://github.com/user-attachments/assets/22849fe8-199f-4d9f-ad45-055bccf88bad)
