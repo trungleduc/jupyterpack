@@ -10,6 +10,7 @@ from jupyterpack.common import (
     BaseBridge,
     decode_broadcast_message,
     encode_broadcast_message,
+    generate_broadcast_channel_name,
 )
 from jupyterpack.js import BroadcastChannel
 
@@ -93,7 +94,9 @@ class TornadoBridge(BaseBridge):
         protocols_str: str | None,
     ):
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
-        broadcast_channel_key = f"/jupyterpack/ws/{instance_id}"
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id
+        )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
 
         if broadcast_channel is None:
@@ -173,7 +176,9 @@ class TornadoBridge(BaseBridge):
         msg: str | bytes,
         action: str = "backend_message",
     ):
-        broadcast_channel_key = f"/jupyterpack/ws/{instance_id}"
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id
+        )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
         if broadcast_channel is not None:
             broadcast_channel.postMessage(

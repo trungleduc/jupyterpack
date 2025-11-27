@@ -92,3 +92,7 @@ def decode_broadcast_message(payload_message: str) -> Union[bytes, str]:
         return binary_data
     else:
         return binary_data.decode("utf-8")
+
+
+def generate_broadcast_channel_name(instance_id: str, kernel_client_id: str) -> str:
+    return f"/jupyterpack/ws/{instance_id}/{kernel_client_id}"

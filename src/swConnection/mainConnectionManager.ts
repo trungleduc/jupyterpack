@@ -16,12 +16,7 @@ import { UUID } from '@lumino/coreutils';
  * It's running on the main thread
  */
 export class ConnectionManager implements IConnectionManager {
-  constructor(public instanceId: string) {
-    this._wsBroadcastChannel = new BroadcastChannel(
-      `/jupyterpack/ws/${instanceId}`
-    );
-    this._initWsChannel();
-  }
+  constructor(public instanceId: string) {}
 
   async registerConnection(
     pythonServer: IBasePythonServer
@@ -29,7 +24,11 @@ export class ConnectionManager implements IConnectionManager {
     const uuid = UUID.uuid4();
 
     this._pythonServers.set(uuid, pythonServer);
-
+    const wsbc = new BroadcastChannel(
+      `/jupyterpack/ws/${this.instanceId}/${uuid}`
+    );
+    this._initWsChannel(wsbc);
+    this._wsBroadcastChannelMap.set(`${this.instanceId}/${uuid}`, wsbc);
     return { instanceId: this.instanceId, kernelClientId: uuid };
   }
 
@@ -57,8 +56,8 @@ export class ConnectionManager implements IConnectionManager {
     });
     return response;
   }
-  private _initWsChannel() {
-    this._wsBroadcastChannel.onmessage = event => {
+  private _initWsChannel(broadcastChannel: BroadcastChannel) {
+    broadcastChannel.onmessage = event => {
       const rawData = event.data;
       let data: IBroadcastMessage;
       if (typeof rawData === 'string') {
@@ -126,5 +125,5 @@ export class ConnectionManager implements IConnectionManager {
     };
   }
   private _pythonServers = new Map<string, IBasePythonServer>();
-  private _wsBroadcastChannel: BroadcastChannel;
+  private _wsBroadcastChannelMap: Map<string, BroadcastChannel> = new Map();
 }

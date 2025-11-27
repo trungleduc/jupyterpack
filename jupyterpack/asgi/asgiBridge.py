@@ -8,7 +8,9 @@ from jupyterpack.common import (
     BaseBridge,
     decode_broadcast_message,
     encode_broadcast_message,
+    generate_broadcast_channel_name,
 )
+
 from jupyterpack.js import BroadcastChannel
 
 from .websocketHandler import WebSocketAdapter
@@ -70,7 +72,9 @@ class ASGIBridge(BaseBridge):
         protocols_str: Optional[str] = None,
     ):
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
-        broadcast_channel_key = f"/jupyterpack/ws/{instance_id}"
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id
+        )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key)
         if broadcast_channel is None:
             broadcast_channel = BroadcastChannel(broadcast_channel_key)

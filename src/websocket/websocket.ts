@@ -59,7 +59,9 @@
     }
     return data;
   };
-  const bcWsChannel = new BroadcastChannel(`/jupyterpack/ws/${instanceId}`);
+  const bcWsChannel = new BroadcastChannel(
+    `/jupyterpack/ws/${instanceId}/${kernelClientId}`
+  );
 
   class BroadcastChannelWebSocket implements WebSocket {
     constructor(url: string | URL, protocols?: string | string[]) {
@@ -177,6 +179,7 @@
       if (dest !== kernelClientId || wsUrl !== this.url) {
         return;
       }
+      console.log('recevied ws message', data);
       switch (action) {
         case 'connected': {
           this.readyState = this.OPEN;
