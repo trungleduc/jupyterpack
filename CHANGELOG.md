@@ -2,6 +2,12 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.5.1
+
+No merged PRs
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.5.0
 
 ([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.4.0...4c5e398823d753aa4373c951508c9313f0441ce3))
@@ -15,8 +21,6 @@
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2025-11-09&to=2025-11-27&type=c))
 
 [@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2025-11-09..2025-11-27&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.4.0
 
