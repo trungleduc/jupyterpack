@@ -1,7 +1,8 @@
 import asyncio
 import tornado.escape
 from typing import Any
-from .tools import encode_broadcast_message
+
+from jupyterpack.common.tools import encode_broadcast_message
 
 
 class WSConnection:

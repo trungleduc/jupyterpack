@@ -59,7 +59,9 @@
     }
     return data;
   };
-  const bcWsChannel = new BroadcastChannel(`/jupyterpack/ws/${instanceId}`);
+  const bcWsChannel = new BroadcastChannel(
+    `/jupyterpack/ws/${instanceId}/${kernelClientId}`
+  );
 
   class BroadcastChannelWebSocket implements WebSocket {
     constructor(url: string | URL, protocols?: string | string[]) {
@@ -109,6 +111,10 @@
         cb();
       }
       this._eventHandlers['close'] = [];
+      sendTypedMessage({
+        action: 'close',
+        wsUrl: this.url
+      });
       bcWsChannel.removeEventListener('message', this._bcMessageHandler);
 
       this.readyState = this.CLOSED;
@@ -168,10 +174,12 @@
       } else {
         data = rawData;
       }
+
       const { action, dest, wsUrl, payload } = data;
       if (dest !== kernelClientId || wsUrl !== this.url) {
         return;
       }
+
       switch (action) {
         case 'connected': {
           this.readyState = this.OPEN;

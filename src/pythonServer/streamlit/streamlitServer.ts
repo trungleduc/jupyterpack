@@ -26,20 +26,20 @@ export class StreamlitServer extends TornadoServer {
     patch_tornado()
     set_base_url_env("${baseURL}")
     `;
-    await this.executeCode({ code: patchCode });
+    await this.kernelExecutor.executeCode({ code: patchCode });
 
     const bootstrapCode = `
     from jupyterpack.streamlit import patch_streamlit
     patch_streamlit()
     `;
-    await this.executeCode({ code: bootstrapCode });
+    await this.kernelExecutor.executeCode({ code: bootstrapCode });
 
     const stCode = `
       from jupyterpack.streamlit import StreamlitServer, create_streamlit_app
       __jupyterpack_st_server, __jupyterpack_tor_app = await create_streamlit_app("${entryPath}", "${baseURL}")
-      ${this._SERVER_VAR} = StreamlitServer(__jupyterpack_tor_app, "${baseURL}", __jupyterpack_st_server)
+      ${this._server_var} = StreamlitServer(__jupyterpack_tor_app, "${baseURL}", __jupyterpack_st_server)
       `;
-    await this.executeCode({ code: stCode });
+    await this.kernelExecutor.executeCode({ code: stCode });
   }
 
   async reloadPythonServer(options: {
@@ -51,17 +51,15 @@ export class StreamlitServer extends TornadoServer {
       return;
     }
     const reloadCode = `
-      ${this._SERVER_VAR}.dispose()
+      ${this._server_var}.dispose()
       __jupyterpack_st_server, __jupyterpack_tor_app = await create_streamlit_app("${entryPath}", "${this._baseUrl}")
-      ${this._SERVER_VAR}.reload(__jupyterpack_tor_app, __jupyterpack_st_server)
+      ${this._server_var}.reload(__jupyterpack_tor_app, __jupyterpack_st_server)
       `;
-    await this.executeCode(
+    await this.kernelExecutor.executeCode(
       {
         code: reloadCode
       },
       true
     );
   }
-
-  protected _SERVER_VAR = '__jupyterpack_streamlit_server';
 }

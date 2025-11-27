@@ -1,11 +1,12 @@
+import base64
 import importlib.util
+import json
+import os
 import sys
-from types import ModuleType
-
 import tempfile
 from pathlib import Path
-from typing import List
-import os
+from types import ModuleType
+from typing import List, Union
 
 
 def set_base_url_env(base_url: str):
@@ -57,3 +58,41 @@ def create_mock_module(module_names: List[str], mock_content: str, patch_parent=
             sys.modules[module_name] = mock_module
 
     return tmpdir
+
+
+def encode_broadcast_message(
+    kernel_client_id: str,
+    ws_url: str,
+    msg: str | bytes,
+    action: str = "backend_message",
+):
+    if isinstance(msg, bytes):
+        is_binary = True
+        b64_msg = base64.b64encode(msg).decode("ascii")
+    elif isinstance(msg, str):
+        is_binary = False
+        b64_msg = msg
+
+    return json.dumps(
+        {
+            "action": action,
+            "dest": kernel_client_id,
+            "wsUrl": ws_url,
+            "payload": {"isBinary": is_binary, "data": b64_msg},
+        }
+    )
+
+
+def decode_broadcast_message(payload_message: str) -> Union[bytes, str]:
+    msg_object = json.loads(payload_message)
+    is_binary = msg_object["isBinary"]
+    data = msg_object["data"]
+    binary_data = base64.b64decode(data)
+    if is_binary:
+        return binary_data
+    else:
+        return binary_data.decode("utf-8")
+
+
+def generate_broadcast_channel_name(instance_id: str, kernel_client_id: str) -> str:
+    return f"/jupyterpack/ws/{instance_id}/{kernel_client_id}"

@@ -1,22 +1,22 @@
 import base64
 import logging
+from typing import Dict
+
 import tornado
 from tornado.httputil import HTTPServerRequest
 from tornado.websocket import WebSocketHandler
 
-from ..js.broadcastChannel import BroadcastChannel
-
-from .wsConnection import WSConnection
-
-from .patchedConnection import PatchedConnection
-from .tools import (
-    DumpStream,
-    convert_headers,
+from jupyterpack.common import (
+    BaseBridge,
     decode_broadcast_message,
     encode_broadcast_message,
+    generate_broadcast_channel_name,
 )
-from typing import Dict
+from jupyterpack.js import BroadcastChannel
 
+from .patchedConnection import PatchedConnection
+from .tools import DumpStream, convert_headers
+from .wsConnection import WSConnection
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARN)
@@ -27,7 +27,7 @@ logger.setLevel(logging.WARN)
 ALL_BROADCAST_CHANNEL: Dict[str, BroadcastChannel] = {}
 
 
-class TornadoBridge:
+class TornadoBridge(BaseBridge):
     """
     Encapsulates Tornado app lifecycle, request/response bridging, and WebSocket handling.
     """
@@ -36,13 +36,7 @@ class TornadoBridge:
         self.base_url = base_url
         self.tornado_app = tornado_app
         self.websocket_handlers: Dict[str, tornado.websocket.WebSocketHandler] = {}
-        self._patched = False
         self._ws_handlers = {}
-        self._ws_broadcast_channels = {}
-
-    # ---------------------------
-    # Fetch Handling
-    # ---------------------------
 
     async def fetch(self, request: Dict):
         """
@@ -92,9 +86,6 @@ class TornadoBridge:
                 "status_code": 500,
             }
 
-    # ---------------------------
-    # Websocket Handling
-    # ---------------------------
     async def open_ws(
         self,
         instance_id: str,
@@ -103,7 +94,9 @@ class TornadoBridge:
         protocols_str: str | None,
     ):
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
-        broadcast_channel_key = f"/jupyterpack/ws/{instance_id}"
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id
+        )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
 
         if broadcast_channel is None:
@@ -171,6 +164,10 @@ class TornadoBridge:
             instance_id, kernel_client_id, ws_url, "", "connected"
         )
 
+    async def close_ws(self, instance_id: str, kernel_client_id: str, ws_url: str):
+        handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
+        self._ws_handlers.pop(handler_key, None)
+
     def send_ws_message_to_js(
         self,
         instance_id: str,
@@ -179,7 +176,9 @@ class TornadoBridge:
         msg: str | bytes,
         action: str = "backend_message",
     ):
-        broadcast_channel_key = f"/jupyterpack/ws/{instance_id}"
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id
+        )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
         if broadcast_channel is not None:
             broadcast_channel.postMessage(

@@ -1,0 +1,5 @@
+{
+  "name": "Shiny Example",
+  "entry": "server.py",
+  "framework": "shiny"
+}

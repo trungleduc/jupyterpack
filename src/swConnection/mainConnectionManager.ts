@@ -1,9 +1,9 @@
-import { arrayBufferToBase64 } from '../tools';
+import { arrayBufferToBase64, stringToBase64 } from '../tools';
 import {
+  IBasePythonServer,
   IBroadcastMessage,
   IConnectionManager,
-  IDict,
-  IKernelExecutor
+  IDict
 } from '../type';
 import { UUID } from '@lumino/coreutils';
 
@@ -16,20 +16,19 @@ import { UUID } from '@lumino/coreutils';
  * It's running on the main thread
  */
 export class ConnectionManager implements IConnectionManager {
-  constructor(public instanceId: string) {
-    this._wsBroadcastChannel = new BroadcastChannel(
-      `/jupyterpack/ws/${instanceId}`
-    );
-    this._initWsChannel();
-  }
+  constructor(public instanceId: string) {}
 
   async registerConnection(
-    kernelExecutor: IKernelExecutor
+    pythonServer: IBasePythonServer
   ): Promise<{ instanceId: string; kernelClientId: string }> {
     const uuid = UUID.uuid4();
 
-    this._kernelExecutors.set(uuid, kernelExecutor);
-
+    this._pythonServers.set(uuid, pythonServer);
+    const wsbc = new BroadcastChannel(
+      `/jupyterpack/ws/${this.instanceId}/${uuid}`
+    );
+    this._initWsChannel(wsbc);
+    this._wsBroadcastChannelMap.set(`${this.instanceId}/${uuid}`, wsbc);
     return { instanceId: this.instanceId, kernelClientId: uuid };
   }
 
@@ -43,7 +42,7 @@ export class ConnectionManager implements IConnectionManager {
   }): Promise<IDict | null> {
     const { urlPath, kernelClientId, method, params, requestBody, headers } =
       options;
-    const executor = this._kernelExecutors.get(kernelClientId);
+    const executor = this._pythonServers.get(kernelClientId);
     if (!executor) {
       return null;
     }
@@ -57,8 +56,8 @@ export class ConnectionManager implements IConnectionManager {
     });
     return response;
   }
-  private _initWsChannel() {
-    this._wsBroadcastChannel.onmessage = event => {
+  private _initWsChannel(broadcastChannel: BroadcastChannel) {
+    broadcastChannel.onmessage = event => {
       const rawData = event.data;
       let data: IBroadcastMessage;
       if (typeof rawData === 'string') {
@@ -68,13 +67,13 @@ export class ConnectionManager implements IConnectionManager {
       }
 
       const { action, dest, wsUrl, payload } = data;
-      const executor = this._kernelExecutors.get(dest);
+      const executor = this._pythonServers.get(dest);
       if (!executor) {
         console.error(
           'Missing kernel handle for message',
           data,
           dest,
-          this._kernelExecutors
+          this._pythonServers
         );
         return;
       }
@@ -89,6 +88,14 @@ export class ConnectionManager implements IConnectionManager {
           });
           break;
         }
+        case 'close': {
+          executor.closeWebsocket({
+            instanceId: this.instanceId,
+            kernelId: dest,
+            wsUrl
+          });
+          break;
+        }
         case 'send': {
           let serializedData: string;
           let isBinary: boolean;
@@ -97,7 +104,8 @@ export class ConnectionManager implements IConnectionManager {
             serializedData = arrayBufferToBase64(payload as any);
             isBinary = true;
           } else if (typeof payload === 'string') {
-            serializedData = payload;
+            // convert string to base64 string to avoid encoding problem
+            serializedData = stringToBase64(payload);
             isBinary = false;
           } else {
             console.error('Unknown message type', payload);
@@ -116,6 +124,6 @@ export class ConnectionManager implements IConnectionManager {
       }
     };
   }
-  private _kernelExecutors = new Map<string, IKernelExecutor>();
-  private _wsBroadcastChannel: BroadcastChannel;
+  private _pythonServers = new Map<string, IBasePythonServer>();
+  private _wsBroadcastChannelMap: Map<string, BroadcastChannel> = new Map();
 }

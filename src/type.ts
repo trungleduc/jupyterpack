@@ -26,7 +26,9 @@ export enum JupyterPackFramework {
   REACT = 'react',
   DASH = 'dash',
   STREAMLIT = 'streamlit',
-  TORNADO = 'tornado'
+  TORNADO = 'tornado',
+  SHINY = 'shiny',
+  STARLETTE = 'starlette'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
@@ -49,7 +51,15 @@ export interface IKernelExecutorParams {
   params?: string;
   requestBody?: ArrayBuffer;
 }
+
 export interface IKernelExecutor extends IDisposable {
+  executeCode(
+    code: KernelMessage.IExecuteRequestMsg['content'],
+    waitForResult?: boolean
+  ): Promise<string | null>;
+}
+
+export interface IBasePythonServer extends IDisposable {
   getResponse(options: IKernelExecutorParams): Promise<IDict>;
   openWebsocket(options: {
     instanceId: string;
@@ -57,16 +67,17 @@ export interface IKernelExecutor extends IDisposable {
     wsUrl: string;
     protocol?: string;
   }): Promise<void>;
+  closeWebsocket(options: {
+    instanceId: string;
+    kernelId: string;
+    wsUrl: string;
+  }): Promise<void>;
   sendWebsocketMessage(options: {
     instanceId: string;
     kernelId: string;
     wsUrl: string;
     message: string;
   }): Promise<void>;
-  executeCode(
-    code: KernelMessage.IExecuteRequestMsg['content'],
-    waitForResult?: boolean
-  ): Promise<string | null>;
   init(options: {
     entryPath?: string;
     initCode?: string;
@@ -89,7 +100,7 @@ export interface IKernelExecutor extends IDisposable {
 
 export interface IConnectionManager {
   registerConnection(
-    kernelExecutor: IKernelExecutor
+    kernelExecutor: IBasePythonServer
   ): Promise<{ instanceId: string; kernelClientId: string }>;
   generateResponse(
     option: { kernelClientId: string } & IKernelExecutorParams
