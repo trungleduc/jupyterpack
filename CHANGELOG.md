@@ -2,6 +2,22 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.5.0
+
+([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.4.0...4c5e398823d753aa4373c951508c9313f0441ce3))
+
+### Enhancements made
+
+- asgi server [#11](https://github.com/trungleduc/jupyterpack/pull/11) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2025-11-09&to=2025-11-27&type=c))
+
+[@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2025-11-09..2025-11-27&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.4.0
 
 ([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.3.0...28c9dd5f2c2b438f003b8850eba2b95df140caf0))
@@ -16,8 +32,6 @@
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2025-10-30&to=2025-11-09&type=c))
 
 [@trungleduc](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2025-10-30..2025-11-09&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.3.0
 
