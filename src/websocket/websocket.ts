@@ -172,6 +172,7 @@
       } else {
         data = rawData;
       }
+
       const { action, dest, wsUrl, payload } = data;
       if (dest !== kernelClientId || wsUrl !== this.url) {
         return;

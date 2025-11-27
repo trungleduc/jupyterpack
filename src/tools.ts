@@ -53,6 +53,15 @@ export function base64ToString(base64: string): string {
   return new TextDecoder('utf-8').decode(bytes);
 }
 
+export function stringToBase64(str: string): string {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+
 export function stringOrNone(content?: string) {
   return content ? `"${content}"` : 'None';
 }

@@ -16,8 +16,10 @@ dependencies:
   - altair
   - pyarrow
   - starlette
+  - htmltools
   - pip:
     - shiny
+    - shinychat
     - vega_datasets
     - streamlit==1.50.0
     - pyodide_http

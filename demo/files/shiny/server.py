@@ -1,66 +1,46 @@
-from starlette.applications import Starlette
-from starlette.responses import HTMLResponse
-from starlette.routing import Route, WebSocketRoute
+# This example is taken from the shinylive official playground (https://shinylive.io/py/examples/#modules)
+
+from shiny import App, module, reactive, render, ui
 
 
-async def homepage(request):
-    html = """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>WS Demo</title>
-    </head>
-    <body>
-        <h1>WebSocket Demo</h1>
-        <pre id="log"></pre>
-        <input id="msg" placeholder="Type a message..." />
-        <button onclick="sendMsg()">Send</button>
-        <button onclick="closeWs()">Closed</button>
-        <script>
-            const log = (msg) => {
-                document.getElementById("log").textContent += msg + "\\n";
-            };
-
-            const ws = new WebSocket(`ws://${location.host}{{base_url}}ws`);
-
-            ws.onopen = () => log("WebSocket connected");
-            ws.onmessage = (ev) => log("Received: " + ev.data);
-            ws.onclose = () => log("WebSocket closed");
-
-            function sendMsg() {
-                const val = document.getElementById("msg").value;
-                ws.send(val);
-                log("Sent: " + val);
-            }
-            function closeWs() {
-                ws.close();
-                log("Closed websocket");
-            }
-        </script>
-    </body>
-    </html>
-    """
-    return HTMLResponse(html)
+# ============================================================
+# Counter module
+# ============================================================
+@module.ui
+def counter_ui(label: str = "Increment counter") -> ui.TagChild:
+    return ui.card(
+        ui.h2("This is " + label),
+        ui.input_action_button(id="button", label=label),
+        ui.output_code(id="out"),
+    )
 
 
-async def ws_hello(websocket):
-    await websocket.accept()
-    await websocket.send_text("Hello from server!")
+@module.server
+def counter_server(input, output, session, starting_value: int = 0):
+    count: reactive.value[int] = reactive.value(starting_value)
 
-    try:
-        while True:
-            message = await websocket.receive_text()
-            await websocket.send_text(f"Echo: {message}")
-    except Exception:
-        pass
-    finally:
-        await websocket.close()
+    @reactive.effect
+    @reactive.event(input.button)
+    def _():
+        count.set(count() + 1)
+
+    @render.code
+    def out() -> str:
+        return f"Click count is {count()}"
 
 
-app = Starlette(
-    routes=[
-        Route("{{base_url}}", homepage),
-        WebSocketRoute("{{base_url}}ws", ws_hello),
-    ]
+# =============================================================================
+# App that uses module
+# =============================================================================
+app_ui = ui.page_fluid(
+    counter_ui("counter1", "Counter 1"),
+    counter_ui("counter2", "Counter 2"),
 )
+
+
+def server(input, output, session):
+    counter_server("counter1")
+    counter_server("counter2")
+
+
+app = App(app_ui, server)

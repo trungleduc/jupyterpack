@@ -1,4 +1,4 @@
-import { arrayBufferToBase64 } from '../tools';
+import { arrayBufferToBase64, stringToBase64 } from '../tools';
 import {
   IBasePythonServer,
   IBroadcastMessage,
@@ -105,7 +105,8 @@ export class ConnectionManager implements IConnectionManager {
             serializedData = arrayBufferToBase64(payload as any);
             isBinary = true;
           } else if (typeof payload === 'string') {
-            serializedData = payload;
+            // convert string to base64 string to avoid encoding problem
+            serializedData = stringToBase64(payload);
             isBinary = false;
           } else {
             console.error('Unknown message type', payload);

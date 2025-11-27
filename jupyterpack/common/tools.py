@@ -87,7 +87,8 @@ def decode_broadcast_message(payload_message: str) -> Union[bytes, str]:
     msg_object = json.loads(payload_message)
     is_binary = msg_object["isBinary"]
     data = msg_object["data"]
+    binary_data = base64.b64decode(data)
     if is_binary:
-        return base64.b64decode(data)
+        return binary_data
     else:
-        return data
+        return binary_data.decode("utf-8")

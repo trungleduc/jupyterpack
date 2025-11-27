@@ -37,8 +37,7 @@ class WebSocketAdapter:
                     self._task.cancel()
             else:
                 raise ValueError(f"unknown message type {msg['type']}")
-        except Exception as e:
-            print("Exception in websocket send", e)
+        except Exception:
             raise
 
     async def receive(self):

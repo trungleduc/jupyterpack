@@ -96,7 +96,7 @@ class ASGIBridge(BaseBridge):
             "server": ("127.0.0.1", 8081),
             "client": ("127.0.0.1", 56789),
             "scheme": "ws",
-            "root_path": "/",
+            "root_path": "",
             "headers": headers,
             "method": "GET",
             "path": ws_url,
