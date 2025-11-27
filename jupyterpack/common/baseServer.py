@@ -73,7 +73,7 @@ class BaseServer(ABC):
 
     async def close_ws(self, instance_id: str, kernel_client_id: str, ws_url: str):
         if self.bridge is None:
-            raise Exception("Server bridge is not created")
+            return
 
         await self.bridge.close_ws(instance_id, kernel_client_id, ws_url)
 

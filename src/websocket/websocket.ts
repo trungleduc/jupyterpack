@@ -179,7 +179,7 @@
       if (dest !== kernelClientId || wsUrl !== this.url) {
         return;
       }
-      console.log('recevied ws message', data);
+
       switch (action) {
         case 'connected': {
           this.readyState = this.OPEN;

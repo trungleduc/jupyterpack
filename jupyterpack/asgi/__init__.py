@@ -1,3 +1,3 @@
-from .asgiServer import AsgiServer
+from .asgiServer import AsgiServer, ASGIBridge
 
-__all__ = ["AsgiServer"]
+__all__ = ["AsgiServer", "ASGIBridge"]

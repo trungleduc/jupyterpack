@@ -3,12 +3,13 @@ import { BasePythonServer } from '../baseServer';
 
 export class ShinyServer extends BasePythonServer {
   async init(options: {
+    entryPath?: string;
     initCode?: string;
     instanceId: string;
     kernelClientId: string;
   }) {
     await super.init(options);
-    const { initCode, instanceId, kernelClientId } = options;
+    const { instanceId, kernelClientId, entryPath } = options;
     const baseURL = this.buildBaseURL({
       instanceId,
       kernelClientId,
@@ -17,14 +18,16 @@ export class ShinyServer extends BasePythonServer {
     const bootstrapCode = `
     from jupyterpack.common import set_base_url_env
     set_base_url_env("${baseURL}")
+    from jupyterpack.shiny import patch_shiny
+    patch_shiny()
     `;
     await this.kernelExecutor.executeCode({ code: bootstrapCode });
-    if (initCode) {
-      const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
-      await this.kernelExecutor.executeCode({ code: initCodeWithUrl });
+    if (entryPath) {
       const loaderCode = `
-      from jupyterpack.asgi import AsgiServer
-      ${this._server_var} = AsgiServer(app, "${baseURL}")
+      from jupyterpack.shiny import ShinyServer, get_shiny_app
+
+
+      ${this._server_var} = ShinyServer(get_shiny_app("${entryPath}"), "${baseURL}")
       `;
 
       await this.kernelExecutor.executeCode({ code: loaderCode });
@@ -44,15 +47,15 @@ export class ShinyServer extends BasePythonServer {
     entryPath?: string;
     initCode?: string;
   }): Promise<void> {
-    const { initCode } = options;
-    if (initCode) {
-      await this.kernelExecutor.executeCode({
-        code: initCode.replaceAll('{{base_url}}', this._baseUrl ?? '')
-      });
+    const { entryPath } = options;
+    if (entryPath) {
       const reloadCode = `
+      from jupyterpack.shiny import  get_shiny_app
+
       await ${this._server_var}.dispose()
-      ${this._server_var}.reload(app)
+      ${this._server_var}.reload(get_shiny_app("${entryPath}"))
       `;
+
       await this.kernelExecutor.executeCode({ code: reloadCode }, true);
     }
   }
