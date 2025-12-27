@@ -1,5 +1,8 @@
 {
   "name": "Dash Example",
   "entry": "server.py",
-  "framework": "dash"
+  "framework": "dash",
+  "dependencies": {
+    "mamba": []
+  }
 }

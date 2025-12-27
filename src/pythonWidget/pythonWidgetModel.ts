@@ -135,9 +135,12 @@ export class PythonWidgetModel implements IPythonWidgetModel {
       sessionConnection: this._sessionConnection
     }));
     const data = await this._connectionManager.registerConnection(executor);
+
     await executor.init({
       initCode: entryContent.content,
       entryPath: spkContent.entry,
+      dependencies: spkContent.dependencies,
+      disableDependencies: spkContent.disableDependencies,
       ...data
     });
     const finish = new PromiseDelegate<void>();

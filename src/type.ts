@@ -38,6 +38,8 @@ export interface IJupyterPackFileFormat {
     autoreload?: boolean;
   };
   rootUrl?: string;
+  dependencies?: IDependencies;
+  disableDependencies?: boolean;
 }
 
 export enum MessageAction {
@@ -78,12 +80,7 @@ export interface IBasePythonServer extends IDisposable {
     wsUrl: string;
     message: string;
   }): Promise<void>;
-  init(options: {
-    entryPath?: string;
-    initCode?: string;
-    instanceId: string;
-    kernelClientId: string;
-  }): Promise<void>;
+  init(options: IPythonServerInitOptions): Promise<void>;
   disposePythonServer(): Promise<void>;
   reloadPythonServer(options: {
     entryPath?: string;
@@ -124,4 +121,18 @@ export interface IPythonWidgetModel extends IDisposable {
       }
     | { success: false; error: string }
   >;
+}
+
+export interface IDependencies {
+  mamba?: string[];
+  pip?: string[];
+}
+
+export interface IPythonServerInitOptions {
+  entryPath?: string;
+  initCode?: string;
+  instanceId: string;
+  kernelClientId: string;
+  dependencies?: IDependencies;
+  disableDependencies?: boolean;
 }
