@@ -1,12 +1,5 @@
-import { KernelExecutor } from './kernelExecutor';
-import websocketPatch from '../websocket/websocket.js?raw';
-import {
-  IDict,
-  IBasePythonServer,
-  IKernelExecutor,
-  JupyterPackFramework
-} from '../type';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+
 import {
   arrayBufferToBase64,
   base64ToArrayBuffer,
@@ -14,6 +7,16 @@ import {
   isBinaryContentType,
   stringOrNone
 } from '../tools';
+import {
+  IBasePythonServer,
+  IDependencies,
+  IDict,
+  IKernelExecutor,
+  IPythonServerInitOptions,
+  JupyterPackFramework
+} from '../type';
+import websocketPatch from '../websocket/websocket.js?raw';
+import { KernelExecutor } from './kernelExecutor';
 
 export abstract class BasePythonServer implements IBasePythonServer {
   constructor(options: KernelExecutor.IOptions) {
@@ -45,17 +48,39 @@ export abstract class BasePythonServer implements IBasePythonServer {
       })
       .catch(console.error);
   }
-  async init(options: {
-    entryPath?: string;
-    initCode?: string;
-    instanceId: string;
-    kernelClientId: string;
-  }): Promise<void> {
+  async init(options: IPythonServerInitOptions): Promise<void> {
     const patchCode = `
     from jupyterpack.common import patch_all
     patch_all()
     `;
     await this._kernelExecutor.executeCode({ code: patchCode });
+    if (!options.disableDependencies) {
+      const { dependencies } = options;
+      if (dependencies?.mamba) {
+        const mambaDeps = `
+      %mamba install ${dependencies.mamba.join(' ')}
+      True
+      `;
+        await this.kernelExecutor.executeCode(
+          {
+            code: mambaDeps
+          },
+          true
+        );
+      }
+      if (dependencies?.pip) {
+        const pipDeps = `
+        %pip install ${dependencies.pip.join(' ')}
+        True
+        `;
+        await this.kernelExecutor.executeCode(
+          {
+            code: pipDeps
+          },
+          true
+        );
+      }
+    }
   }
 
   async disposePythonServer(): Promise<void> {
@@ -229,6 +254,21 @@ export abstract class BasePythonServer implements IBasePythonServer {
     this._baseUrl = baseURL;
 
     return baseURL;
+  }
+  protected mergeDependencies(
+    spkDeps?: IDependencies,
+    defaultDeps?: IDependencies
+  ): IDependencies | undefined {
+    if (!spkDeps) {
+      return defaultDeps;
+    }
+    if (!defaultDeps) {
+      return spkDeps;
+    }
+    const merged: IDependencies = {};
+    merged.mamba = [...(spkDeps.mamba ?? []), ...(defaultDeps.mamba ?? [])];
+    merged.pip = [...(spkDeps.pip ?? []), ...(defaultDeps.pip ?? [])];
+    return merged;
   }
 
   protected _baseUrl: string | undefined;

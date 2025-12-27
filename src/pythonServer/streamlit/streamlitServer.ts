@@ -1,13 +1,15 @@
-import { JupyterPackFramework } from '../../type';
-import { TornadoServer } from '../tornado/tornadoServer';
+import { IPythonServerInitOptions, JupyterPackFramework } from '../../type';
+import { BasePythonServer } from '../baseServer';
+import { DEPENDENCIES } from './deps';
 
-export class StreamlitServer extends TornadoServer {
-  async init(options: {
-    entryPath?: string;
-    initCode?: string;
-    instanceId: string;
-    kernelClientId: string;
-  }) {
+export class StreamlitServer extends BasePythonServer {
+  async init(options: IPythonServerInitOptions) {
+    const mergedOptions: IPythonServerInitOptions = {
+      ...options,
+      dependencies: this.mergeDependencies(options.dependencies, DEPENDENCIES)
+    };
+    await super.init(mergedOptions);
+
     const { instanceId, kernelClientId, entryPath } = options;
     if (!entryPath) {
       throw new Error(
@@ -21,8 +23,7 @@ export class StreamlitServer extends TornadoServer {
     });
 
     const patchCode = `
-    from jupyterpack.common import set_base_url_env, patch_tornado, patch_all
-    patch_all()
+    from jupyterpack.common import set_base_url_env, patch_tornado
     patch_tornado()
     set_base_url_env("${baseURL}")
     `;

@@ -1,13 +1,15 @@
-import { JupyterPackFramework } from '../../type';
+import { IPythonServerInitOptions, JupyterPackFramework } from '../../type';
 import { BasePythonServer } from '../baseServer';
+import { DEPENDENCIES } from './deps';
 
 export class DashServer extends BasePythonServer {
-  async init(options: {
-    initCode?: string;
-    instanceId: string;
-    kernelClientId: string;
-  }) {
-    await super.init(options);
+  async init(options: IPythonServerInitOptions) {
+    const mergedOptions: IPythonServerInitOptions = {
+      ...options,
+      dependencies: this.mergeDependencies(options.dependencies, DEPENDENCIES)
+    };
+    await super.init(mergedOptions);
+
     const { initCode, instanceId, kernelClientId } = options;
 
     const baseURL = this.buildBaseURL({

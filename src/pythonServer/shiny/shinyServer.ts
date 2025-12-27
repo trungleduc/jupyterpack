@@ -1,14 +1,15 @@
-import { JupyterPackFramework } from '../../type';
+import { IPythonServerInitOptions, JupyterPackFramework } from '../../type';
 import { BasePythonServer } from '../baseServer';
+import { DEPENDENCIES } from './deps';
 
 export class ShinyServer extends BasePythonServer {
-  async init(options: {
-    entryPath?: string;
-    initCode?: string;
-    instanceId: string;
-    kernelClientId: string;
-  }) {
-    await super.init(options);
+  async init(options: IPythonServerInitOptions) {
+    const mergedOptions: IPythonServerInitOptions = {
+      ...options,
+      dependencies: this.mergeDependencies(options.dependencies, DEPENDENCIES)
+    };
+    await super.init(mergedOptions);
+
     const { instanceId, kernelClientId, entryPath } = options;
     const baseURL = this.buildBaseURL({
       instanceId,
