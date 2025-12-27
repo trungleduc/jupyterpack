@@ -110,7 +110,6 @@ interface IJupyterPackFileFormat {
 
   You only need to specify the dependencies of the application, the required dependencies of the framework will be automatically added.
 
-
 - `disableDependencies` (optional): Disable entirely the dependency installation. This is useful when dependencies are already provided by the environment. Default is `false`.
 
 ### Full example
