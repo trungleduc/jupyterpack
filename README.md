@@ -47,7 +47,7 @@ the `app.spk` is the entry point of your React app, it should contain the follow
 }
 ```
 
-Double clicking the `spk` file to open the web app as a tab of JupyterLab.
+Double-clicking the `spk` file to open the web app as a tab of JupyterLab.
 
 ## `.spk` — Jupyter Pack File Format
 
@@ -108,10 +108,8 @@ interface IJupyterPackFileFormat {
     }
     ```
 
-  ```
-  You only need to specify the dependencies of the web application, the required dependencies of the framework will be automatically added.
+  You only need to specify the dependencies of the application, the required dependencies of the framework will be automatically added.
 
-  ```
 
 - `disableDependencies` (optional): Disable entirely the dependency installation. This is useful when dependencies are already provided by the environment. Default is `false`.
 
@@ -133,7 +131,7 @@ interface IJupyterPackFileFormat {
 }
 ```
 
-## Framework specific configurations
+## Framework-specific configurations
 
 ### Dash application
 
