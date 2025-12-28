@@ -1,3 +1,4 @@
+import { JupyterPackFramework } from './../type';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -11,6 +12,7 @@ import { dashIcon, logoIcon, shinyIcon, streamlitIcon } from '../tools';
 import { IConnectionManager, IJupyterpackDocTracker } from '../type';
 import { addCommands } from './commands';
 import { JupyterPackWidgetFactory } from './widgetFactory';
+import { generateAppFiles } from './templates';
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
@@ -67,47 +69,97 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
 
 export const launcherPlugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterpack:spklauncher',
-  requires: [ILauncher],
+  optional: [ILauncher],
   autoStart: true,
   provides: IJupyterpackDocTrackerToken,
-  activate: (app: JupyterFrontEnd, launcher: ILauncher): void => {
+  activate: (app: JupyterFrontEnd, launcher: ILauncher | null): void => {
+    if (!launcher) {
+      return;
+    }
     const { commands } = app;
     const commandId = 'jupyterpack:create-new-file';
     const dashCommandId = 'jupyterpack:create-dash-app';
     const streamlitCommandId = 'jupyterpack:create-streamlit-app';
     const shinyCommandId = 'jupyterpack:create-shiny-app';
+
     commands.addCommand(commandId, {
       label: 'New SPK File',
       icon: logoIcon,
       caption: 'Create a new SPK fike',
-      execute: async () => {
-        console.log('AAAAAAAAAAAAAAA');
+      execute: async args => {
+        const cwd = args['cwd'] as string;
+        const contentsManager = app.serviceManager.contents;
+        let model = await contentsManager.newUntitled({
+          path: cwd,
+          type: 'file',
+          ext: '.spk'
+        });
+        const spkContent = `
+{
+  "name": "${model.name}",
+  "entry": "",
+  "framework": "",
+  "rootUrl": "/",
+  "metadata": {
+    "autoreload": true
+  },
+  "dependencies": {
+    "mamba": [],
+    "pip": []
+  }
+}  
+`;
+        model = await contentsManager.save(model.path, {
+          ...model,
+          format: 'text',
+          size: undefined,
+          content: spkContent
+        });
       }
     });
+
     commands.addCommand(dashCommandId, {
       label: 'Dash App',
       icon: dashIcon,
       caption: 'Create a new Dash Application',
-      execute: async () => {
-        console.log('AAAAAAAAAAAAAAA');
+      execute: async args => {
+        const cwd = args['cwd'] as string;
+        await generateAppFiles({
+          contentsManager: app.serviceManager.contents,
+          cwd,
+          framework: JupyterPackFramework.DASH
+        });
       }
     });
+
     commands.addCommand(streamlitCommandId, {
       label: 'Streamlit App',
       icon: streamlitIcon,
       caption: 'Create a new Streamlit Application',
-      execute: async () => {
-        console.log('AAAAAAAAAAAAAAA');
+      execute: async args => {
+        const cwd = args['cwd'] as string;
+        await generateAppFiles({
+          contentsManager: app.serviceManager.contents,
+          cwd,
+          framework: JupyterPackFramework.STREAMLIT
+        });
       }
     });
+
     commands.addCommand(shinyCommandId, {
       label: 'Shiny App',
       icon: shinyIcon,
       caption: 'Create a new Shiny Application',
-      execute: async () => {
-        console.log('AAAAAAAAAAAAAAA');
+      execute: async args => {
+        const cwd = args['cwd'] as string;
+        await generateAppFiles({
+          contentsManager: app.serviceManager.contents,
+          cwd,
+          framework: JupyterPackFramework.SHINY
+        });
       }
     });
+
     launcher.add({
       command: commandId,
       category: 'JupyterPack',
