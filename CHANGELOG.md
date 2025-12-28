@@ -2,6 +2,25 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.5.4
+
+([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.5.3...e4e3e1ec6a792da4345a7f5f94fde1328a10bcc8))
+
+### Enhancements made
+
+- add launcher items [#14](https://github.com/trungleduc/jupyterpack/pull/14) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2025-12-27&to=2025-12-28&type=c))
+
+@trungleduc ([activity](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2025-12-27..2025-12-28&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.5.3
 
 ([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.5.2...83f914708f8ba2dc853a6fd46f25d0fc489e523b))
@@ -18,8 +37,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2025-12-27&to=2025-12-27&type=c))
 
 @trungleduc ([activity](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2025-12-27..2025-12-27&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.5.2
 
