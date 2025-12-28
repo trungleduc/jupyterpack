@@ -1,6 +1,9 @@
 import logoStr from '../style/icons/box.svg';
 import autoReloadStr from '../style/icons/autoreload.svg';
 import linkStr from '../style/icons/externallink.svg';
+import dashStr from '../style/icons/Plotly-Logo-Black.svg';
+import streamlitStr from '../style/icons/streamlit-logo-primary.svg';
+import shinyStr from '../style/icons/shiny-for-python.svg';
 import { LabIcon } from '@jupyterlab/ui-components';
 
 export const IS_LITE = !!document.getElementById('jupyter-lite-main');
@@ -20,6 +23,20 @@ export const linkIcon = new LabIcon({
   svgstr: linkStr
 });
 
+export const dashIcon = new LabIcon({
+  name: 'jupyterpack:dashBlack',
+  svgstr: dashStr
+});
+
+export const streamlitIcon = new LabIcon({
+  name: 'jupyterpack:streamlitBlack',
+  svgstr: streamlitStr
+});
+
+export const shinyIcon = new LabIcon({
+  name: 'jupyterpack:shinyLogo',
+  svgstr: shinyStr
+});
 export function removePrefix(path: string, prefix: string): string {
   if (path.startsWith(prefix)) {
     return path.slice(prefix.length);

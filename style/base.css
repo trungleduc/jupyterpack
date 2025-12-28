@@ -56,3 +56,13 @@
   width: 0 !important;
   min-height: 0 !important;
 }
+
+.jp-LauncherCard[data-category='JupyterPack'] {
+  .jp-LauncherCard-icon div {
+    width: 98% !important;
+  }
+
+  .jp-LauncherCard-icon svg {
+    width: 98% !important;
+  }
+}
