@@ -1,4 +1,4 @@
-from .patch import patch_all, patch_tornado
+from .patch import patch_all, patch_tornado, patch_watchdog, patch_multiprocessing
 from .tools import (
     set_base_url_env,
     import_from_path,
@@ -12,7 +12,9 @@ from .baseBridge import BaseBridge
 
 __all__ = [
     "patch_all",
+    "patch_watchdog",
     "patch_tornado",
+    "patch_multiprocessing",
     "set_base_url_env",
     "import_from_path",
     "create_mock_module",

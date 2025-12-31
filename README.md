@@ -126,7 +126,8 @@ interface IJupyterPackFileFormat {
   "dependencies": {
     "mamba": ["numpy", "pandas"],
     "pip": []
-  }
+  },
+  "disableDependencies": false
 }
 ```
 
