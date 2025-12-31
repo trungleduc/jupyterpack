@@ -17,6 +17,7 @@ dependencies:
   - pyarrow
   - starlette
   - htmltools
+  - panel
   - pip:
     - shiny
     - shinychat

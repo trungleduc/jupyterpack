@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 
 class DumpStream(BaseIOStream):
-    max_buffer_size = 1048576000
+    max_buffer_size = 1024 * 1024 * 1024
 
     def close_fd(*args, **kwargs):
         pass

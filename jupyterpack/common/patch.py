@@ -39,6 +39,13 @@ def patch_tornado():
 
         import_from_path("tornado", "/lib/python3.13/site-packages/tornado/__init__.py")
 
+        from tornado.httpserver import HTTPServer
+
+        def add_sockets(*ignore):
+            pass
+
+        HTTPServer.add_sockets = add_sockets
+
 
 def patch_watchdog():
     if IS_WASM:

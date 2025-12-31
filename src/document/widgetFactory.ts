@@ -56,7 +56,8 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
         case JupyterPackFramework.STREAMLIT:
         case JupyterPackFramework.TORNADO:
         case JupyterPackFramework.STARLETTE:
-        case JupyterPackFramework.SHINY: {
+        case JupyterPackFramework.SHINY:
+        case JupyterPackFramework.PANEL: {
           const model = new PythonWidgetModel({
             jpackModel,
             context,

@@ -106,9 +106,10 @@ class TornadoBridge(BaseBridge):
         headers = convert_headers(
             [
                 ("X-Sec-WebSocket-Protocol", protocols_str),
+                ("Host", "localhost"),
                 ("Upgrade", "websocket"),
                 ("Connection", "Upgrade"),
-                ("Sec-WebSocket-Key", ""),
+                ("Sec-WebSocket-Key", "123123"),
                 ("Sec-WebSocket-Version", "13"),
             ]
         )
@@ -118,7 +119,7 @@ class TornadoBridge(BaseBridge):
 
         stream = DumpStream()
         ws_connection = WSConnection(
-            instance_id, kernel_client_id, ws_url, broadcast_channel
+            instance_id, kernel_client_id, ws_url, broadcast_channel, protocols
         )
         connection = PatchedConnection(
             stream,
@@ -140,6 +141,13 @@ class TornadoBridge(BaseBridge):
         )
 
         handler = self.tornado_app.find_handler(request)
+        if hasattr(handler, "handler_class") and hasattr(
+            handler.handler_class, "get_websocket_protocol"
+        ):
+            handler.handler_class.get_websocket_protocol = (
+                lambda self, *args, **kwargs: ws_connection
+            )
+
         ret = handler.execute()
         if ret is not None:
             await ret
@@ -147,17 +155,15 @@ class TornadoBridge(BaseBridge):
         await connection_state.finish_future
 
         if isinstance(handler.handler, WebSocketHandler):
-            handler.handler.select_subprotocol(protocols)
-            handler.handler.ws_connection = ws_connection
-            ret = handler.handler.open(
-                *handler.handler.open_args, **handler.handler.open_kwargs
-            )
+            ws_handler = handler.handler
+            ws_handler.select_subprotocol(protocols)
+            ws_handler.ws_connection = ws_connection
+            ret = ws_handler.open(*ws_handler.open_args, **ws_handler.open_kwargs)
             if ret is not None:
                 try:
                     await ret
                 except Exception:
                     raise ("Failed to open websocket")
-
         self._ws_handlers[handler_key] = handler
 
         self.send_ws_message_to_js(
