@@ -20,7 +20,10 @@ class WSGIBridge(BaseBridge):
         request: {body: Optional[bytes], headers: List[Tuple[str, str]], method: str, url: str}
         """
         method = request.get("method", "GET").upper()
-        url = request.get("url", "/")
+        url: str = request.get("url", "/")
+        if url.startswith(self.base_url):
+            url = url.replace(self.base_url, "")
+
         headers = dict(request.get("headers", []))
         body = request.get("body", None)
         params = request.get("params", None)

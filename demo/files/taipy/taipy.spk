@@ -1,0 +1,8 @@
+{
+  "name": "Taipy Example",
+  "entry": "server.py",
+  "framework": "taipy",
+  "dependencies": {
+    "mamba": []
+  }
+}

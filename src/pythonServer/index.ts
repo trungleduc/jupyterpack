@@ -4,6 +4,7 @@ import { KernelExecutor } from './kernelExecutor';
 import { ShinyServer } from './shiny/shinyServer';
 import { StarletteServer } from './starlette/starletteServer';
 import { StreamlitServer } from './streamlit/streamlitServer';
+import { TaipyServer } from './taipy/taipyServer';
 import { TornadoServer } from './tornado/tornadoServer';
 
 type BasePythonServerConstructor = new (
@@ -18,5 +19,6 @@ export const PYTHON_SERVER = new Map<
   [JupyterPackFramework.STREAMLIT, StreamlitServer],
   [JupyterPackFramework.TORNADO, TornadoServer],
   [JupyterPackFramework.SHINY, ShinyServer],
+  [JupyterPackFramework.TAIPY, TaipyServer],
   [JupyterPackFramework.STARLETTE, StarletteServer]
 ]);

@@ -4,23 +4,35 @@ channels:
   - https://repo.prefix.dev/conda-forge
 dependencies:
   - xeus-python
-  - dash
-  - werkzeug>=2.2,<3.0
+  # - dash
+  # - werkzeug>=2.2,<3.0
   - httpx
   - numpy
   - pandas
   - tornado
   - blinker>=1.5.0,<2
   - cachetools>=4.0,<7
-  - protobuf
-  - altair
-  - pyarrow
-  - starlette
-  - htmltools
+  # - protobuf
+  # - altair
+  # - pyarrow
+  # - starlette
+  # - htmltools
+
   - pip:
-    - shiny
-    - shinychat
-    - vega_datasets
-    - streamlit==1.50.0
+    # - flask>=3.0.0
+    # - shiny
+    # - shinychat
+    # - vega_datasets
+    # - streamlit==1.50.0
+    - 'flask>=3.0.0'
+    - flask-restful
+    - flask-socketio
+    - 'flask_cors'
+    - taipy
+    - taipy-common
+    - taipy-core
+    - taipy-gui
+    - taipy-rest
+    - taipy-templates
     - pyodide_http
     - ../dist/jupyterpack-0.0.0-py3-none-any.whl
