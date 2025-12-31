@@ -1,7 +1,10 @@
-from .tools import import_from_path
+import contextlib
+import multiprocessing
 import sys
-from ..js import register_comm_target
 from platform import platform
+
+from ..js import register_comm_target
+from .tools import create_mock_module, import_from_path
 
 if "wasm" in platform():
     IS_WASM = True
@@ -35,3 +38,18 @@ def patch_tornado():
             del sys.modules["tornado.gen"]
 
         import_from_path("tornado", "/lib/python3.13/site-packages/tornado/__init__.py")
+
+
+def patch_watchdog():
+    if IS_WASM:
+        content = """
+class FileSystemEventHandler:
+    def __init__(self, *args, **kwargs):
+       pass
+"""
+        create_mock_module(["watchdog.events"], content)
+
+
+def patch_multiprocessing():
+    if IS_WASM:
+        multiprocessing.Lock = contextlib.nullcontext

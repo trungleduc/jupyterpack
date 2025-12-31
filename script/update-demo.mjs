@@ -78,7 +78,7 @@ function listAllFiles(dir, baseDir = dir) {
   return entries;
 }
 
-function buildJupyterpackArchive() {
+async function buildJupyterpackArchive() {
   const sourceDir = 'jupyterpack';
   const destDir = 'demo/_output/xeus/xeus-kernels/kernel_packages';
   const prefix = 'lib/python3.13/site-packages/jupyterpack/';
@@ -92,10 +92,23 @@ function buildJupyterpackArchive() {
   }
 
   const archivePath = path.join(destDir, existing);
+  // const test_archivePath = path.join(destDir, 'test_' + existing);
+
+  /* -------------------------------------------------- */
+  /* 1. Extract existing archive EXCEPT lib/**          */
+  /* -------------------------------------------------- */
+  await tar.x({
+    file: archivePath,
+    cwd: tempDir,
+    filter: p => !p.startsWith('lib/')
+  });
+
+  /* -------------------------------------------------- */
+  /* 2. Copy new jupyterpack into lib/...                */
+  /* -------------------------------------------------- */
 
   const targetPackDir = path.join(tempDir, prefix);
   fse.ensureDirSync(targetPackDir);
-
   // Copy everything except labextension
   for (const entry of fse.readdirSync(sourceDir)) {
     if (entry === 'labextension') continue;
@@ -104,28 +117,30 @@ function buildJupyterpackArchive() {
     });
   }
 
+  /* -------------------------------------------------- */
+  /* 3. Re-pack archive                                 */
+  /* -------------------------------------------------- */
   fs.unlinkSync(archivePath);
-  tar
-    .c(
-      {
-        gzip: true,
-        file: archivePath,
-        cwd: tempDir,
-        portable: true
-      },
-      listAllFiles(tempDir)
-    )
-    .then(() => {
-      fse.removeSync(tempDir);
-      console.log(`✅ Archive updated in place: ${archivePath}`);
-    });
+  await tar.c(
+    {
+      gzip: true,
+      file: archivePath,
+      cwd: tempDir,
+      portable: true
+    },
+    listAllFiles(tempDir)
+  );
+
+  console.log(`✅ Archive updated in place: ${archivePath}`);
 }
 
 const inputPath = 'jupyterpack/labextension';
 const outputPath = 'demo/_output/extensions/jupyterpack';
 const jsonPath = 'demo/_output/jupyter-lite.json';
 
-updateFederatedExtension(`${inputPath}/static`, jsonPath);
-cleanAndCopy(inputPath, outputPath);
-cleanAndCopy('demo/files', 'demo/_output/files');
-buildJupyterpackArchive();
+(async () => {
+  updateFederatedExtension(`${inputPath}/static`, jsonPath);
+  await cleanAndCopy(inputPath, outputPath);
+  await cleanAndCopy('demo/files', 'demo/_output/files');
+  await buildJupyterpackArchive();
+})();
