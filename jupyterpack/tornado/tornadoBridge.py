@@ -1,6 +1,6 @@
 import base64
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 import tornado
 from tornado.httputil import HTTPServerRequest
@@ -45,7 +45,10 @@ class TornadoBridge(BaseBridge):
 
         request_headers = convert_headers(request.get("headers", []))
         request_method = request.get("method", "GET").upper()
+        request_params: str = request.get("params", None)
         request_url: str = request.get("url", "/")
+        if request_params is not None:
+            request_url = f"{request_url}?{request_params}"
 
         request_body = request.get("body", None)
         stream = DumpStream()
@@ -92,10 +95,11 @@ class TornadoBridge(BaseBridge):
         kernel_client_id: str,
         ws_url: str,
         protocols_str: str | None,
+        broadcast_channel_suffix: str | None,
     ):
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
         broadcast_channel_key = generate_broadcast_channel_name(
-            instance_id, kernel_client_id
+            instance_id, kernel_client_id, broadcast_channel_suffix
         )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
 
@@ -167,12 +171,29 @@ class TornadoBridge(BaseBridge):
         self._ws_handlers[handler_key] = handler
 
         self.send_ws_message_to_js(
-            instance_id, kernel_client_id, ws_url, "", "connected"
+            instance_id,
+            kernel_client_id,
+            ws_url,
+            "",
+            "connected",
+            broadcast_channel_suffix,
         )
 
-    async def close_ws(self, instance_id: str, kernel_client_id: str, ws_url: str):
+    async def close_ws(
+        self,
+        instance_id: str,
+        kernel_client_id: str,
+        ws_url: str,
+        broadcast_channel_suffix: str = None,
+    ):
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
         self._ws_handlers.pop(handler_key, None)
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id, broadcast_channel_suffix
+        )
+        broadcast_channel = ALL_BROADCAST_CHANNEL.pop(broadcast_channel_key, None)
+        if broadcast_channel is not None:
+            broadcast_channel.close()
 
     def send_ws_message_to_js(
         self,
@@ -181,9 +202,10 @@ class TornadoBridge(BaseBridge):
         ws_url: str,
         msg: str | bytes,
         action: str = "backend_message",
+        broadcast_channel_suffix: Optional[str] = None,
     ):
         broadcast_channel_key = generate_broadcast_channel_name(
-            instance_id, kernel_client_id
+            instance_id, kernel_client_id, broadcast_channel_suffix
         )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
         if broadcast_channel is not None:

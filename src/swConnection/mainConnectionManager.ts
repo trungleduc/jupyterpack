@@ -84,7 +84,8 @@ export class ConnectionManager implements IConnectionManager {
             instanceId: this.instanceId,
             kernelId: dest,
             wsUrl,
-            protocol: payload.protocol
+            protocol: payload.protocol,
+            broadcastChannelSuffix: payload.broadcastChannelSuffix
           });
           break;
         }

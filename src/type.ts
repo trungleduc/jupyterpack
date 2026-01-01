@@ -69,6 +69,7 @@ export interface IBasePythonServer extends IDisposable {
     kernelId: string;
     wsUrl: string;
     protocol?: string;
+    broadcastChannelSuffix?: string;
   }): Promise<void>;
   closeWebsocket(options: {
     instanceId: string;

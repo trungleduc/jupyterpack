@@ -7,7 +7,7 @@ def model(n=5):
     return "⭐" * n
 
 
-pn.extension()
+pn.extension(template="fast")
 
 slider = pn.widgets.IntSlider(value=5, start=1, end=5)
 

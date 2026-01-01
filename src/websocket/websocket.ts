@@ -28,6 +28,13 @@
     bcWsChannel.postMessage({ ...msg, dest: kernelClientId });
   };
 
+  function randomString(len = 12) {
+    const chars =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const bytes = crypto.getRandomValues(new Uint8Array(len));
+    return Array.from(bytes, b => chars[b % chars.length]).join('');
+  }
+
   function base64ToBinary(base64: string, dataType: BinaryType) {
     const binary = atob(base64); // decode base64
     const len = binary.length;
@@ -62,7 +69,6 @@
   const bcWsChannel = new BroadcastChannel(
     `/jupyterpack/ws/${instanceId}/${kernelClientId}`
   );
-
   class BroadcastChannelWebSocket implements WebSocket {
     constructor(url: string | URL, protocols?: string | string[]) {
       const urlObj = new URL(url);
@@ -211,13 +217,22 @@
       sendTypedMessage({
         action: 'open',
         payload: {
-          protocol: this.protocol
+          protocol: this.protocol,
+          broadcastChannelSuffix: this._broadcastChannelSuffix
         },
         wsUrl: this.url
       });
 
-      bcWsChannel.addEventListener('message', this._bcMessageHandler);
+      this._directKernelBroadcastChannel.addEventListener(
+        'message',
+        this._bcMessageHandler
+      );
     };
+
+    private _broadcastChannelSuffix = randomString();
+    private _directKernelBroadcastChannel = new BroadcastChannel(
+      `/jupyterpack/ws/${instanceId}/${kernelClientId}/${this._broadcastChannelSuffix}`
+    );
   }
 
   window.WebSocket = BroadcastChannelWebSocket as any;
