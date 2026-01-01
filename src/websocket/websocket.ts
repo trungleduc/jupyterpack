@@ -122,7 +122,7 @@
         wsUrl: this.url
       });
       bcWsChannel.removeEventListener('message', this._bcMessageHandler);
-
+      this._directKernelBroadcastChannel.close();
       this.readyState = this.CLOSED;
     }
     send(data: unknown): void {
