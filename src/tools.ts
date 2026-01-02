@@ -4,7 +4,10 @@ import linkStr from '../style/icons/externallink.svg';
 import dashStr from '../style/icons/Plotly-Logo-Black.svg';
 import streamlitStr from '../style/icons/streamlit-logo-primary.svg';
 import shinyStr from '../style/icons/shiny-for-python.svg';
+import panelStr from '../style/icons/panel_logo_stacked.svg';
 import { LabIcon } from '@jupyterlab/ui-components';
+import { Contents } from '@jupyterlab/services';
+import { PathExt } from '@jupyterlab/coreutils';
 
 export const IS_LITE = !!document.getElementById('jupyter-lite-main');
 
@@ -37,6 +40,11 @@ export const shinyIcon = new LabIcon({
   name: 'jupyterpack:shinyLogo',
   svgstr: shinyStr
 });
+export const panelIcon = new LabIcon({
+  name: 'jupyterpack:panelLogo',
+  svgstr: panelStr
+});
+
 export function removePrefix(path: string, prefix: string): string {
   if (path.startsWith(prefix)) {
     return path.slice(prefix.length);
@@ -132,4 +140,38 @@ export function isBinaryContentType(contentType?: string) {
 
   // Default: assume binary
   return true;
+}
+
+export async function newDirectory(options: {
+  dirName: string;
+  contentsManager: Contents.IManager;
+  cwd: string;
+}): Promise<string> {
+  const { dirName, contentsManager, cwd } = options;
+  const currentDirContent = await contentsManager.get(cwd, {
+    content: true
+  });
+  const allDir = ((currentDirContent.content ?? []) as Contents.IModel[]).map(
+    c => c.name
+  );
+
+  let createdDir = dirName;
+  if (allDir.includes(createdDir)) {
+    let idx = 1;
+    createdDir = `${dirName} (${idx})`;
+    while (allDir.includes(createdDir)) {
+      idx += 1;
+      createdDir = `${dirName} (${idx})`;
+    }
+  }
+  const res = await contentsManager.newUntitled({
+    path: cwd,
+    type: 'directory'
+  });
+
+  const renameRes = await contentsManager.rename(
+    res.path,
+    PathExt.join(cwd, createdDir)
+  );
+  return renameRes.path;
 }

@@ -25,6 +25,82 @@ pip install jupyterpack
 conda install -c conda-forge jupyterpack
 ```
 
+## Set up JupyterLite deployment
+
+`jupyterpack` currently supports only `xeus-python` kernel and does **not** support `pyodide-kernel`. You can refer to the `xeus-python` [official documentation](https://jupyterlite-xeus.readthedocs.io/en/stable/deploy.html) for the base setup of JupyterLite with `xeus-python` kernel.
+
+### Framework-specific setup
+
+At runtime, `jupyterpack` can automatically install the dependencies required by the supported frameworks.
+Alternatively, you can preinstall framework dependencies directly into your JupyterLite build. When dependencies are preinstalled, runtime installation can be skipped by setting `disableDependencies` to `true` in your `.spk` file.
+
+Below are example environment.yml files for each supported framework.
+
+- **Dash**
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - dash
+  - werkzeug>=2.2,<3.0
+  - blinker>=1.5.0,<2
+  - cachetools>=4.0,<7
+  - pip:
+      - pyodide_http
+```
+
+- **Streamlit**
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - blinker>=1.5.0,<2
+  - cachetools>=4.0,<7
+  - protobuf
+  - altair
+  - pyarrow
+  - pip:
+      - streamlit>=1.50.0
+      - pyodide_http
+```
+
+- **Shiny**
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - pip:
+      - shiny
+      - shinychat
+      - pyodide_http
+```
+
+- **Panel**
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - panel
+  - pip:
+      - pyodide_http
+```
+
 ## Usage
 
 To use `jupyterpack`, you need to create a `.spk` file that defines your web application. Here's an example structure of a React application:
@@ -126,7 +202,8 @@ interface IJupyterPackFileFormat {
   "dependencies": {
     "mamba": ["numpy", "pandas"],
     "pip": []
-  }
+  },
+  "disableDependencies": false
 }
 ```
 

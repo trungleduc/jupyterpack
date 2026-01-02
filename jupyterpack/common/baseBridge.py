@@ -17,6 +17,7 @@ class BaseBridge(ABC):
         kernel_client_id: str,
         ws_url: str,
         protocols_str: Optional[str] = None,
+        broadcast_channel_suffix: Optional[str] = None,
     ) -> None:
         pass
 
@@ -26,6 +27,7 @@ class BaseBridge(ABC):
         instance_id: str,
         kernel_client_id: str,
         ws_url: str,
+        broadcast_channel_suffix: Optional[str] = None,
     ) -> None:
         pass
 

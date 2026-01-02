@@ -70,10 +70,11 @@ class ASGIBridge(BaseBridge):
         kernel_client_id: str,
         ws_url: str,
         protocols_str: Optional[str] = None,
+        broadcast_channel_suffix: Optional[str] = None,
     ):
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
         broadcast_channel_key = generate_broadcast_channel_name(
-            instance_id, kernel_client_id
+            instance_id, kernel_client_id, broadcast_channel_suffix
         )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key)
         if broadcast_channel is None:
@@ -87,7 +88,7 @@ class ASGIBridge(BaseBridge):
         raw_headers: List[Tuple[str, str]] = [
             ("Upgrade", "websocket"),
             ("Connection", "Upgrade"),
-            ("Sec-WebSocket-Key", ""),
+            ("Sec-WebSocket-Key", "123123"),
             ("Sec-WebSocket-Version", "13"),
         ]
         if protocols_str:
@@ -110,11 +111,24 @@ class ASGIBridge(BaseBridge):
 
         ws_adapter.start(self.asgi_app, scope)
 
-    async def close_ws(self, instance_id: str, kernel_client_id: str, ws_url: str):
+    async def close_ws(
+        self,
+        instance_id: str,
+        kernel_client_id: str,
+        ws_url: str,
+        broadcast_channel_suffix: str = None,
+    ):
         handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
         adapter = self._ws_adapters.pop(handler_key, None)
         if adapter is not None:
             adapter.stop()
+
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id, broadcast_channel_suffix
+        )
+        broadcast_channel = ALL_BROADCAST_CHANNEL.pop(broadcast_channel_key, None)
+        if broadcast_channel is not None:
+            broadcast_channel.close()
 
     async def receive_ws_message_from_js(
         self, instance_id: str, kernel_client_id: str, ws_url: str, payload_message: str
@@ -132,8 +146,11 @@ class ASGIBridge(BaseBridge):
         ws_url: str,
         msg: str | bytes,
         action: str = "backend_message",
+        broadcast_channel_suffix: Optional[str] = None,
     ):
-        broadcast_channel_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id, broadcast_channel_suffix
+        )
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key)
         if broadcast_channel is not None:
             broadcast_channel.postMessage(

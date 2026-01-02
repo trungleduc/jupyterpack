@@ -56,7 +56,8 @@ export abstract class BasePythonServer implements IBasePythonServer {
     await this._kernelExecutor.executeCode({ code: patchCode });
     if (!options.disableDependencies) {
       const { dependencies } = options;
-      if (dependencies?.mamba) {
+
+      if (dependencies?.mamba && dependencies.mamba.length > 0) {
         const mambaDeps = `
       %mamba install ${dependencies.mamba.join(' ')}
       True
@@ -68,7 +69,7 @@ export abstract class BasePythonServer implements IBasePythonServer {
           true
         );
       }
-      if (dependencies?.pip) {
+      if (dependencies?.pip && dependencies.pip.length > 0) {
         const pipDeps = `
         %pip install ${dependencies.pip.join(' ')}
         True
@@ -109,9 +110,11 @@ export abstract class BasePythonServer implements IBasePythonServer {
     kernelId: string;
     wsUrl: string;
     protocol?: string;
+    broadcastChannelSuffix?: string;
   }): string {
-    const { instanceId, kernelId, wsUrl, protocol } = options;
-    const code = `await ${this._server_var}.open_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)})`;
+    const { instanceId, kernelId, wsUrl, protocol, broadcastChannelSuffix } =
+      options;
+    const code = `await ${this._server_var}.open_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(protocol)}, ${stringOrNone(broadcastChannelSuffix)})`;
     return code;
   }
 
@@ -119,9 +122,10 @@ export abstract class BasePythonServer implements IBasePythonServer {
     instanceId: string;
     kernelId: string;
     wsUrl: string;
+    broadcastChannelSuffix?: string;
   }): string {
-    const { instanceId, kernelId, wsUrl } = options;
-    const code = `await ${this._server_var}.close_ws("${instanceId}", "${kernelId}", "${wsUrl}")`;
+    const { instanceId, kernelId, wsUrl, broadcastChannelSuffix } = options;
+    const code = `await ${this._server_var}.close_ws("${instanceId}", "${kernelId}", "${wsUrl}", ${stringOrNone(broadcastChannelSuffix)})`;
     return code;
   }
 
@@ -141,6 +145,7 @@ export abstract class BasePythonServer implements IBasePythonServer {
     kernelId: string;
     wsUrl: string;
     protocol?: string;
+    broadcastChannelSuffix?: string;
   }): Promise<void> {
     const code = this.openWebsocketFunctionFactory(options);
     if (code) {
@@ -159,6 +164,7 @@ export abstract class BasePythonServer implements IBasePythonServer {
     instanceId: string;
     kernelId: string;
     wsUrl: string;
+    broadcastChannelSuffix?: string;
   }): Promise<void> {
     const code = this.closeWebsocketFunctionFactory(options);
     if (code) {
@@ -276,6 +282,7 @@ export abstract class BasePythonServer implements IBasePythonServer {
     instanceId: string;
     kernelId: string;
     wsUrl: string;
+    broadcastChannelSuffix?: string;
   }[] = [];
   protected readonly _server_var = '__jupyterpack_python_server';
 

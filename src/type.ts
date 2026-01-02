@@ -28,7 +28,8 @@ export enum JupyterPackFramework {
   STREAMLIT = 'streamlit',
   TORNADO = 'tornado',
   SHINY = 'shiny',
-  STARLETTE = 'starlette'
+  STARLETTE = 'starlette',
+  PANEL = 'panel'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
@@ -68,6 +69,7 @@ export interface IBasePythonServer extends IDisposable {
     kernelId: string;
     wsUrl: string;
     protocol?: string;
+    broadcastChannelSuffix?: string;
   }): Promise<void>;
   closeWebsocket(options: {
     instanceId: string;

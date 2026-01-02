@@ -18,6 +18,9 @@ class BroadcastChannelOverComm:
     def postMessage(self, message):
         self._comm.send(message)
 
+    def close(self):
+        self._comm.close()
+
 
 # Even though BroadcastChannelOverComm works on both wasm and non-wasm,
 # we still want to use BroadcastChannel in wasm environment to avoid
@@ -41,6 +44,9 @@ if IS_WASM:
 
             def postMessage(self, message):
                 self._broadcast_channel.postMessage(message)
+
+            def close(self):
+                self._broadcast_channel.close()
 
 else:
     BroadcastChannel = BroadcastChannelOverComm

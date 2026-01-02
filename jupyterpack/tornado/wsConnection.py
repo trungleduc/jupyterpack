@@ -1,6 +1,6 @@
 import asyncio
 import tornado.escape
-from typing import Any
+from typing import Any, List
 
 from jupyterpack.common.tools import encode_broadcast_message
 
@@ -12,13 +12,20 @@ class WSConnection:
         kernel_client_id: str,
         ws_url: str,
         broadcast_channel: Any,
+        protocols: List[str],
     ):
         self.instance_id = instance_id
         self.kernel_client_id = kernel_client_id
         self.ws_url = ws_url
         self.broadcast_channel = broadcast_channel
+        self.protocols = protocols
 
     client_terminated = False
+
+    @property
+    def selected_subprotocol(self):
+        protocol = self.protocols[0] if len(self.protocols) else None
+        return protocol
 
     def is_closing(self):
         return False
@@ -37,4 +44,7 @@ class WSConnection:
         pass
 
     def close(self, code, reason=None):
+        pass
+
+    async def accept_connection(self, *args, **kwargs):
         pass

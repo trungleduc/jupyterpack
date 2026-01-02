@@ -61,21 +61,34 @@ class BaseServer(ABC):
         kernel_client_id: str,
         ws_url: str,
         protocols_str: str | None,
+        broadcast_channel_suffix: str | None,
     ):
         if self.bridge is None:
             raise Exception("Server bridge is not created")
         try:
             await self.bridge.open_ws(
-                instance_id, kernel_client_id, ws_url, protocols_str
+                instance_id,
+                kernel_client_id,
+                ws_url,
+                protocols_str,
+                broadcast_channel_suffix,
             )
         except Exception:
             raise
 
-    async def close_ws(self, instance_id: str, kernel_client_id: str, ws_url: str):
+    async def close_ws(
+        self,
+        instance_id: str,
+        kernel_client_id: str,
+        ws_url: str,
+        broadcast_channel_suffix: Optional[str] = None,
+    ):
         if self.bridge is None:
             return
 
-        await self.bridge.close_ws(instance_id, kernel_client_id, ws_url)
+        await self.bridge.close_ws(
+            instance_id, kernel_client_id, ws_url, broadcast_channel_suffix
+        )
 
     async def receive_ws_message(
         self, instance_id: str, kernel_client_id: str, ws_url: str, payload_message: str

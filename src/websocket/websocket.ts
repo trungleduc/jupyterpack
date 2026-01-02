@@ -28,6 +28,13 @@
     bcWsChannel.postMessage({ ...msg, dest: kernelClientId });
   };
 
+  function randomString(len = 12) {
+    const chars =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const bytes = crypto.getRandomValues(new Uint8Array(len));
+    return Array.from(bytes, b => chars[b % chars.length]).join('');
+  }
+
   function base64ToBinary(base64: string, dataType: BinaryType) {
     const binary = atob(base64); // decode base64
     const len = binary.length;
@@ -43,6 +50,8 @@
       throw new Error("Unsupported type: use 'arraybuffer' or 'blob'");
     }
   }
+
+  const OPENDED_WS = new Set<BroadcastChannelWebSocket>();
 
   const decodeServerMessage = (
     payload: {
@@ -62,7 +71,6 @@
   const bcWsChannel = new BroadcastChannel(
     `/jupyterpack/ws/${instanceId}/${kernelClientId}`
   );
-
   class BroadcastChannelWebSocket implements WebSocket {
     constructor(url: string | URL, protocols?: string | string[]) {
       const urlObj = new URL(url);
@@ -81,6 +89,8 @@
 
       this.readyState = this.CONNECTING;
       this._open();
+      OPENDED_WS.add(this);
+      console.log(`[WebSocket]: Opening ${this.url}`);
     }
 
     onclose: ((this: WebSocket, ev?: CloseEvent) => any) | null = () => {
@@ -98,13 +108,22 @@
       () => {
         // no-op
       };
-    close(code?: unknown, reason?: unknown): void {
+
+    disposeBroadcastChannel() {
+      this._directKernelBroadcastChannel.removeEventListener(
+        'message',
+        this._bcMessageHandler
+      );
+      this._directKernelBroadcastChannel.close();
+    }
+
+    close(code?: any, reason?: any): void {
       if (this.readyState === this.CLOSED) {
         return;
       }
 
       if (this.onclose) {
-        this.onclose();
+        this.onclose(new CloseEvent('close', { code, reason }));
       }
       while (this._eventHandlers['close'].length) {
         const cb = this._eventHandlers['close'].pop();
@@ -116,7 +135,7 @@
         wsUrl: this.url
       });
       bcWsChannel.removeEventListener('message', this._bcMessageHandler);
-
+      this.disposeBroadcastChannel();
       this.readyState = this.CLOSED;
     }
     send(data: unknown): void {
@@ -211,14 +230,26 @@
       sendTypedMessage({
         action: 'open',
         payload: {
-          protocol: this.protocol
+          protocol: this.protocol,
+          broadcastChannelSuffix: this._broadcastChannelSuffix
         },
         wsUrl: this.url
       });
 
-      bcWsChannel.addEventListener('message', this._bcMessageHandler);
+      this._directKernelBroadcastChannel.addEventListener(
+        'message',
+        this._bcMessageHandler
+      );
     };
+
+    private _broadcastChannelSuffix = randomString();
+    private _directKernelBroadcastChannel = new BroadcastChannel(
+      `/jupyterpack/ws/${instanceId}/${kernelClientId}/${this._broadcastChannelSuffix}`
+    );
   }
 
   window.WebSocket = BroadcastChannelWebSocket as any;
+  window.addEventListener('beforeunload', () => {
+    OPENDED_WS.forEach(ws => ws.disposeBroadcastChannel());
+  });
 })();

@@ -26,7 +26,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
-dependencies = ["httpx", "tornado", "starlette", "numpy", "pandas"]
+dependencies = ["httpx", "tornado", "starlette", "numpy", "pandas", "specta"]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 
 [tool.hatch.version]
