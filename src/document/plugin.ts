@@ -8,7 +8,13 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 import { ILauncher } from '@jupyterlab/launcher';
 
 import { IConnectionManagerToken, IJupyterpackDocTrackerToken } from '../token';
-import { dashIcon, logoIcon, shinyIcon, streamlitIcon } from '../tools';
+import {
+  dashIcon,
+  logoIcon,
+  panelIcon,
+  shinyIcon,
+  streamlitIcon
+} from '../tools';
 import { IConnectionManager, IJupyterpackDocTracker } from '../type';
 import { addCommands } from './commands';
 import { JupyterPackWidgetFactory } from './widgetFactory';
@@ -81,6 +87,7 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
     const dashCommandId = 'jupyterpack:create-dash-app';
     const streamlitCommandId = 'jupyterpack:create-streamlit-app';
     const shinyCommandId = 'jupyterpack:create-shiny-app';
+    const panelCommandId = 'jupyterpack:create-panel-app';
 
     commands.addCommand(commandId, {
       label: 'New SPK File',
@@ -160,6 +167,20 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(panelCommandId, {
+      label: 'Panel App',
+      icon: panelIcon,
+      caption: 'Create a new Panel Application',
+      execute: async args => {
+        const cwd = args['cwd'] as string;
+        await generateAppFiles({
+          contentsManager: app.serviceManager.contents,
+          cwd,
+          framework: JupyterPackFramework.PANEL
+        });
+      }
+    });
+
     launcher.add({
       command: commandId,
       category: 'JupyterPack',
@@ -179,6 +200,11 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       command: shinyCommandId,
       category: 'JupyterPack',
       rank: 4
+    });
+    launcher.add({
+      command: panelCommandId,
+      category: 'JupyterPack',
+      rank: 5
     });
   }
 };

@@ -3,6 +3,9 @@ import { JupyterPackFramework } from '../../type';
 import { DASH_APP } from './dash';
 import { STREAMLIT_APP } from './streamlit';
 import { SHINY_APP } from './shiny';
+import { newDirectory } from '../../tools';
+import { PathExt } from '@jupyterlab/coreutils';
+import { PANEL_APP } from './panel';
 
 export async function generateAppFiles(options: {
   contentsManager: Contents.IManager;
@@ -10,9 +13,13 @@ export async function generateAppFiles(options: {
   cwd: string;
 }) {
   const { contentsManager, framework, cwd } = options;
-
-  const pyModel = await contentsManager.newUntitled({
-    path: cwd,
+  const newPath = await newDirectory({
+    dirName: `${framework} app`,
+    contentsManager,
+    cwd
+  });
+  let pyModel = await contentsManager.newUntitled({
+    path: newPath,
     type: 'file',
     ext: '.py'
   });
@@ -30,6 +37,10 @@ export async function generateAppFiles(options: {
       appContent = SHINY_APP;
       break;
     }
+    case JupyterPackFramework.PANEL: {
+      appContent = PANEL_APP;
+      break;
+    }
     default:
       break;
   }
@@ -40,15 +51,20 @@ export async function generateAppFiles(options: {
     content: appContent
   });
 
+  pyModel = await contentsManager.rename(
+    pyModel.path,
+    PathExt.join(newPath, 'app.py')
+  );
+
   let model = await contentsManager.newUntitled({
-    path: cwd,
+    path: newPath,
     type: 'file',
     ext: '.spk'
   });
 
   const spkContent = `
 {
-  "name": "${model.name}",
+  "name": "entrypoint.spk",
   "entry": "${pyModel.name}",
   "framework": "${framework}",
   "dependencies": {
@@ -62,4 +78,9 @@ export async function generateAppFiles(options: {
     size: undefined,
     content: spkContent
   });
+
+  await contentsManager.rename(
+    model.path,
+    PathExt.join(newPath, 'entrypoint.spk')
+  );
 }

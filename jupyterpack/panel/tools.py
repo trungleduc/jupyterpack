@@ -1,7 +1,7 @@
 from ..common.patch import IS_WASM
 
 
-async def create_panel_app(script_path: str, base_url: str):
+def create_panel_app(script_path: str, base_url: str):
     from panel.io.server import get_server
 
     tor_app = get_server(script_path, prefix=base_url)
