@@ -45,6 +45,7 @@ channels:
   - https://repo.prefix.dev/conda-forge
 dependencies:
   - xeus-python
+  - jupyterpack
   - dash
   - werkzeug>=2.2,<3.0
   - blinker>=1.5.0,<2
@@ -62,6 +63,7 @@ channels:
   - https://repo.prefix.dev/conda-forge
 dependencies:
   - xeus-python
+  - jupyterpack
   - blinker>=1.5.0,<2
   - cachetools>=4.0,<7
   - protobuf
@@ -81,6 +83,7 @@ channels:
   - https://repo.prefix.dev/conda-forge
 dependencies:
   - xeus-python
+  - jupyterpack
   - pip:
       - shiny
       - shinychat
@@ -96,6 +99,7 @@ channels:
   - https://repo.prefix.dev/conda-forge
 dependencies:
   - xeus-python
+  - jupyterpack
   - panel
   - pip:
       - pyodide_http
