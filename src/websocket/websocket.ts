@@ -51,6 +51,8 @@
     }
   }
 
+  const OPENDED_WS = new Set<BroadcastChannelWebSocket>();
+
   const decodeServerMessage = (
     payload: {
       data: string;
@@ -87,6 +89,8 @@
 
       this.readyState = this.CONNECTING;
       this._open();
+      OPENDED_WS.add(this);
+      console.log(`[WebSocket]: Opening ${this.url}`);
     }
 
     onclose: ((this: WebSocket, ev?: CloseEvent) => any) | null = () => {
@@ -104,13 +108,22 @@
       () => {
         // no-op
       };
-    close(code?: unknown, reason?: unknown): void {
+
+    disposeBroadcastChannel() {
+      this._directKernelBroadcastChannel.removeEventListener(
+        'message',
+        this._bcMessageHandler
+      );
+      this._directKernelBroadcastChannel.close();
+    }
+
+    close(code?: any, reason?: any): void {
       if (this.readyState === this.CLOSED) {
         return;
       }
 
       if (this.onclose) {
-        this.onclose();
+        this.onclose(new CloseEvent('close', { code, reason }));
       }
       while (this._eventHandlers['close'].length) {
         const cb = this._eventHandlers['close'].pop();
@@ -122,7 +135,7 @@
         wsUrl: this.url
       });
       bcWsChannel.removeEventListener('message', this._bcMessageHandler);
-      this._directKernelBroadcastChannel.close();
+      this.disposeBroadcastChannel();
       this.readyState = this.CLOSED;
     }
     send(data: unknown): void {
@@ -236,4 +249,7 @@
   }
 
   window.WebSocket = BroadcastChannelWebSocket as any;
+  window.addEventListener('beforeunload', () => {
+    OPENDED_WS.forEach(ws => ws.disposeBroadcastChannel());
+  });
 })();

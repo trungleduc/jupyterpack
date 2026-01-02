@@ -28,10 +28,9 @@ export class PanelServer extends BasePythonServer {
     await this.kernelExecutor.executeCode({ code: patchCode });
 
     const stCode = `
-      from jupyterpack.panel import PanelServer, create_panel_app, patch_panel
+      from jupyterpack.panel import PanelServer, patch_panel
       patch_panel()
-      __jupyterpack_tor_app = await create_panel_app("${entryPath}", "${baseURL}")
-      ${this._server_var} = PanelServer(__jupyterpack_tor_app, "${baseURL}")
+      ${this._server_var} = PanelServer("${entryPath}", "${baseURL}")
       `;
     await this.kernelExecutor.executeCode({ code: stCode });
   }
@@ -46,8 +45,7 @@ export class PanelServer extends BasePythonServer {
     }
     const reloadCode = `
       ${this._server_var}.dispose()
-      __jupyterpack_tor_app = await create_panel_app("${entryPath}", "${this._baseUrl}")
-      ${this._server_var}.reload(__jupyterpack_tor_app)
+      ${this._server_var}.reload("${entryPath}")
       `;
     await this.kernelExecutor.executeCode(
       {

@@ -1,22 +1,15 @@
-import tornado
-
+from .tools import create_panel_app
 from ..tornado.tornadoServer import TornadoServer
 
 
-async def create_panel_app(script_path: str, base_url: str):
-    from panel.io.server import get_server
-
-    tor_app = get_server(script_path, prefix=base_url)
-
-    return tor_app._tornado
-
-
 class PanelServer(TornadoServer):
-    def __init__(self, tornado_app: tornado.web.Application, base_url: str):
+    def __init__(self, script_path: str, base_url: str):
+        tornado_app = create_panel_app(script_path, base_url)
         super().__init__(tornado_app, base_url)
 
     def dispose(self):
         super().dispose()
 
-    def reload(self, tornado_app: tornado.web.Application):
+    def reload(self, script_path: str):
+        tornado_app = create_panel_app(script_path, self.base_url)
         return super().reload(tornado_app)
