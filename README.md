@@ -25,7 +25,7 @@ pip install jupyterpack
 conda install -c conda-forge jupyterpack
 ```
 
-## Set up JupyterLite deployment
+## Setting up JupyterLite deployment
 
 `jupyterpack` currently supports only `xeus-python` kernel and does **not** support `pyodide-kernel`. You can refer to the `xeus-python` [official documentation](https://jupyterlite-xeus.readthedocs.io/en/stable/deploy.html) for the base setup of JupyterLite with `xeus-python` kernel.
 
