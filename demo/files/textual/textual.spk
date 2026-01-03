@@ -1,0 +1,5 @@
+{
+  "name": "Textual Example",
+  "entry": "server.py",
+  "framework": "textual"
+}

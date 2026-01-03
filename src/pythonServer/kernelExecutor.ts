@@ -39,7 +39,7 @@ export class KernelExecutor implements IKernelExecutor {
           }
           case 'stream': {
             const content = (msg as KernelMessage.IStreamMsg).content;
-            if (content.text.length === 0) {
+            if (content.text.trim().length === 0) {
               break;
             }
             if (content.name === 'stderr') {

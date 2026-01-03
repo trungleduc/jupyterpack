@@ -4,9 +4,7 @@ from typing import Dict
 
 from httpx import Client, WSGITransport
 
-from jupyterpack.common import (
-    BaseBridge,
-)
+from jupyterpack.common import BaseBridge
 
 
 class WSGIBridge(BaseBridge):
