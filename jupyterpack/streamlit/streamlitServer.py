@@ -1,12 +1,14 @@
-from streamlit import config
-import streamlit.web.server.server as st_server
-from streamlit.runtime.runtime import Runtime
+from typing import Any
 import tornado
 
 from ..tornado.tornadoServer import TornadoServer
 
 
 async def create_streamlit_app(script_path: str, base_url: str):
+    from streamlit import config
+    import streamlit.web.server.server as st_server
+    from streamlit.runtime.runtime import Runtime
+
     if Runtime._instance is not None:
         Runtime._instance.stop()
         Runtime._instance = None
@@ -27,7 +29,7 @@ class StreamlitServer(TornadoServer):
         self,
         tornado_app: tornado.web.Application,
         base_url: str,
-        streamlit_server: st_server.Server,
+        streamlit_server: Any,
     ):
         super().__init__(tornado_app, base_url)
         self._streamlit_server = streamlit_server
@@ -39,8 +41,6 @@ class StreamlitServer(TornadoServer):
             self._streamlit_server = None
         super().dispose()
 
-    def reload(
-        self, tornado_app: tornado.web.Application, streamlit_server: st_server.Server
-    ):
+    def reload(self, tornado_app: tornado.web.Application, streamlit_server: Any):
         self._streamlit_server = streamlit_server
         return super().reload(tornado_app)
