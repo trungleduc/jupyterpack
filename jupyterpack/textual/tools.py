@@ -2,6 +2,7 @@ import os
 
 from aiohttp.abc import AbstractStreamWriter
 from io import BytesIO
+import asyncio
 
 
 class MemoryWriter(AbstractStreamWriter):
@@ -32,7 +33,12 @@ class MemoryWriter(AbstractStreamWriter):
 
 
 def patch_textual():
-    os.environ["TEXTUAL_DRIVER"] = "textual.drivers.web_driver:WebDriver"
+    if not hasattr(asyncio.tasks, "_set_task_name"):
+        asyncio.tasks._set_task_name = lambda task, name: None
+    from textual import constants
+
+    constants.DRIVER = "jupyterpack.textual.driver:JupyterPackDriver"
+    os.environ["TEXTUAL_DRIVER"] = constants.DRIVER
     os.environ["TEXTUAL_FPS"] = "60"
     os.environ["TEXTUAL_COLOR_SYSTEM"] = "truecolor"
     os.environ["TERM_PROGRAM"] = "textual"
