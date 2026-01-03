@@ -1,22 +1,38 @@
+import asyncio
 import base64
 import json
 from textual_serve.server import Server
-from typing import Dict
+from typing import Dict, List, Optional
 from aiohttp.test_utils import make_mocked_request
 from jupyterpack.common import BaseBridge
+from .driver import JupyterPackDriver
+from ..common.tools import (
+    decode_broadcast_message,
+    encode_broadcast_message,
+    generate_broadcast_channel_name,
+)
 from .tools import MemoryWriter
+from jupyterpack.js import BroadcastChannel, js_log
+
+ALL_BROADCAST_CHANNEL: Dict[str, BroadcastChannel] = {}
+META = b"M"
+DATA = b"D"
+PACKED = b"P"
 
 
 class TextualBridge(BaseBridge):
     def __init__(self, textual_app, base_url: str):
         self.base_url = base_url
-        self.wsgi_app = textual_app
+        self._textual_app = textual_app
+        self._tasks: List[asyncio.Task] = []
         self._public_url = "http://" + f"127.0.0.1:8448/{base_url}".replace(
             "//", "/"
         ).removesuffix("/")
 
         self._textual_server = Server("", public_url=self._public_url)
         self._temp_app = None
+        self._driver: Optional[JupyterPackDriver] = None
+        self._ready_event = asyncio.Event()
 
     async def fetch(self, request: Dict):
         """
@@ -80,14 +96,136 @@ class TextualBridge(BaseBridge):
                 "status_code": 500,
             }
 
-    async def open_ws(self, *args, **kwargs):
-        raise NotImplementedError("WSGI bridge does not support WebSocket")
+    async def open_ws(
+        self,
+        instance_id: str,
+        kernel_client_id: str,
+        ws_url: str,
+        protocols_str: str | None,
+        broadcast_channel_suffix: str | None,
+        **kwargs,
+    ):
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id, broadcast_channel_suffix
+        )
+        broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
+
+        if broadcast_channel is None:
+            broadcast_channel = BroadcastChannel(broadcast_channel_key)
+            ALL_BROADCAST_CHANNEL[broadcast_channel_key] = broadcast_channel
+
+        run_task = asyncio.create_task(
+            self._run(instance_id, kernel_client_id, ws_url, broadcast_channel_suffix)
+        )
+        self._tasks.append(run_task)
+
+        send_data_task = asyncio.create_task(
+            self._send_data(
+                instance_id, kernel_client_id, ws_url, broadcast_channel_suffix
+            )
+        )
+
+        self._tasks.append(send_data_task)
 
     async def close_ws(self, *args, **kwargs):
-        raise NotImplementedError("WSGI bridge does not support WebSocket")
+        for task in self._tasks:
+            task.cancel()
+        self._tasks = []
 
-    async def receive_ws_message_from_js(self, *args, **kwargs):
-        raise NotImplementedError("WSGI bridge does not support WebSocket")
+    async def receive_ws_message_from_js(
+        self, instance_id: str, kernel_client_id: str, ws_url: str, payload_message: str
+    ):
+        data = decode_broadcast_message(payload_message)
+        js_log(f"Received message from JS: {data}")
 
-    def send_ws_message_to_js(self, *args, **kwargs):
-        raise NotImplementedError("WSGI bridge does not support WebSocket")
+    def send_ws_message_to_js(
+        self,
+        instance_id: str,
+        kernel_client_id: str,
+        ws_url: str,
+        msg: str | bytes,
+        action: str = "backend_message",
+        broadcast_channel_suffix: Optional[str] = None,
+    ):
+        broadcast_channel_key = generate_broadcast_channel_name(
+            instance_id, kernel_client_id, broadcast_channel_suffix
+        )
+        broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
+        if broadcast_channel is not None:
+            broadcast_channel.postMessage(
+                encode_broadcast_message(kernel_client_id, ws_url, msg, action)
+            )
+
+    async def _send_data(
+        self,
+        instance_id: str,
+        kernel_client_id: str,
+        ws_url: str,
+        broadcast_channel_suffix: Optional[str] = None,
+    ):
+        await self._ready_event.wait()
+        while True:
+            msg = await self._driver.stdout_queue.get()
+            js_log(f"Sending data to JS: {msg}")
+            self.send_ws_message_to_js(
+                instance_id,
+                kernel_client_id,
+                ws_url,
+                msg,
+                "backend_message",
+                broadcast_channel_suffix,
+            )
+
+    async def _run(
+        self,
+        instance_id: str,
+        kernel_client_id: str,
+        ws_url: str,
+        broadcast_channel_suffix: Optional[str] = None,
+    ):
+        app_task = asyncio.create_task(self._textual_app.run_async())
+
+        self._tasks.append(app_task)
+        while True:
+            if self._textual_app._driver is not None:
+                self._driver = self._textual_app._driver
+                if not isinstance(self._driver, JupyterPackDriver):
+                    app_task.cancel()
+                    raise Exception("Driver is not JupyterPackDriver")
+                break
+            await asyncio.sleep(0.1)
+        ready = False
+        # Wait for prelude text
+        for _ in range(10):
+            line = []
+            while True:
+                data = await self._driver.stdout_queue.get()
+                line.append(data)
+                if data[-1] == 10:  # "\n"
+                    break
+            line = b"".join(line)
+            if not line:
+                break
+            if line == b"__GANGLION__\n":
+                ready = True
+                break
+
+        if not ready:
+            app_task.cancel()
+            raise Exception("Textual app did not start correctly")
+        else:
+            self._ready_event.set()
+            self.send_ws_message_to_js(
+                instance_id,
+                kernel_client_id,
+                ws_url,
+                "",
+                "connected",
+                broadcast_channel_suffix,
+            )
+
+    def dispose(self):
+        self._driver.exit_app()
+        for t in self._tasks:
+            t.cancel()
+        self._tasks = []

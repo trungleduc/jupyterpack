@@ -18,6 +18,8 @@ export class TextualServer extends BasePythonServer {
     });
     const bootstrapCode = `
     from jupyterpack.common import set_base_url_env
+    from jupyterpack.textual import patch_textual
+    patch_textual()
     set_base_url_env("${baseURL}")
     `;
     await this.kernelExecutor.executeCode({ code: bootstrapCode });
@@ -26,8 +28,9 @@ export class TextualServer extends BasePythonServer {
     }
 
     const loaderCode = `
-      from jupyterpack.textual import TextualServer, patch_textual
-      patch_textual()
+      from jupyterpack.textual import TextualServer
+      import os
+      print('3333333', os.environ.get('TEXTUAL_DRIVER'), app.driver_class)
       ${this._server_var} = TextualServer(app, "${baseURL}")
       `;
 

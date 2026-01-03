@@ -10,13 +10,13 @@ class TextualServer(BaseServer):
 
     @property
     def bridge(self):
-        if self._bridge is None:
-            raise Exception("Missing ASGI bridge instance")
         return self._bridge
 
     def reload(self, textual_app):
         pass
 
     def dispose(self):
+        if self._bridge is not None:
+            self._bridge.dispose()
+            self._bridge = None
         self._app = None
-        self._bridge = None
