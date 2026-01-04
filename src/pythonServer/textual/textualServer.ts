@@ -29,8 +29,6 @@ export class TextualServer extends BasePythonServer {
 
     const loaderCode = `
       from jupyterpack.textual import TextualServer
-      import os
-      print('3333333', os.environ.get('TEXTUAL_DRIVER'), app.driver_class)
       ${this._server_var} = TextualServer(app, "${baseURL}")
       `;
 

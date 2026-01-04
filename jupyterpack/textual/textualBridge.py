@@ -5,19 +5,16 @@ from textual_serve.server import Server
 from typing import Dict, List, Optional
 from aiohttp.test_utils import make_mocked_request
 from jupyterpack.common import BaseBridge
-from .driver import JupyterPackDriver
+from .textualDriver import JupyterPackDriver
 from ..common.tools import (
     decode_broadcast_message,
     encode_broadcast_message,
     generate_broadcast_channel_name,
 )
-from .tools import MemoryWriter
+from .tools import DATA, META, MemoryWriter, deserialize_packet, serialize_packet
 from jupyterpack.js import BroadcastChannel, js_log
 
 ALL_BROADCAST_CHANNEL: Dict[str, BroadcastChannel] = {}
-META = b"M"
-DATA = b"D"
-PACKED = b"P"
 
 
 class TextualBridge(BaseBridge):
@@ -33,6 +30,13 @@ class TextualBridge(BaseBridge):
         self._temp_app = None
         self._driver: Optional[JupyterPackDriver] = None
         self._ready_event = asyncio.Event()
+        self._broastcast_channel_keymap = {}
+
+    def dispose(self):
+        self._driver.exit_app()
+        for t in self._tasks:
+            t.cancel()
+        self._tasks = []
 
     async def fetch(self, request: Dict):
         """
@@ -105,9 +109,12 @@ class TextualBridge(BaseBridge):
         broadcast_channel_suffix: str | None,
         **kwargs,
     ):
+        handler_key = f"{instance_id}@{kernel_client_id}@{ws_url}"
+
         broadcast_channel_key = generate_broadcast_channel_name(
             instance_id, kernel_client_id, broadcast_channel_suffix
         )
+        self._broastcast_channel_keymap[handler_key] = broadcast_channel_suffix
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key, None)
 
         if broadcast_channel is None:
@@ -120,7 +127,7 @@ class TextualBridge(BaseBridge):
         self._tasks.append(run_task)
 
         send_data_task = asyncio.create_task(
-            self._send_data(
+            self._send_textual_data_to_frontend(
                 instance_id, kernel_client_id, ws_url, broadcast_channel_suffix
             )
         )
@@ -135,8 +142,38 @@ class TextualBridge(BaseBridge):
     async def receive_ws_message_from_js(
         self, instance_id: str, kernel_client_id: str, ws_url: str, payload_message: str
     ):
-        data = decode_broadcast_message(payload_message)
-        js_log(f"Received message from JS: {data}")
+        envelope: List[str] = json.loads(decode_broadcast_message(payload_message))
+        assert isinstance(envelope, list)
+        type_ = envelope[0]
+        if type_ == "stdin":
+            data = envelope[1]
+            await self._send_bytes_to_textual_app(data.encode("utf-8"))
+        elif type_ == "resize":
+            data = envelope[1]
+            await self._send_meta_to_textual_app(
+                {
+                    "type": "resize",
+                    "width": data["width"],
+                    "height": data["height"],
+                }
+            )
+        elif type_ == "ping":
+            data = envelope[1]
+            broadcast_channel_suffix = self._broastcast_channel_keymap.get(
+                f"{instance_id}@{kernel_client_id}@{ws_url}", ""
+            )
+            self.send_ws_message_to_js(
+                instance_id,
+                kernel_client_id,
+                ws_url,
+                json.dumps(["pong", data]),
+                "backend_message",
+                broadcast_channel_suffix,
+            )
+        elif type_ == "blur":
+            await self._send_meta_to_textual_app({"type": "blur"})
+        elif type_ == "focus":
+            await self._send_meta_to_textual_app({"type": "focus"})
 
     def send_ws_message_to_js(
         self,
@@ -156,7 +193,7 @@ class TextualBridge(BaseBridge):
                 encode_broadcast_message(kernel_client_id, ws_url, msg, action)
             )
 
-    async def _send_data(
+    async def _send_textual_data_to_frontend(
         self,
         instance_id: str,
         kernel_client_id: str,
@@ -166,15 +203,16 @@ class TextualBridge(BaseBridge):
         await self._ready_event.wait()
         while True:
             msg = await self._driver.stdout_queue.get()
-            js_log(f"Sending data to JS: {msg}")
-            self.send_ws_message_to_js(
-                instance_id,
-                kernel_client_id,
-                ws_url,
-                msg,
-                "backend_message",
-                broadcast_channel_suffix,
-            )
+            packet_type, payload = deserialize_packet(msg)
+            if packet_type == DATA:
+                self.send_ws_message_to_js(
+                    instance_id,
+                    kernel_client_id,
+                    ws_url,
+                    payload,
+                    "backend_message",
+                    broadcast_channel_suffix,
+                )
 
     async def _run(
         self,
@@ -224,8 +262,41 @@ class TextualBridge(BaseBridge):
                 broadcast_channel_suffix,
             )
 
-    def dispose(self):
-        self._driver.exit_app()
-        for t in self._tasks:
-            t.cancel()
-        self._tasks = []
+    async def _send_bytes_to_textual_app(self, data: bytes) -> bool:
+        """Send bytes to process.
+
+        Args:
+            data: Data to send.
+
+        Returns:
+            True if the data was sent, otherwise False.
+        """
+        await self._ready_event.wait()
+        try:
+            packet = serialize_packet(DATA, data)
+            self._driver.stdin_queue.put_nowait(packet)
+        except Exception as e:
+            js_log(f"Error sending data to textual app: {e}")
+            return False
+        return True
+
+    async def _send_meta_to_textual_app(
+        self, data: dict[str, str | None | int | bool]
+    ) -> bool:
+        """Send meta data to process.
+        Args:
+           data: Data to send.
+           Returns:
+              True if the data was sent, otherwise False.
+        """
+
+        await self._ready_event.wait()
+        try:
+            data_bytes = json.dumps(data).encode("utf-8")
+            packet = serialize_packet(META, data_bytes)
+            self._driver.stdin_queue.put_nowait(packet)
+
+        except Exception as e:
+            js_log(f"Error sending data to textual app: {e}")
+            return False
+        return True
