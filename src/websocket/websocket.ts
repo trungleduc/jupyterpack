@@ -75,7 +75,6 @@
     constructor(url: string | URL, protocols?: string | string[]) {
       const urlObj = new URL(url);
       this.url = urlObj.pathname + urlObj.search + urlObj.hash;
-      console.log('[WebSocket]: Constructing', this.url, protocols);
       if (protocols) {
         this.protocol = Array.isArray(protocols)
           ? protocols.join(',')
@@ -201,7 +200,6 @@
 
       switch (action) {
         case 'connected': {
-          console.log('receibved connected');
           this.readyState = this.OPEN;
 
           if (this.onopen) {
