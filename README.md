@@ -3,12 +3,18 @@
 [![Github Actions Status](https://github.com/trungleduc/jupyterpack/workflows/Build/badge.svg)](https://github.com/trungleduc/specta/actions/workflows/build.yml)
 [![Try on lite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://trungleduc.github.io/jupyterpack/lab/)
 
-<h2 align="center"> A JupyterLite extension to serve in-browser Python and Javascript web application</h2>
+<h2 align="center"> A JupyterLite extension to serve in-browser Python and JavaScript web application</h2>
 
 ## Features
 
-- **Python Web Apps**: Serve Python web applications directly in the browser using JupyterLite's in-browser Python kernel. `jupyterpack` currently supports Dash, Streamlit, Panel and Shiny for Python. You can also use `jupyterpack` to serve any `Starlette` or `Tornado` application.
-  .
+- **Python Web Apps**: Serve Python web applications directly in the browser using JupyterLite's in-browser Python kernel. `jupyterpack` currently supports:
+  - **Dash**
+  - **Streamlit**
+  - **Panel**
+  - **Shiny for Python**
+
+  You can also use `jupyterpack` to serve any **Starlette** or **Tornado** application.
+   
 - **JavaScript Web Apps**: Bundle and serve JavaScript web applications using in-browser bundlers.
 
 ![Image](https://github.com/user-attachments/assets/22849fe8-199f-4d9f-ad45-055bccf88bad)
@@ -24,6 +30,12 @@ pip install jupyterpack
 # Install using conda
 conda install -c conda-forge jupyterpack
 ```
+
+## Try it online!
+
+You can try it online by clicking on this badge:
+
+[![Try on lite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://trungleduc.github.io/jupyterpack/lab/)
 
 ## Setting up JupyterLite deployment
 
@@ -255,11 +267,6 @@ Shiny applications also follow a structure similar to Dash apps.
 
 In both cases, the server is managed by `jupyterpack`, and opening the `.spk` file will launch the app in JupyterLab.
 
-## Try it online!
-
-You can try it online by clicking on this badge:
-
-[![Try on lite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://trungleduc.github.io/jupyterpack/lab/)
 
 ## License
 
