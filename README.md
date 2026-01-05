@@ -14,7 +14,7 @@
   - **Shiny for Python**
 
   You can also use `jupyterpack` to serve any **Starlette** or **Tornado** application.
-   
+
 - **JavaScript Web Apps**: Bundle and serve JavaScript web applications using in-browser bundlers.
 
 ![Image](https://github.com/user-attachments/assets/22849fe8-199f-4d9f-ad45-055bccf88bad)
@@ -266,7 +266,6 @@ Shiny applications also follow a structure similar to Dash apps.
 - **Shiny Core**: the application instance must be assigned to a variable named `app`.
 
 In both cases, the server is managed by `jupyterpack`, and opening the `.spk` file will launch the app in JupyterLab.
-
 
 ## License
 
