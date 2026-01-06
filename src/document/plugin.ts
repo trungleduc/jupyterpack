@@ -13,7 +13,8 @@ import {
   logoIcon,
   panelIcon,
   shinyIcon,
-  streamlitIcon
+  streamlitIcon,
+  textualIcon
 } from '../tools';
 import { IConnectionManager, IJupyterpackDocTracker } from '../type';
 import { addCommands } from './commands';
@@ -88,6 +89,7 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
     const streamlitCommandId = 'jupyterpack:create-streamlit-app';
     const shinyCommandId = 'jupyterpack:create-shiny-app';
     const panelCommandId = 'jupyterpack:create-panel-app';
+    const textualCommandId = 'jupyterpack:create-textual-app';
 
     commands.addCommand(commandId, {
       label: 'New SPK File',
@@ -181,6 +183,20 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    commands.addCommand(textualCommandId, {
+      label: 'Textual App',
+      icon: textualIcon,
+      caption: 'Create a new Textual Application',
+      execute: async args => {
+        const cwd = args['cwd'] as string;
+        await generateAppFiles({
+          contentsManager: app.serviceManager.contents,
+          cwd,
+          framework: JupyterPackFramework.TEXTUAL
+        });
+      }
+    });
+
     launcher.add({
       command: commandId,
       category: 'JupyterPack',
@@ -205,6 +221,11 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       command: panelCommandId,
       category: 'JupyterPack',
       rank: 5
+    });
+    launcher.add({
+      command: textualCommandId,
+      category: 'JupyterPack',
+      rank: 6
     });
   }
 };

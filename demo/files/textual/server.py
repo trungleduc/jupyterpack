@@ -1,3 +1,5 @@
+# This example is taken from the textual official repository (https://github.com/Textualize/textual/blob/main/examples/calculator.py)
+
 from decimal import Decimal
 
 from textual import events, on

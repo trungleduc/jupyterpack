@@ -65,4 +65,8 @@
   .jp-LauncherCard-icon svg {
     width: 98% !important;
   }
+
+  svg[data-icon='jupyterpack:textualLogo'] {
+    height: 45px !important;
+  }
 }
