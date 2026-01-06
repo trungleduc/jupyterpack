@@ -49,10 +49,10 @@ export class TextualServer extends BasePythonServer {
     initCode?: string;
   }): Promise<void> {
     const { initCode } = options;
+    await this.disposePythonServer();
+
     if (initCode) {
-      if (initCode) {
-        await this.kernelExecutor.executeCode({ code: initCode });
-      }
+      await this.kernelExecutor.executeCode({ code: initCode });
       await this.kernelExecutor.executeCode(
         { code: `${this._server_var}.reload(app)` },
         true

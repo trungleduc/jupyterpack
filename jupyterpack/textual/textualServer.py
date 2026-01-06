@@ -1,6 +1,6 @@
 from .textualBridge import TextualBridge
 from ..common import BaseServer
-from ..js import js_log
+
 
 class TextualServer(BaseServer):
     def __init__(self, textual_app, base_url):
@@ -13,8 +13,10 @@ class TextualServer(BaseServer):
         return self._bridge
 
     def reload(self, textual_app):
-        js_log(f"called {textual_app}" )
-        pass
+        self._app = textual_app
+        self._bridge = TextualBridge(textual_app, self.base_url)
+
+        return True
 
     def dispose(self):
         if self._bridge is not None:
