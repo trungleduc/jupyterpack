@@ -3,7 +3,13 @@
 [![Github Actions Status](https://github.com/trungleduc/jupyterpack/workflows/Build/badge.svg)](https://github.com/trungleduc/specta/actions/workflows/build.yml)
 [![Try on lite](https://jupyterlite.rtfd.io/en/latest/_static/badge.svg)](https://trungleduc.github.io/jupyterpack/lab/)
 
-<h2 align="center"> A JupyterLite extension to serve in-browser Python and JavaScript web application</h2>
+<h2 align="center">In-browser Python and JavaScript web applications for JupyterLite</h2>
+
+`jupyterpack` brings in-browser Python and JavaScript web applications to the JupyterLite ecosystem. Built as a JupyterLite extension, it allows applications to run, serve, and interact fully client-side, with no backend required.
+
+<br/>
+
+![Image](https://github.com/user-attachments/assets/22849fe8-199f-4d9f-ad45-055bccf88bad)
 
 ## Features
 
@@ -12,12 +18,13 @@
   - **Streamlit**
   - **Panel**
   - **Shiny for Python**
+  - **Textual**
 
   You can also use `jupyterpack` to serve any **Starlette** or **Tornado** application.
 
 - **JavaScript Web Apps**: Bundle and serve JavaScript web applications using in-browser bundlers.
 
-![Image](https://github.com/user-attachments/assets/22849fe8-199f-4d9f-ad45-055bccf88bad)
+Example of each framework can be found in the [demo](https://github.com/trungleduc/jupyterpack/tree/main/demo/files) folder.
 
 ## Installation
 
@@ -117,6 +124,22 @@ dependencies:
       - pyodide_http
 ```
 
+- **Texual**
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - jupyterpack
+  - textual
+  - textual-serve
+  - pip:
+      - pyodide_http
+```
+
 ## Usage
 
 To use `jupyterpack`, you need to create a `.spk` file that defines your web application. Here's an example structure of a React application:
@@ -173,14 +196,16 @@ interface IJupyterPackFileFormat {
 
 - `framework` (required): The framework used to run the application. Supported frameworks are:
 
-  | Value       | Description                      |
-  | ----------- | -------------------------------- |
-  | `react`     | React-based frontend application |
-  | `dash`      | Plotly Dash application          |
-  | `streamlit` | Streamlit application            |
-  | `tornado`   | Tornado web application          |
-  | `shiny`     | Shiny application (Python)       |
-  | `starlette` | Starlette ASGI application       |
+  | Value       | Description                                                         |
+  | ----------- | ------------------------------------------------------------------- |
+  | `react`     | React-based frontend application                                    |
+  | `dash`      | [Plotly Dash](https://github.com/plotly/dash) application           |
+  | `streamlit` | [Streamlit](https://github.com/streamlit/streamlit) application     |
+  | `shiny`     | [Shiny](https://github.com/posit-dev/py-shiny) application (Python) |
+  | `panel`     | [Panel](https://github.com/holoviz/panel) application               |
+  | `textual`   | [Textual](https://github.com/Textualize/textual) application        |
+  | `tornado`   | [Tornado](https://github.com/tornadoweb/tornado) web application    |
+  | `starlette` | [Starlette](https://github.com/Kludex/starlette) web application    |
 
 - `name` (optional): The name of the application. If not provided, the name will be the name of the .spk file.
 
@@ -252,20 +277,26 @@ As with React applications, double-clicking the `.spk` file will open the Dash a
 
 ### Streamlit application
 
-Streamlit applications follow a similar structure to Dash apps.
-Write your code as a standard Streamlit application and do **not** start the server manually — `jupyterpack` will handle execution and serving automatically.
+There is no special requirement for Streamlit applications, just write your code as a standard Streamlit application and do **not** start the server manually — `jupyterpack` will handle execution and serving automatically.
 
 Opening the `.spk` file will launch the Streamlit app in a new JupyterLab tab.
 
 ### Shiny application
 
-Shiny applications also follow a structure similar to Dash apps.  
 `jupyterpack` supports both **Shiny Express** and **Shiny Core** applications.
 
 - **Shiny Express**: no special requirements.
 - **Shiny Core**: the application instance must be assigned to a variable named `app`.
 
 In both cases, the server is managed by `jupyterpack`, and opening the `.spk` file will launch the app in JupyterLab.
+
+### Panel application
+
+There is no special requirement for Panel applications, just write your code as a standard Panel application and call `.servable()` on the layout you want to serve.
+
+### Textual application
+
+You must define your Textual application as a variable named `app` and do not call `app.run()` yourself — `jupyterpack` is responsible for starting and managing the server lifecycle.
 
 ## License
 
