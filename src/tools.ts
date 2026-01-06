@@ -5,6 +5,7 @@ import dashStr from '../style/icons/Plotly-Logo-Black.svg';
 import streamlitStr from '../style/icons/streamlit-logo-primary.svg';
 import shinyStr from '../style/icons/shiny-for-python.svg';
 import panelStr from '../style/icons/panel_logo_stacked.svg';
+import textualStr from '../style/icons/textual.svg';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { Contents } from '@jupyterlab/services';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -43,6 +44,10 @@ export const shinyIcon = new LabIcon({
 export const panelIcon = new LabIcon({
   name: 'jupyterpack:panelLogo',
   svgstr: panelStr
+});
+export const textualIcon = new LabIcon({
+  name: 'jupyterpack:textualLogo',
+  svgstr: textualStr
 });
 
 export function removePrefix(path: string, prefix: string): string {

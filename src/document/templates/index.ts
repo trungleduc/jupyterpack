@@ -6,6 +6,7 @@ import { SHINY_APP } from './shiny';
 import { newDirectory } from '../../tools';
 import { PathExt } from '@jupyterlab/coreutils';
 import { PANEL_APP } from './panel';
+import { TEXTUAL_APP } from './textual';
 
 export async function generateAppFiles(options: {
   contentsManager: Contents.IManager;
@@ -39,6 +40,10 @@ export async function generateAppFiles(options: {
     }
     case JupyterPackFramework.PANEL: {
       appContent = PANEL_APP;
+      break;
+    }
+    case JupyterPackFramework.TEXTUAL: {
+      appContent = TEXTUAL_APP;
       break;
     }
     default:

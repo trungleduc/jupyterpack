@@ -29,7 +29,8 @@ export enum JupyterPackFramework {
   TORNADO = 'tornado',
   SHINY = 'shiny',
   STARLETTE = 'starlette',
-  PANEL = 'panel'
+  PANEL = 'panel',
+  TEXTUAL = 'textual'
 }
 export interface IJupyterPackFileFormat {
   entry: string;

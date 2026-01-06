@@ -18,6 +18,8 @@ dependencies:
   - starlette
   - htmltools
   - panel
+  - textual
+  - textual-serve
   - pip:
     - shiny
     - shinychat

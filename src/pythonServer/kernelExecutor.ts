@@ -39,13 +39,13 @@ export class KernelExecutor implements IKernelExecutor {
           }
           case 'stream': {
             const content = (msg as KernelMessage.IStreamMsg).content;
-            if (content.text.length === 0) {
+            if (content.text.trim().length === 0) {
               break;
             }
             if (content.name === 'stderr') {
-              console.error('Kernel stream:', content.text);
+              console.error('[Kernel stream]:', content.text);
             } else {
-              console.log('Kernel stream:', content.text);
+              console.log('[Kernel stream]:', content.text);
             }
             break;
           }

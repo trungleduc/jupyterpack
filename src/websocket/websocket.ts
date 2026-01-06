@@ -75,7 +75,6 @@
     constructor(url: string | URL, protocols?: string | string[]) {
       const urlObj = new URL(url);
       this.url = urlObj.pathname + urlObj.search + urlObj.hash;
-
       if (protocols) {
         this.protocol = Array.isArray(protocols)
           ? protocols.join(',')

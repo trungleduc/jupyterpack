@@ -5,6 +5,7 @@ import { PanelServer } from './panel/panelServer';
 import { ShinyServer } from './shiny/shinyServer';
 import { StarletteServer } from './starlette/starletteServer';
 import { StreamlitServer } from './streamlit/streamlitServer';
+import { TextualServer } from './textual/textualServer';
 import { TornadoServer } from './tornado/tornadoServer';
 
 type BasePythonServerConstructor = new (
@@ -20,5 +21,6 @@ export const PYTHON_SERVER = new Map<
   [JupyterPackFramework.TORNADO, TornadoServer],
   [JupyterPackFramework.SHINY, ShinyServer],
   [JupyterPackFramework.STARLETTE, StarletteServer],
-  [JupyterPackFramework.PANEL, PanelServer]
+  [JupyterPackFramework.PANEL, PanelServer],
+  [JupyterPackFramework.TEXTUAL, TextualServer]
 ]);
