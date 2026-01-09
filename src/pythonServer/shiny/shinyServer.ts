@@ -3,6 +3,7 @@ import { BasePythonServer } from '../baseServer';
 import { DEPENDENCIES } from './deps';
 
 export class ShinyServer extends BasePythonServer {
+  framework = JupyterPackFramework.SHINY;
   async init(options: IPythonServerInitOptions) {
     const mergedOptions: IPythonServerInitOptions = {
       ...options,
@@ -13,8 +14,7 @@ export class ShinyServer extends BasePythonServer {
     const { instanceId, kernelClientId, entryPath } = options;
     const baseURL = this.buildBaseURL({
       instanceId,
-      kernelClientId,
-      framework: JupyterPackFramework.SHINY
+      kernelClientId
     });
     const bootstrapCode = `
     from jupyterpack.common import set_base_url_env

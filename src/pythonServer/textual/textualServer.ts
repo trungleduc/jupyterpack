@@ -3,6 +3,7 @@ import { BasePythonServer } from '../baseServer';
 import { DEPENDENCIES } from './deps';
 
 export class TextualServer extends BasePythonServer {
+  framework = JupyterPackFramework.TEXTUAL;
   async init(options: IPythonServerInitOptions) {
     const mergedOptions: IPythonServerInitOptions = {
       ...options,
@@ -13,8 +14,7 @@ export class TextualServer extends BasePythonServer {
     const { instanceId, kernelClientId, initCode } = options;
     const baseURL = this.buildBaseURL({
       instanceId,
-      kernelClientId,
-      framework: JupyterPackFramework.TEXTUAL
+      kernelClientId
     });
     const bootstrapCode = `
     from jupyterpack.common import set_base_url_env

@@ -3,6 +3,7 @@ import { BasePythonServer } from '../baseServer';
 import { DEPENDENCIES } from './deps';
 
 export class StreamlitServer extends BasePythonServer {
+  framework = JupyterPackFramework.STREAMLIT;
   async init(options: IPythonServerInitOptions) {
     const mergedOptions: IPythonServerInitOptions = {
       ...options,
@@ -18,8 +19,7 @@ export class StreamlitServer extends BasePythonServer {
     }
     const baseURL = this.buildBaseURL({
       instanceId,
-      kernelClientId,
-      framework: JupyterPackFramework.STREAMLIT
+      kernelClientId
     });
 
     const patchCode = `

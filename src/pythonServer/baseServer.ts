@@ -29,6 +29,8 @@ export abstract class BasePythonServer implements IBasePythonServer {
     initCode?: string;
   }): Promise<void>;
 
+  abstract framework: JupyterPackFramework;
+
   get isDisposed(): boolean {
     return this._isDisposed;
   }
@@ -244,9 +246,9 @@ export abstract class BasePythonServer implements IBasePythonServer {
   protected buildBaseURL(options: {
     instanceId: string;
     kernelClientId: string;
-    framework: JupyterPackFramework;
   }) {
-    const { instanceId, kernelClientId, framework } = options;
+    const { instanceId, kernelClientId } = options;
+    const framework = this.framework;
     const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
 
     const baseURL = URLExt.join(

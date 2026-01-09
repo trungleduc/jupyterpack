@@ -30,7 +30,8 @@ export enum JupyterPackFramework {
   SHINY = 'shiny',
   STARLETTE = 'starlette',
   PANEL = 'panel',
-  TEXTUAL = 'textual'
+  TEXTUAL = 'textual',
+  FASTAPI = 'fastapi'
 }
 export interface IJupyterPackFileFormat {
   entry: string;

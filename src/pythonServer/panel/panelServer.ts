@@ -3,6 +3,7 @@ import { BasePythonServer } from '../baseServer';
 import { DEPENDENCIES } from './deps';
 
 export class PanelServer extends BasePythonServer {
+  framework = JupyterPackFramework.PANEL;
   async init(options: IPythonServerInitOptions) {
     const mergedOptions: IPythonServerInitOptions = {
       ...options,
@@ -16,8 +17,7 @@ export class PanelServer extends BasePythonServer {
     }
     const baseURL = this.buildBaseURL({
       instanceId,
-      kernelClientId,
-      framework: JupyterPackFramework.PANEL
+      kernelClientId
     });
 
     const patchCode = `

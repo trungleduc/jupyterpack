@@ -3,6 +3,8 @@ import { BasePythonServer } from '../baseServer';
 import { DEPENDENCIES } from './deps';
 
 export class DashServer extends BasePythonServer {
+  framework = JupyterPackFramework.DASH;
+
   async init(options: IPythonServerInitOptions) {
     const mergedOptions: IPythonServerInitOptions = {
       ...options,
@@ -14,8 +16,7 @@ export class DashServer extends BasePythonServer {
 
     const baseURL = this.buildBaseURL({
       instanceId,
-      kernelClientId,
-      framework: JupyterPackFramework.DASH
+      kernelClientId
     });
     await this.kernelExecutor.executeCode({
       code: `
