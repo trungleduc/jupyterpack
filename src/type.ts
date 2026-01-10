@@ -128,6 +128,7 @@ export interface IPythonWidgetModel extends IDisposable {
 }
 
 export interface IDependencies {
+  order?: ('mamba' | 'pip')[];
   mamba?: string[];
   pip?: string[];
 }

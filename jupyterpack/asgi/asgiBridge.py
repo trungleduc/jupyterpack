@@ -1,7 +1,7 @@
 import base64
 import json
 from typing import Dict, List, Optional, Tuple
-
+import traceback
 from httpx import ASGITransport, AsyncClient
 
 from jupyterpack.common import (
@@ -58,6 +58,8 @@ class ASGIBridge(BaseBridge):
                     "status_code": r.status_code,
                 }
             except Exception as e:
+                stack_str = traceback.format_exc()
+                print(stack_str)
                 return {
                     "headers": "e30=",  # {}
                     "content": base64.b64encode(str(e).encode()).decode("ascii"),

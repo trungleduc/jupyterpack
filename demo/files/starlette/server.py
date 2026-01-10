@@ -60,7 +60,7 @@ async def ws_hello(websocket):
 
 app = Starlette(
     routes=[
-        Route("{{base_url}}", homepage),
-        WebSocketRoute("{{base_url}}ws", ws_hello),
+        Route("/", homepage),
+        WebSocketRoute("/ws", ws_hello),
     ]
 )
