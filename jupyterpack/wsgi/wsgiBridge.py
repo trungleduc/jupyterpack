@@ -1,5 +1,6 @@
 import base64
 import json
+import traceback
 from typing import Dict
 
 from httpx import Client, WSGITransport
@@ -40,10 +41,13 @@ class WSGIBridge(BaseBridge):
                     "headers": headers_b64,
                     "status_code": r.status_code,
                 }
-            except Exception as e:
+            except Exception:
+                stack_str = traceback.format_exc()
                 return {
                     "headers": "e30=",  # {}
-                    "content": base64.b64encode(str(e).encode()).decode("ascii"),
+                    "content": base64.b64encode(str(stack_str).encode()).decode(
+                        "ascii"
+                    ),
                     "status_code": 500,
                 }
 

@@ -1,5 +1,6 @@
 import base64
 import logging
+import traceback
 from typing import Dict, Optional
 
 import tornado
@@ -82,10 +83,11 @@ class TornadoBridge(BaseBridge):
                 "headers": connection_state.reply_headers,
                 "status_code": connection_state.status,
             }
-        except Exception as e:
+        except Exception:
+            stack_str = traceback.format_exc()
             return {
                 "headers": "e30=",  # {}
-                "content": base64.b64encode(str(e).encode("utf-8")).decode("ascii"),
+                "content": base64.b64encode(str(stack_str).encode()).decode("ascii"),
                 "status_code": 500,
             }
 

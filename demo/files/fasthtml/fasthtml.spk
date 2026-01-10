@@ -1,0 +1,5 @@
+{
+  "name": "FastAPI Example",
+  "entry": "server.py",
+  "framework": "fasthtml"
+}

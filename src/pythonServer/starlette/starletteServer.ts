@@ -2,6 +2,7 @@ import { JupyterPackFramework } from '../../type';
 import { BasePythonServer } from '../baseServer';
 
 export class StarletteServer extends BasePythonServer {
+  framework = JupyterPackFramework.STARLETTE;
   async init(options: {
     initCode?: string;
     instanceId: string;
@@ -11,8 +12,7 @@ export class StarletteServer extends BasePythonServer {
     const { initCode, instanceId, kernelClientId } = options;
     const baseURL = this.buildBaseURL({
       instanceId,
-      kernelClientId,
-      framework: JupyterPackFramework.STARLETTE
+      kernelClientId
     });
     const bootstrapCode = `
     from jupyterpack.common import set_base_url_env
@@ -21,10 +21,11 @@ export class StarletteServer extends BasePythonServer {
     await this.kernelExecutor.executeCode({ code: bootstrapCode });
     if (initCode) {
       const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
+
       await this.kernelExecutor.executeCode({ code: initCodeWithUrl });
       const loaderCode = `
-      from jupyterpack.asgi import AsgiServer
-      ${this._server_var} = AsgiServer(app, "${baseURL}")
+      from jupyterpack.starlette import StarletteServer
+      ${this._server_var} = StarletteServer(app, "${baseURL}")
       `;
 
       await this.kernelExecutor.executeCode({ code: loaderCode });

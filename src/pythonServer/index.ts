@@ -1,5 +1,7 @@
 import { IBasePythonServer, JupyterPackFramework } from '../type';
 import { DashServer } from './dash/dashServer';
+import { FastAPIServer } from './fastapi/fastapiServer';
+import { FastHTMLServer } from './fasthtml/fasthtmlServer';
 import { KernelExecutor } from './kernelExecutor';
 import { PanelServer } from './panel/panelServer';
 import { ShinyServer } from './shiny/shinyServer';
@@ -22,5 +24,7 @@ export const PYTHON_SERVER = new Map<
   [JupyterPackFramework.SHINY, ShinyServer],
   [JupyterPackFramework.STARLETTE, StarletteServer],
   [JupyterPackFramework.PANEL, PanelServer],
-  [JupyterPackFramework.TEXTUAL, TextualServer]
+  [JupyterPackFramework.TEXTUAL, TextualServer],
+  [JupyterPackFramework.FASTAPI, FastAPIServer],
+  [JupyterPackFramework.FASTHTML, FastHTMLServer]
 ]);

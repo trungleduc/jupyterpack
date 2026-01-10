@@ -2,6 +2,7 @@ import { JupyterPackFramework } from '../../type';
 import { BasePythonServer } from '../baseServer';
 
 export class TornadoServer extends BasePythonServer {
+  framework = JupyterPackFramework.TORNADO;
   async init(options: {
     initCode?: string;
     instanceId: string;
@@ -12,8 +13,7 @@ export class TornadoServer extends BasePythonServer {
 
     const baseURL = this.buildBaseURL({
       instanceId,
-      kernelClientId,
-      framework: JupyterPackFramework.TORNADO
+      kernelClientId
     });
     const bootstrapCode = `
     from jupyterpack.common import set_base_url_env, patch_tornado

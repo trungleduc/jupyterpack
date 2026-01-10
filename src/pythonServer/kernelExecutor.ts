@@ -20,7 +20,6 @@ export class KernelExecutor implements IKernelExecutor {
     if (!kernel) {
       throw new Error('Session has no kernel.');
     }
-
     return new Promise<string | null>((resolve, reject) => {
       const future = kernel.requestExecute(code, false, undefined);
       let executeResult = '';

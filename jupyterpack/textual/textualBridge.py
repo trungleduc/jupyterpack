@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import json
+import traceback
 from textual_serve.server import Server
 from typing import Dict, List, Optional
 from aiohttp.test_utils import make_mocked_request
@@ -59,44 +60,55 @@ class TextualBridge(BaseBridge):
             rel_path = url
         if not rel_path.startswith("/"):
             rel_path = "/" + rel_path
+        try:
+            writer = MemoryWriter()
+            req = make_mocked_request(
+                method,
+                rel_path,
+                headers=resquest_headers,
+                app=self._temp_app,
+                writer=writer,
+            )
+            res = None
+            if rel_path == "/":
+                index = await self._textual_server.handle_index(req)
+                res = {
+                    "headers": index.headers,
+                    "body": index.body,
+                    "status": index.status,
+                }
+            elif rel_path.startswith("/static"):
+                static = await self._temp_app._handle(req)
+                await static.prepare(req)
+                await static.write_eof()
+                res = {
+                    "headers": static.headers,
+                    "body": writer.buf.getvalue(),
+                    "status": static.status,
+                }
 
-        writer = MemoryWriter()
-        req = make_mocked_request(
-            method,
-            rel_path,
-            headers=resquest_headers,
-            app=self._temp_app,
-            writer=writer,
-        )
-        res = None
-        if rel_path == "/":
-            index = await self._textual_server.handle_index(req)
-            res = {"headers": index.headers, "body": index.body, "status": index.status}
-        elif rel_path.startswith("/static"):
-            static = await self._temp_app._handle(req)
-            await static.prepare(req)
-            await static.write_eof()
-            res = {
-                "headers": static.headers,
-                "body": writer.buf.getvalue(),
-                "status": static.status,
-            }
-
-        if res is not None:
-            headers_json = json.dumps(dict(res["headers"])).encode("utf-8")
-            headers_b64 = base64.b64encode(headers_json).decode("ascii")
-            content_b64 = base64.b64encode(res["body"]).decode("ascii")
-            return {
-                "headers": headers_b64,
-                "content": content_b64,
-                "status_code": res["status"],
-            }
-        else:
+            if res is not None:
+                headers_json = json.dumps(dict(res["headers"])).encode("utf-8")
+                headers_b64 = base64.b64encode(headers_json).decode("ascii")
+                content_b64 = base64.b64encode(res["body"]).decode("ascii")
+                return {
+                    "headers": headers_b64,
+                    "content": content_b64,
+                    "status_code": res["status"],
+                }
+            else:
+                return {
+                    "headers": "e30=",  # {}
+                    "content": base64.b64encode("Missing response".encode()).decode(
+                        "ascii"
+                    ),
+                    "status_code": 500,
+                }
+        except Exception:
+            stack_str = traceback.format_exc()
             return {
                 "headers": "e30=",  # {}
-                "content": base64.b64encode("Missing response".encode()).decode(
-                    "ascii"
-                ),
+                "content": base64.b64encode(str(stack_str).encode()).decode("ascii"),
                 "status_code": 500,
             }
 

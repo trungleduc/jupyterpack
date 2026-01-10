@@ -12,6 +12,26 @@ else:
     IS_WASM = False
 
 
+def run_sync_in_worker_thread(
+    func, *args, abandon_on_cancel=False, limiter=None, **kwargs
+):
+    import asyncio
+
+    future = asyncio.get_running_loop().create_future()
+    error = None
+    try:
+        val = func(*args)
+    except Exception as exc:
+        error = exc
+
+    if error is not None:
+        future.set_exception(error)
+    else:
+        future.set_result(val)
+
+    return future
+
+
 def patch_all():
     if IS_WASM:
         import collections
@@ -26,6 +46,28 @@ def patch_all():
             pyodide_http.patch_all()
         except ImportError:
             pass
+
+        import resource
+
+        resource.getrusage = lambda *args, **kwargs: None
+        resource.RUSAGE_THREAD = 0
+        resource.RUSAGE_SELF = 0
+
+        try:
+            import anyio
+
+            _get_async_backend = anyio._core._eventloop.get_async_backend
+
+            def get_async_backend(*args, **kwargs):
+                Cls = _get_async_backend(*args, **kwargs)
+                Cls.run_sync_in_worker_thread = run_sync_in_worker_thread
+                return Cls
+
+            anyio._core._eventloop.get_async_backend = get_async_backend
+            anyio.to_thread.get_async_backend = get_async_backend
+        except Exception:
+            pass
+
     else:
         register_comm_target()
 

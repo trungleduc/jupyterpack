@@ -30,7 +30,9 @@ export enum JupyterPackFramework {
   SHINY = 'shiny',
   STARLETTE = 'starlette',
   PANEL = 'panel',
-  TEXTUAL = 'textual'
+  TEXTUAL = 'textual',
+  FASTAPI = 'fastapi',
+  FASTHTML = 'fasthtml'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
@@ -127,6 +129,7 @@ export interface IPythonWidgetModel extends IDisposable {
 }
 
 export interface IDependencies {
+  order?: ('mamba' | 'pip')[];
   mamba?: string[];
   pip?: string[];
 }

@@ -29,6 +29,8 @@ export abstract class BasePythonServer implements IBasePythonServer {
     initCode?: string;
   }): Promise<void>;
 
+  abstract framework: JupyterPackFramework;
+
   get isDisposed(): boolean {
     return this._isDisposed;
   }
@@ -56,30 +58,9 @@ export abstract class BasePythonServer implements IBasePythonServer {
     await this._kernelExecutor.executeCode({ code: patchCode });
     if (!options.disableDependencies) {
       const { dependencies } = options;
-
-      if (dependencies?.mamba && dependencies.mamba.length > 0) {
-        const mambaDeps = `
-      %mamba install ${dependencies.mamba.join(' ')}
-      True
-      `;
-        await this.kernelExecutor.executeCode(
-          {
-            code: mambaDeps
-          },
-          true
-        );
-      }
-      if (dependencies?.pip && dependencies.pip.length > 0) {
-        const pipDeps = `
-        %pip install ${dependencies.pip.join(' ')}
-        True
-        `;
-        await this.kernelExecutor.executeCode(
-          {
-            code: pipDeps
-          },
-          true
-        );
+      const order = dependencies?.order || ['mamba', 'pip'];
+      for (const solver of order) {
+        await this._installDeps(solver, dependencies?.[solver]);
       }
     }
   }
@@ -244,9 +225,9 @@ export abstract class BasePythonServer implements IBasePythonServer {
   protected buildBaseURL(options: {
     instanceId: string;
     kernelClientId: string;
-    framework: JupyterPackFramework;
   }) {
-    const { instanceId, kernelClientId, framework } = options;
+    const { instanceId, kernelClientId } = options;
+    const framework = this.framework;
     const fullLabextensionsUrl = PageConfig.getOption('fullLabextensionsUrl');
 
     const baseURL = URLExt.join(
@@ -272,6 +253,7 @@ export abstract class BasePythonServer implements IBasePythonServer {
       return spkDeps;
     }
     const merged: IDependencies = {};
+    merged.order = spkDeps.order ?? defaultDeps.order;
     merged.mamba = [...(spkDeps.mamba ?? []), ...(defaultDeps.mamba ?? [])];
     merged.pip = [...(spkDeps.pip ?? []), ...(defaultDeps.pip ?? [])];
     return merged;
@@ -286,6 +268,15 @@ export abstract class BasePythonServer implements IBasePythonServer {
   }[] = [];
   protected readonly _server_var = '__jupyterpack_python_server';
 
+  private async _installDeps(solver: 'mamba' | 'pip', deps?: string[]) {
+    if (deps && deps.length > 0) {
+      const code = `
+      %${solver} install ${deps.join(' ')}
+      True
+      `;
+      await this.kernelExecutor.executeCode({ code }, true);
+    }
+  }
   private _kernelExecutor: IKernelExecutor;
   private _isDisposed: boolean = false;
   private _wsPatch: string;
