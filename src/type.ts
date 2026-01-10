@@ -31,7 +31,8 @@ export enum JupyterPackFramework {
   STARLETTE = 'starlette',
   PANEL = 'panel',
   TEXTUAL = 'textual',
-  FASTAPI = 'fastapi'
+  FASTAPI = 'fastapi',
+  FASTHTML = 'fasthtml'
 }
 export interface IJupyterPackFileFormat {
   entry: string;

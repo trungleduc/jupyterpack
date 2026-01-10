@@ -60,7 +60,6 @@ export abstract class BasePythonServer implements IBasePythonServer {
       const { dependencies } = options;
       const order = dependencies?.order || ['mamba', 'pip'];
       for (const solver of order) {
-        console.log('installing', solver, dependencies?.[solver]);
         await this._installDeps(solver, dependencies?.[solver]);
       }
     }

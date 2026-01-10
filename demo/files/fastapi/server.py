@@ -1,12 +1,8 @@
-import resource
+from fastapi import FastAPI
 
-resource.getrusage = lambda *args, **kwargs: None
-resource.RUSAGE_THREAD = 0
-resource.RUSAGE_SELF = 0
+app = FastAPI()
 
-from fasthtml.common import *
 
-app,rt = fast_app()
-
-@rt('/')
-async def get(): return Div(P('Hello World!'), hx_get="/change")
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
