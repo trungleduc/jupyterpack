@@ -32,7 +32,9 @@ def import_from_path(module_name: str, path: str) -> ModuleType:
     return module
 
 
-def create_mock_module(module_names: List[str], mock_content: str, patch_parent=True):
+def create_mock_module(
+    module_names: List[str], mock_content: str = "", patch_parent=True
+):
     tmpdir = tempfile.TemporaryDirectory()
     package_dir = Path(tmpdir.name) / "__jupyterpack_mock_module"
     package_dir.mkdir()

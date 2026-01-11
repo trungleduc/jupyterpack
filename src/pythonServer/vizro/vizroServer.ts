@@ -2,8 +2,8 @@ import { IPythonServerInitOptions, JupyterPackFramework } from '../../type';
 import { BasePythonServer } from '../baseServer';
 import { DEPENDENCIES } from './deps';
 
-export class DashServer extends BasePythonServer {
-  framework = JupyterPackFramework.DASH;
+export class VizroServer extends BasePythonServer {
+  framework = JupyterPackFramework.VIZRO;
 
   async init(options: IPythonServerInitOptions) {
     const mergedOptions: IPythonServerInitOptions = {
@@ -28,8 +28,15 @@ export class DashServer extends BasePythonServer {
       await this.kernelExecutor.executeCode({ code: initCode });
     }
     const loaderCode = `
-      from jupyterpack.dash import DashServer
-      ${this._server_var} = DashServer(app, "${baseURL}")
+      from jupyterpack.dash import DashServer, get_dash_server
+      try:
+        ${this._server_var} = DashServer(app, "${baseURL}")
+      except NameError:
+        if get_dash_server("${instanceId}", "${kernelClientId}") is not None:
+          ${this._server_var} = DashServer(get_dash_server("${instanceId}", "${kernelClientId}"), "${baseURL}")
+        else:
+          raise Exception("No flask app found")
+      
       `;
     await this.kernelExecutor.executeCode({ code: loaderCode });
   }
@@ -42,9 +49,15 @@ export class DashServer extends BasePythonServer {
     if (initCode) {
       await this.kernelExecutor.executeCode({ code: initCode });
     }
-    await this.kernelExecutor.executeCode(
-      { code: `${this._server_var}.reload(app)` },
-      true
-    );
+    const reloadCode = `
+    try:
+      ${this._server_var}.reload(app)
+    except NameError:
+      if get_dash_server("${this._instanceId}", "${this._kernelClientId}") is not None:
+        ${this._server_var}.reload(get_dash_server("${this._instanceId}", "${this._kernelClientId}"))
+      else:
+        raise Exception("No flask app found")
+    `;
+    await this.kernelExecutor.executeCode({ code: reloadCode }, true);
   }
 }

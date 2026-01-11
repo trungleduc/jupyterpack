@@ -1,0 +1,5 @@
+{
+  "name": "Vizro Example",
+  "entry": "server.py",
+  "framework": "vizro"
+}

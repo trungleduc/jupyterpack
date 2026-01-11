@@ -60,6 +60,7 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
         case JupyterPackFramework.FASTHTML:
         case JupyterPackFramework.SHINY:
         case JupyterPackFramework.PANEL:
+        case JupyterPackFramework.VIZRO:
         case JupyterPackFramework.TEXTUAL: {
           const model = new PythonWidgetModel({
             jpackModel,

@@ -20,6 +20,7 @@ dependencies:
   - panel
   - textual
   - textual-serve
+  - vizro
   - pip:
     - shiny
     - shinychat

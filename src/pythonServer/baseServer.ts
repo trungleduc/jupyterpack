@@ -57,7 +57,9 @@ export abstract class BasePythonServer implements IBasePythonServer {
     `;
     await this._kernelExecutor.executeCode({ code: patchCode });
     if (!options.disableDependencies) {
-      const { dependencies } = options;
+      const { dependencies, instanceId, kernelClientId } = options;
+      this._instanceId = instanceId;
+      this._kernelClientId = kernelClientId;
       const order = dependencies?.order || ['mamba', 'pip'];
       for (const solver of order) {
         await this._installDeps(solver, dependencies?.[solver]);
@@ -260,6 +262,9 @@ export abstract class BasePythonServer implements IBasePythonServer {
   }
 
   protected _baseUrl: string | undefined;
+  protected _instanceId: string | undefined;
+  protected _kernelClientId: string | undefined;
+
   protected readonly _openedWebsockets: {
     instanceId: string;
     kernelId: string;

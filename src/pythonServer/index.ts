@@ -9,6 +9,7 @@ import { StarletteServer } from './starlette/starletteServer';
 import { StreamlitServer } from './streamlit/streamlitServer';
 import { TextualServer } from './textual/textualServer';
 import { TornadoServer } from './tornado/tornadoServer';
+import { VizroServer } from './vizro/vizroServer';
 
 type BasePythonServerConstructor = new (
   options: KernelExecutor.IOptions
@@ -26,5 +27,6 @@ export const PYTHON_SERVER = new Map<
   [JupyterPackFramework.PANEL, PanelServer],
   [JupyterPackFramework.TEXTUAL, TextualServer],
   [JupyterPackFramework.FASTAPI, FastAPIServer],
-  [JupyterPackFramework.FASTHTML, FastHTMLServer]
+  [JupyterPackFramework.FASTHTML, FastHTMLServer],
+  [JupyterPackFramework.VIZRO, VizroServer]
 ]);
