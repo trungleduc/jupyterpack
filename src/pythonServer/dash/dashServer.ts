@@ -29,7 +29,8 @@ export class DashServer extends BasePythonServer {
     }
     const loaderCode = `
       from jupyterpack.dash import DashServer
-      ${this._server_var} = DashServer(app, "${baseURL}")
+      
+      ${this._server_var} = DashServer(globals().get("app", None), "${baseURL}", "${instanceId}", "${kernelClientId}")
       `;
     await this.kernelExecutor.executeCode({ code: loaderCode });
   }
@@ -42,9 +43,9 @@ export class DashServer extends BasePythonServer {
     if (initCode) {
       await this.kernelExecutor.executeCode({ code: initCode });
     }
-    await this.kernelExecutor.executeCode(
-      { code: `${this._server_var}.reload(app)` },
-      true
-    );
+    const reloadCode = `
+      ${this._server_var}.reload(globals().get("app", None), "${this._instanceId}", "${this._kernelClientId}")
+      `;
+    await this.kernelExecutor.executeCode({ code: reloadCode }, true);
   }
 }
