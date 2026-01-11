@@ -1,12 +1,14 @@
+import { PathExt } from '@jupyterlab/coreutils';
 import { Contents } from '@jupyterlab/services';
+
+import { newDirectory } from '../../tools';
 import { JupyterPackFramework } from '../../type';
 import { DASH_APP } from './dash';
-import { STREAMLIT_APP } from './streamlit';
-import { SHINY_APP } from './shiny';
-import { newDirectory } from '../../tools';
-import { PathExt } from '@jupyterlab/coreutils';
 import { PANEL_APP } from './panel';
+import { SHINY_APP } from './shiny';
+import { STREAMLIT_APP } from './streamlit';
 import { TEXTUAL_APP } from './textual';
+import { VIZRO_APP } from './vizro';
 
 export async function generateAppFiles(options: {
   contentsManager: Contents.IManager;
@@ -44,6 +46,10 @@ export async function generateAppFiles(options: {
     }
     case JupyterPackFramework.TEXTUAL: {
       appContent = TEXTUAL_APP;
+      break;
+    }
+    case JupyterPackFramework.VIZRO: {
+      appContent = VIZRO_APP;
       break;
     }
     default:

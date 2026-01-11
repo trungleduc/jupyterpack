@@ -15,7 +15,7 @@
       }
 
       .cls-3 {
-        fill: var(--jp-text-editor-icon-color, var(--jp-inverse-layout-color3));
+        fill: var(--jp-ui-font-color1, var(--jp-inverse-layout-color3));
       }
     </style>
     <linearGradient id="linear-gradient" x1="44.87" y1="40.43" x2="102.87" y2="40.43" gradientTransform="translate(2 -3)" gradientUnits="userSpaceOnUse">

@@ -4,7 +4,7 @@
 	y="0px" viewBox="0 0 154 30" style="enable-background:new 0 0 154 30;" xml:space="preserve" width="154" height="30">
 	<style type="text/css">
 		.st0 {
-			fill: var(--jp-text-editor-icon-color, var(--jp-inverse-layout-color3));
+			fill: var(--jp-ui-font-color1, var(--jp-inverse-layout-color3));
 		}
 	</style>
 	<g id="Layer_1_00000047768344360754847990000012721607800634040751_">
