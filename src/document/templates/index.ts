@@ -9,6 +9,7 @@ import { SHINY_APP } from './shiny';
 import { STREAMLIT_APP } from './streamlit';
 import { TEXTUAL_APP } from './textual';
 import { VIZRO_APP } from './vizro';
+import { FASTHTML_APP } from './fasthtml';
 
 export async function generateAppFiles(options: {
   contentsManager: Contents.IManager;
@@ -50,6 +51,10 @@ export async function generateAppFiles(options: {
     }
     case JupyterPackFramework.VIZRO: {
       appContent = VIZRO_APP;
+      break;
+    }
+    case JupyterPackFramework.FASTHTML: {
+      appContent = FASTHTML_APP;
       break;
     }
     default:

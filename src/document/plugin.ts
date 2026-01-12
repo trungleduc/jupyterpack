@@ -9,6 +9,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { IConnectionManagerToken, IJupyterpackDocTrackerToken } from '../token';
 import {
   dashIcon,
+  fasthtmlIcon,
   logoIcon,
   panelIcon,
   shinyIcon,
@@ -136,7 +137,8 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       [JupyterPackFramework.SHINY]: shinyIcon,
       [JupyterPackFramework.PANEL]: panelIcon,
       [JupyterPackFramework.TEXTUAL]: textualIcon,
-      [JupyterPackFramework.VIZRO]: vizroIcon
+      [JupyterPackFramework.VIZRO]: vizroIcon,
+      [JupyterPackFramework.FASTHTML]: fasthtmlIcon
     };
     Object.entries(iconMap).forEach(([framework, icon], index) => {
       addLauncherCommands({
