@@ -1,4 +1,3 @@
-import { JupyterPackFramework } from './../type';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -14,12 +13,16 @@ import {
   panelIcon,
   shinyIcon,
   streamlitIcon,
-  textualIcon
+  textualIcon,
+  vizroIcon
 } from '../tools';
-import { IConnectionManager, IJupyterpackDocTracker } from '../type';
-import { addCommands } from './commands';
+import {
+  IConnectionManager,
+  IJupyterpackDocTracker,
+  JupyterPackFramework
+} from '../type';
+import { addCommands, addLauncherCommands } from './commands';
 import { JupyterPackWidgetFactory } from './widgetFactory';
-import { generateAppFiles } from './templates';
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
@@ -85,11 +88,6 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
     }
     const { commands } = app;
     const commandId = 'jupyterpack:create-new-file';
-    const dashCommandId = 'jupyterpack:create-dash-app';
-    const streamlitCommandId = 'jupyterpack:create-streamlit-app';
-    const shinyCommandId = 'jupyterpack:create-shiny-app';
-    const panelCommandId = 'jupyterpack:create-panel-app';
-    const textualCommandId = 'jupyterpack:create-textual-app';
 
     commands.addCommand(commandId, {
       label: 'New SPK File',
@@ -127,105 +125,27 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    commands.addCommand(dashCommandId, {
-      label: 'Dash App',
-      icon: dashIcon,
-      caption: 'Create a new Dash Application',
-      execute: async args => {
-        const cwd = args['cwd'] as string;
-        await generateAppFiles({
-          contentsManager: app.serviceManager.contents,
-          cwd,
-          framework: JupyterPackFramework.DASH
-        });
-      }
-    });
-
-    commands.addCommand(streamlitCommandId, {
-      label: 'Streamlit App',
-      icon: streamlitIcon,
-      caption: 'Create a new Streamlit Application',
-      execute: async args => {
-        const cwd = args['cwd'] as string;
-        await generateAppFiles({
-          contentsManager: app.serviceManager.contents,
-          cwd,
-          framework: JupyterPackFramework.STREAMLIT
-        });
-      }
-    });
-
-    commands.addCommand(shinyCommandId, {
-      label: 'Shiny App',
-      icon: shinyIcon,
-      caption: 'Create a new Shiny Application',
-      execute: async args => {
-        const cwd = args['cwd'] as string;
-        await generateAppFiles({
-          contentsManager: app.serviceManager.contents,
-          cwd,
-          framework: JupyterPackFramework.SHINY
-        });
-      }
-    });
-
-    commands.addCommand(panelCommandId, {
-      label: 'Panel App',
-      icon: panelIcon,
-      caption: 'Create a new Panel Application',
-      execute: async args => {
-        const cwd = args['cwd'] as string;
-        await generateAppFiles({
-          contentsManager: app.serviceManager.contents,
-          cwd,
-          framework: JupyterPackFramework.PANEL
-        });
-      }
-    });
-
-    commands.addCommand(textualCommandId, {
-      label: 'Textual App',
-      icon: textualIcon,
-      caption: 'Create a new Textual Application',
-      execute: async args => {
-        const cwd = args['cwd'] as string;
-        await generateAppFiles({
-          contentsManager: app.serviceManager.contents,
-          cwd,
-          framework: JupyterPackFramework.TEXTUAL
-        });
-      }
-    });
-
     launcher.add({
       command: commandId,
       category: 'JupyterPack',
       rank: 1
     });
-    launcher.add({
-      command: dashCommandId,
-      category: 'JupyterPack',
-      rank: 2
-    });
-    launcher.add({
-      command: streamlitCommandId,
-      category: 'JupyterPack',
-      rank: 3
-    });
-    launcher.add({
-      command: shinyCommandId,
-      category: 'JupyterPack',
-      rank: 4
-    });
-    launcher.add({
-      command: panelCommandId,
-      category: 'JupyterPack',
-      rank: 5
-    });
-    launcher.add({
-      command: textualCommandId,
-      category: 'JupyterPack',
-      rank: 6
+    const iconMap = {
+      [JupyterPackFramework.DASH]: dashIcon,
+      [JupyterPackFramework.STREAMLIT]: streamlitIcon,
+      [JupyterPackFramework.SHINY]: shinyIcon,
+      [JupyterPackFramework.PANEL]: panelIcon,
+      [JupyterPackFramework.TEXTUAL]: textualIcon,
+      [JupyterPackFramework.VIZRO]: vizroIcon
+    };
+    Object.entries(iconMap).forEach(([framework, icon], index) => {
+      addLauncherCommands({
+        app,
+        launcher,
+        framework: framework as JupyterPackFramework,
+        icon,
+        rank: index + 2
+      });
     });
   }
 };

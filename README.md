@@ -14,13 +14,14 @@
 ## Features
 
 - **Python Web Apps**: Serve Python web applications directly in the browser using JupyterLite's in-browser Python kernel. `jupyterpack` currently supports:
-  - **Dash**
-  - **Streamlit**
-  - **Panel**
-  - **Shiny for Python**
-  - **Textual**
+  - [**Dash**](https://github.com/plotly/dash)
+  - [**Streamlit**](https://github.com/streamlit/streamlit)
+  - [**Panel**](https://github.com/holoviz/panel)
+  - [**Shiny for Python**](https://github.com/posit-dev/py-shiny)
+  - [**Textual**](https://github.com/Textualize/textual)
+  - [**Vizro**](https://github.com/mckinsey/vizro)
 
-  You can also use `jupyterpack` to serve any **Starlette** or **Tornado** application.
+  You can also use `jupyterpack` to serve any [**Flask**](https://github.com/pallets/flask), [**Starlette**](https://github.com/Kludex/starlette) or [**Tornado**](https://github.com/tornadoweb/tornado) application.
 
 - **JavaScript Web Apps**: Bundle and serve JavaScript web applications using in-browser bundlers.
 
@@ -136,6 +137,24 @@ dependencies:
   - jupyterpack
   - textual
   - textual-serve
+  - pip:
+      - pyodide_http
+```
+
+- **Vizro**
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - jupyterpack
+  - werkzeug>=2.2,<3.0
+  - blinker>=1.5.0,<2
+  - cachetools>=4.0,<7
+  - vizro
   - pip:
       - pyodide_http
 ```
@@ -297,6 +316,10 @@ There is no special requirement for Panel applications, just write your code as 
 ### Textual application
 
 You must define your Textual application as a variable named `app` and do not call `app.run()` yourself — `jupyterpack` is responsible for starting and managing the server lifecycle.
+
+### Vizro application
+
+There is no special requirement for Vizro applications, just write your code as a standard Vizro application and call `Vizro().build(...).run()` to serve your dashboard.
 
 ## License
 

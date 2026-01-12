@@ -42,9 +42,9 @@ export class KernelExecutor implements IKernelExecutor {
               break;
             }
             if (content.name === 'stderr') {
-              console.error('[Kernel stream]:', content.text);
+              console.error('[Kernel stderr]:', content.text);
             } else {
-              console.log('[Kernel stream]:', content.text);
+              console.log('[Kernel stdout]:', content.text);
             }
             break;
           }

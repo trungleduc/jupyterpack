@@ -1,11 +1,14 @@
-import { refreshIcon } from '@jupyterlab/ui-components';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { ILauncher } from '@jupyterlab/launcher';
+import { LabIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel } from '@lumino/widgets';
 
 import { autoReloadIcon, linkIcon } from '../tools';
-import { IJupyterpackDocTracker } from '../type';
+import { IJupyterpackDocTracker, JupyterPackFramework } from '../type';
 import { IFramePanel } from './iframePanel';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { generateAppFiles } from './templates';
 
 export const CommandIDs = {
   RELOAD: 'jupyterpack:reload',
@@ -87,5 +90,37 @@ export function addCommands(
       spectaUrl.searchParams.set('path', context.path);
       window.open(spectaUrl.toString(), '_blank');
     }
+  });
+}
+
+export function addLauncherCommands(options: {
+  app: JupyterFrontEnd;
+  launcher: ILauncher;
+  framework: JupyterPackFramework;
+  icon: LabIcon;
+  rank: number;
+}) {
+  const { app, launcher, framework, icon, rank } = options;
+  const { commands } = app;
+  const commandId = `jupyterpack:create-${framework}-app`;
+
+  const frameworkName = framework.charAt(0).toUpperCase() + framework.slice(1);
+  commands.addCommand(commandId, {
+    label: `${frameworkName} App`,
+    icon: icon,
+    caption: `Create a new ${frameworkName} Application`,
+    execute: async args => {
+      const cwd = args['cwd'] as string;
+      await generateAppFiles({
+        contentsManager: app.serviceManager.contents,
+        cwd,
+        framework
+      });
+    }
+  });
+  launcher.add({
+    command: commandId,
+    category: 'JupyterPack',
+    rank
   });
 }

@@ -4,7 +4,7 @@
    viewBox="0 0 1034.000000 243.000000" preserveAspectRatio="xMidYMid meet">
    <style xmlns="http://www.w3.org/2000/svg" type="text/css">
       .st0 {
-         fill: var(--jp-text-editor-icon-color, var(--jp-inverse-layout-color3));
+         fill: var(--jp-ui-font-color1, var(--jp-inverse-layout-color3));
       }
    </style>
    <g transform="translate(0.000000,243.000000) scale(0.100000,-0.100000)" class="st0" stroke="none">

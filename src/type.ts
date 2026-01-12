@@ -32,7 +32,8 @@ export enum JupyterPackFramework {
   PANEL = 'panel',
   TEXTUAL = 'textual',
   FASTAPI = 'fastapi',
-  FASTHTML = 'fasthtml'
+  FASTHTML = 'fasthtml',
+  VIZRO = 'vizro'
 }
 export interface IJupyterPackFileFormat {
   entry: string;

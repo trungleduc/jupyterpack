@@ -4,7 +4,7 @@
     .st0 {
       fill-rule: evenodd;
       clip-rule: evenodd;
-      fill: var(--jp-text-editor-icon-color, var(--jp-inverse-layout-color3));
+      fill: var(--jp-ui-font-color1, var(--jp-inverse-layout-color3));
     }
   </style>
   <path class="st0"

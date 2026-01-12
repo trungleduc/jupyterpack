@@ -68,6 +68,8 @@ def patch_all():
         except Exception:
             pass
 
+        create_mock_module(["black"])
+
     else:
         register_comm_target()
 
