@@ -20,6 +20,7 @@
   - [**Shiny for Python**](https://github.com/posit-dev/py-shiny)
   - [**Textual**](https://github.com/Textualize/textual)
   - [**Vizro**](https://github.com/mckinsey/vizro)
+  - [**FastHTML**](https://github.com/AnswerDotAI/fasthtml)
 
   You can also use `jupyterpack` to serve any [**Flask**](https://github.com/pallets/flask), [**Starlette**](https://github.com/Kludex/starlette) or [**Tornado**](https://github.com/tornadoweb/tornado) application.
 
@@ -320,6 +321,10 @@ You must define your Textual application as a variable named `app` and do not ca
 ### Vizro application
 
 There is no special requirement for Vizro applications, just write your code as a standard Vizro application and call `Vizro().build(...).run()` to serve your dashboard.
+
+### FastHTML application
+
+JupyterPack only supports async handlers with FastHTML. You must convert all synchronous handlers to async, and you should not call `serve()` yourself — jupyterpack is responsible for starting and managing the server lifecycle.
 
 ## License
 
