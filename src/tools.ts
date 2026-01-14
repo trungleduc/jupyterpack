@@ -1,16 +1,23 @@
-import logoStr from '../style/icons/box.svg';
+import { PathExt } from '@jupyterlab/coreutils';
+import { Contents } from '@jupyterlab/services';
+import { LabIcon } from '@jupyterlab/ui-components';
+import {
+  compressToEncodedURIComponent,
+  decompressFromEncodedURIComponent
+} from 'lz-string';
+
 import autoReloadStr from '../style/icons/autoreload.svg';
+import logoStr from '../style/icons/box.svg';
+import copyStr from '../style/icons/copy.svg';
 import linkStr from '../style/icons/externallink.svg';
-import dashStr from '../style/icons/Plotly-Logo-Black.svg';
-import streamlitStr from '../style/icons/streamlit-logo-primary.svg';
-import shinyStr from '../style/icons/shiny-for-python.svg';
+import fasthtmlStr from '../style/icons/fasthtml.svg';
 import panelStr from '../style/icons/panel_logo_stacked.svg';
+import dashStr from '../style/icons/Plotly-Logo-Black.svg';
+import shinyStr from '../style/icons/shiny-for-python.svg';
+import streamlitStr from '../style/icons/streamlit-logo-primary.svg';
 import textualStr from '../style/icons/textual.svg';
 import vizroStr from '../style/icons/vizro.svg';
-import fasthtmlStr from '../style/icons/fasthtml.svg';
-import { LabIcon } from '@jupyterlab/ui-components';
-import { Contents } from '@jupyterlab/services';
-import { PathExt } from '@jupyterlab/coreutils';
+import { IJupyterPackFileFormat } from './type';
 
 export const IS_LITE = !!document.getElementById('jupyter-lite-main');
 
@@ -62,6 +69,11 @@ export const vizroIcon = new LabIcon({
 export const fasthtmlIcon = new LabIcon({
   name: 'jupyterpack:fasthtmlLogo',
   svgstr: fasthtmlStr
+});
+
+export const copyIcon = new LabIcon({
+  name: 'jupyterpack:copyIcon',
+  svgstr: copyStr
 });
 
 export function removePrefix(path: string, prefix: string): string {
@@ -208,4 +220,30 @@ export async function newDirectory(options: {
     PathExt.join(cwd, createdDir)
   );
   return renameRes.path;
+}
+
+export function encodeSpk({
+  spkContent,
+  entryContent
+}: {
+  spkContent: string;
+  entryContent: string;
+}): string {
+  const payload = {
+    spk: spkContent,
+    entry: entryContent
+  };
+  const text = JSON.stringify(payload);
+  return compressToEncodedURIComponent(text);
+}
+
+export function decodeSpk(hash: string): {
+  spk: IJupyterPackFileFormat;
+  entry: string;
+} {
+  const payload = JSON.parse(decompressFromEncodedURIComponent(hash));
+  return {
+    spk: JSON.parse(payload.spk),
+    entry: payload.entry
+  };
 }

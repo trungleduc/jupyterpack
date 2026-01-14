@@ -9,6 +9,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IConnectionManagerToken, IJupyterpackDocTrackerToken } from '../token';
 import {
   dashIcon,
+  decodeSpk,
   fasthtmlIcon,
   logoIcon,
   panelIcon,
@@ -26,7 +27,7 @@ import { addCommands, addLauncherCommands } from './commands';
 import { JupyterPackWidgetFactory } from './widgetFactory';
 import { spkFactory } from './templates/spk';
 import { newFile } from './templates';
-import { DASH_APP } from './templates/dash';
+
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
@@ -43,7 +44,7 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
     const tracker = new WidgetTracker<DocumentWidget>({
       namespace: FACTORY
     });
-    addCommands(app.commands, tracker);
+    addCommands(app.commands, tracker, app.serviceManager.contents);
     const widgetFactory = new JupyterPackWidgetFactory({
       name: FACTORY,
       modelName: 'text',
@@ -153,26 +154,22 @@ export const spkFromLink: JupyterFrontEndPlugin<void> = {
     const spkLink = queryParams.has('spk-link');
     if (spkLink && window.location.hash) {
       const linkData = window.location.hash.slice(1);
-      console.log('spk link data', linkData);
       app.restored.then(async () => {
         await new Promise(resolve => setTimeout(resolve, 500));
-
+        const { spk, entry } = decodeSpk(linkData);
         const contentsManager = app.serviceManager.contents;
 
         await newFile({
           cwd: '',
           name: '__entry_from_link__.py',
           ext: '.py',
-          content: DASH_APP,
+          content: entry,
           contentsManager,
           overwrite: true
         });
-
-        const spkContent = spkFactory({
-          name: '__spk_from_link__',
-          framework: 'dash',
-          entry: '__entry_from_link__.py'
-        });
+        spk.name = '__spk_from_link__';
+        spk.entry = '__entry_from_link__.py';
+        const spkContent = JSON.stringify(spk, null, 2);
         await newFile({
           cwd: '',
           name: '__spk_from_link__.spk',

@@ -35,5 +35,12 @@ export class ToolbarWidget extends ReactiveToolbar {
         commands: options.commands
       })
     );
+    this.addItem(
+      'Copy Link',
+      new CommandToolbarButton({
+        id: CommandIDs.COPY_LINK,
+        commands: options.commands
+      })
+    );
   }
 }

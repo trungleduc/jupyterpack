@@ -1,19 +1,25 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ILauncher } from '@jupyterlab/launcher';
-import { LabIcon, refreshIcon } from '@jupyterlab/ui-components';
+import { copyIcon, LabIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel } from '@lumino/widgets';
 
-import { autoReloadIcon, linkIcon } from '../tools';
-import { IJupyterpackDocTracker, JupyterPackFramework } from '../type';
+import { autoReloadIcon, encodeSpk, linkIcon } from '../tools';
+import {
+  IJupyterpackDocTracker,
+  IJupyterPackFileFormat,
+  JupyterPackFramework
+} from '../type';
 import { IFramePanel } from './iframePanel';
 import { generateAppFiles } from './templates';
+import { Contents } from '@jupyterlab/services';
 
 export const CommandIDs = {
   RELOAD: 'jupyterpack:reload',
   TOGGLE_AUTORELOAD: 'jupyterpack:toggleAutoreload',
-  OPEN_SPECTA: 'jupyterpack:openInSpecta'
+  OPEN_SPECTA: 'jupyterpack:openInSpecta',
+  COPY_LINK: 'jupyterpack:copyEncodedLink'
 };
 
 const labBaseUrl = PageConfig.getOption('baseUrl');
@@ -33,7 +39,8 @@ function getCurrentIframPanel(
 }
 export function addCommands(
   commands: CommandRegistry,
-  tracker: IJupyterpackDocTracker
+  tracker: IJupyterpackDocTracker,
+  contentsManager: Contents.IManager
 ) {
   commands.addCommand(CommandIDs.RELOAD, {
     caption: 'Reload',
@@ -89,6 +96,44 @@ export function addCommands(
       );
       spectaUrl.searchParams.set('path', context.path);
       window.open(spectaUrl.toString(), '_blank');
+    }
+  });
+  commands.addCommand(CommandIDs.COPY_LINK, {
+    caption: 'Copy link to clipboard',
+    isEnabled: () => {
+      return tracker.currentWidget !== null;
+    },
+    icon: copyIcon,
+    execute: async () => {
+      const context = tracker.currentWidget?.context;
+      if (!context) {
+        return;
+      }
+      await context.ready;
+      const filePath = context.localPath;
+      const spkContent =
+        context.model.toJSON() as any as IJupyterPackFileFormat;
+      const entryPath = PathExt.join(
+        PathExt.dirname(filePath),
+        spkContent.entry
+      );
+      const entryContent = await contentsManager.get(entryPath, {
+        content: true,
+        format: 'text'
+      });
+      const encodedData = encodeSpk({
+        spkContent: JSON.stringify(spkContent),
+        entryContent: entryContent.content
+      });
+      const spectaUrl = new URL(
+        URLExt.join(labBaseUrl, 'specta'),
+        window.location.origin
+      );
+      spectaUrl.searchParams.set('no-tree', 'true');
+      spectaUrl.searchParams.set('spk-link', '');
+      spectaUrl.hash = encodedData;
+
+      await navigator.clipboard.writeText(spectaUrl.toString());
     }
   });
 }

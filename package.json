@@ -64,6 +64,7 @@
         "@jupyterlab/docmanager": "^4.5.2",
         "@jupyterlab/launcher": "^4.0.0",
         "comlink": "^4.4.2",
+        "lz-string": "^1.5.0",
         "strip-ansi": "^7.1.2"
     },
     "devDependencies": {
