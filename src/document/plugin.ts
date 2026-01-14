@@ -5,7 +5,7 @@ import {
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 import { ILauncher } from '@jupyterlab/launcher';
-
+import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IConnectionManagerToken, IJupyterpackDocTrackerToken } from '../token';
 import {
   dashIcon,
@@ -24,6 +24,9 @@ import {
 } from '../type';
 import { addCommands, addLauncherCommands } from './commands';
 import { JupyterPackWidgetFactory } from './widgetFactory';
+import { spkFactory } from './templates/spk';
+import { newFile } from './templates';
+import { DASH_APP } from './templates/dash';
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
@@ -78,6 +81,7 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
   }
 };
 
+const CREATE_SPK_COMMAND_ID = 'jupyterpack:create-new-file';
 export const launcherPlugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterpack:spklauncher',
   optional: [ILauncher],
@@ -88,46 +92,34 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       return;
     }
     const { commands } = app;
-    const commandId = 'jupyterpack:create-new-file';
 
-    commands.addCommand(commandId, {
+    commands.addCommand(CREATE_SPK_COMMAND_ID, {
       label: 'New SPK File',
       icon: logoIcon,
       caption: 'Create a new SPK fike',
       execute: async args => {
-        const cwd = args['cwd'] as string;
+        const cwd = (args['cwd'] ?? '') as string;
         const contentsManager = app.serviceManager.contents;
-        let model = await contentsManager.newUntitled({
-          path: cwd,
-          type: 'file',
-          ext: '.spk'
-        });
-        const spkContent = `
-{
-  "name": "${model.name}",
-  "entry": "",
-  "framework": "",
-  "rootUrl": "/",
-  "metadata": {
-    "autoreload": true
-  },
-  "dependencies": {
-    "mamba": [],
-    "pip": []
-  }
-}  
-`;
-        model = await contentsManager.save(model.path, {
-          ...model,
-          format: 'text',
-          size: undefined,
-          content: spkContent
+
+        const spkContent =
+          args['spkContent'] ??
+          spkFactory({
+            name: 'Untitled',
+            framework: (args['framework'] ?? '') as string
+          });
+
+        await newFile({
+          cwd,
+          ext: '.spk',
+          name: args['name'] as string | undefined,
+          content: spkContent as string,
+          contentsManager
         });
       }
     });
 
     launcher.add({
-      command: commandId,
+      command: CREATE_SPK_COMMAND_ID,
       category: 'JupyterPack',
       rank: 1
     });
@@ -149,5 +141,65 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
         rank: index + 2
       });
     });
+  }
+};
+
+export const spkFromLink: JupyterFrontEndPlugin<void> = {
+  id: 'jupyterpack:spkFromLink',
+  requires: [IDocumentManager],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, docManager: IDocumentManager): void => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const spkLink = queryParams.has('spk-link');
+    if (spkLink && window.location.hash) {
+      const linkData = window.location.hash.slice(1);
+      console.log('spk link data', linkData);
+      app.restored.then(async () => {
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const contentsManager = app.serviceManager.contents;
+
+        await newFile({
+          cwd: '',
+          name: '__entry_from_link__.py',
+          ext: '.py',
+          content: DASH_APP,
+          contentsManager,
+          overwrite: true
+        });
+
+        const spkContent = spkFactory({
+          name: '__spk_from_link__',
+          framework: 'dash',
+          entry: '__entry_from_link__.py'
+        });
+        await newFile({
+          cwd: '',
+          name: '__spk_from_link__.spk',
+          ext: '.spk',
+          content: spkContent,
+          contentsManager,
+          overwrite: true
+        });
+        await new Promise(resolve => setTimeout(resolve, 200));
+        let count = 0;
+        const tryOpen = () => {
+          const widget = docManager.openOrReveal(
+            '__spk_from_link__.spk',
+            'default'
+          );
+          if (widget) {
+            app.shell.add(widget, 'main');
+          } else {
+            count++;
+            if (count > 10) {
+              return;
+            }
+            setTimeout(tryOpen, 100);
+          }
+        };
+        tryOpen();
+      });
+    }
   }
 };

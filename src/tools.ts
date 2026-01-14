@@ -161,6 +161,21 @@ export function isBinaryContentType(contentType?: string) {
   return true;
 }
 
+export async function pathExists(
+  cwd: string,
+  name: string,
+  contentsManager: Contents.IManager
+) {
+  const currentDirContent = await contentsManager.get(cwd, {
+    content: true
+  });
+
+  const allEntries = (
+    (currentDirContent.content ?? []) as Contents.IModel[]
+  ).map(c => c.name);
+  return allEntries.includes(name);
+}
+
 export async function newDirectory(options: {
   dirName: string;
   contentsManager: Contents.IManager;
