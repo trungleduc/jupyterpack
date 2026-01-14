@@ -28,7 +28,6 @@ import { JupyterPackWidgetFactory } from './widgetFactory';
 import { spkFactory } from './templates/spk';
 import { newFile } from './templates';
 
-
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
 
