@@ -1,7 +1,7 @@
 import { PathExt } from '@jupyterlab/coreutils';
 import { Contents } from '@jupyterlab/services';
 
-import { newDirectory } from '../../tools';
+import { newDirectory, pathExists } from '../../tools';
 import { JupyterPackFramework } from '../../type';
 import { DASH_APP } from './dash';
 import { PANEL_APP } from './panel';
@@ -99,4 +99,32 @@ export async function generateAppFiles(options: {
     model.path,
     PathExt.join(newPath, 'entrypoint.spk')
   );
+}
+
+export async function newFile(options: {
+  cwd: string;
+  name?: string;
+  ext: string;
+  content: string;
+  contentsManager: Contents.IManager;
+  overwrite?: boolean;
+}) {
+  const { cwd, name, content, contentsManager, ext, overwrite } = options;
+  let model = await contentsManager.newUntitled({
+    path: cwd,
+    type: 'file',
+    ext
+  });
+  model = await contentsManager.save(model.path, {
+    ...model,
+    format: 'text',
+    size: undefined,
+    content
+  });
+  if (name) {
+    if (overwrite && (await pathExists(cwd, name, contentsManager))) {
+      await contentsManager.delete(PathExt.join(cwd, name));
+    }
+    await contentsManager.rename(model.path, PathExt.join(cwd, name));
+  }
 }

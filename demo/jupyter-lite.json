@@ -3,7 +3,7 @@
     "enableMemoryStorage": true,
     "contentsStorageDrivers": ["memoryStorageDriver"],
     "spectaConfig": {
-      "hideTopbar": true
+      "hideTopbar": false
     }
   }
 }
