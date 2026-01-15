@@ -28,6 +28,8 @@
 
 Example of each framework can be found in the [demo](https://github.com/trungleduc/jupyterpack/tree/main/demo/files) folder.
 
+- ** Direct link to your app**: Share your app with others by generating a direct link to your app. This link can be shared with anyone and will open your app in the browser (see the [toolbar buttons](https://github.com/trungleduc/jupyterpack/edit/main/README.md#toolbar-buttons)).
+
 ## Installation
 
 You can install `jupyterpack` using `pip` or `conda`
@@ -162,6 +164,8 @@ dependencies:
 
 ## Usage
 
+### Create a `.spk` file
+
 To use `jupyterpack`, you need to create a `.spk` file that defines your web application. Here's an example structure of a React application:
 
 ```bash
@@ -183,6 +187,15 @@ the `app.spk` is the entry point of your React app, it should contain the follow
 ```
 
 Double-clicking the `spk` file to open the web app as a tab of JupyterLab.
+
+### Toolbar buttons
+
+Once the app is loaded, you can interact with it using the toolbar buttons:
+
+- **Reload**: Reload the app manually after editing the code.
+- **Toggle autoreload**: Enable or disable autoreloading of the app when files change.
+- **Open in Specta**: Open the app in full-screen mode without JupyterLab UI elements
+- **Copy link to clipboard**: Copy a shareable link to your application. Anyone with the link can access your app.
 
 ## `.spk` — Jupyter Pack File Format
 
