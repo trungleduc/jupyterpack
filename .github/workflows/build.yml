@@ -112,7 +112,8 @@ jobs:
             jupyterlab
             jupyterlite-core
             jupyterlite-xeus
-            specta
+            pip:
+              specta>=0.4.6
 
       - name: Download extension package
         uses: actions/download-artifact@v4
