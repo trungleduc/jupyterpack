@@ -13,16 +13,22 @@ export class VizroServer extends DashServer {
     await super.init(mergedOptions);
   }
 
+  async disposePythonServer(): Promise<void> {
+    await this.kernelExecutor.executeCode({ code: this._resetVizroCode }, true);
+    await super.disposePythonServer();
+  }
+
   async reloadPythonServer(options: {
     entryPath?: string;
     initCode?: string;
   }): Promise<void> {
-    const resetVizroCode = `
+    await this.kernelExecutor.executeCode({ code: this._resetVizroCode }, true);
+    await super.reloadPythonServer(options);
+  }
+
+  private _resetVizroCode = `
     from vizro import Vizro
     Vizro._reset()
     True
     `;
-    await this.kernelExecutor.executeCode({ code: resetVizroCode }, true);
-    await super.reloadPythonServer(options);
-  }
 }
