@@ -4,7 +4,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { copyIcon, LabIcon, refreshIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { Panel } from '@lumino/widgets';
-
+import { Notification } from '@jupyterlab/apputils';
 import { autoReloadIcon, encodeSpk, linkIcon } from '../tools';
 import {
   IJupyterpackDocTracker,
@@ -134,6 +134,9 @@ export function addCommands(
       spectaUrl.hash = encodedData;
 
       await navigator.clipboard.writeText(spectaUrl.toString());
+      Notification.success('Link copied to clipboard', {
+        autoClose: 3000
+      });
     }
   });
 }
