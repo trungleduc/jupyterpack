@@ -1,5 +1,5 @@
 import gradio as gr
-gr.__version__
+
 
 def greet(name):
     return "Hello " + name + "!"

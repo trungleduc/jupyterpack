@@ -1,13 +1,12 @@
-import asyncio
-import json
 import os
 from pathlib import Path
-import time
-from typing import Any, Callable, Literal
+import sys
+
+from typing import Any, Callable, Literal, Sequence
 from types import SimpleNamespace
 import warnings
-import gradio.blocks
-import starlette.requests
+
+from ..common.tools import create_mock_module
 
 
 wasm_utils = SimpleNamespace(IS_WASM=True)
@@ -20,7 +19,27 @@ def get_gradio_server(instance_id: str, kernel_client_id: str):
 
 
 def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
-    from gradio import analytics, networking, utils, blocks
+    os.link = lambda src, dst: None
+    os.environ["GRADIO_ANALYTICS_ENABLED"] = "false"
+    sys.modules["audioop"] = {}
+
+    content = """
+def transpile(*args, **kwargs):
+    return ''
+"""
+    create_mock_module("groovy", content)
+
+    ffmpeg = """
+class FFmpeg:
+    def __init__(self, *args, **kwargs):
+        pass
+    def run(self, *args, **kwargs):
+        pass
+"""
+    create_mock_module("ffmpy", ffmpeg)
+
+    from gradio import analytics, utils, blocks
+
     from gradio.route_utils import API_PREFIX
     from gradio.utils import (
         TupleNoPrint,
@@ -28,19 +47,19 @@ def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
 
     def launch(
         self,
-        inline: bool | None = None,
+        inline: bool | None = False,
         inbrowser: bool = False,
-        share: bool | None = None,
-        debug: bool = False,
+        share: bool | None = False,
+        debug: bool = True,
         max_threads: int = 40,
         auth: (
             Callable[[str, str], bool] | tuple[str, str] | list[tuple[str, str]] | None
         ) = None,
         auth_message: str | None = None,
         prevent_thread_lock: bool = False,
-        show_error: bool = False,
-        server_name: str | None = None,
-        server_port: int | None = None,
+        show_error: bool = True,
+        server_name: str | None = "0.0.0.0",
+        server_port: int | None = 8778,
         *,
         height: int = 500,
         width: int | str = "100%",
@@ -50,7 +69,8 @@ def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
         ssl_keyfile_password: str | None = None,
         ssl_verify: bool = True,
         quiet: bool = False,
-        show_api: bool = not wasm_utils.IS_WASM,
+        footer_links: list[Literal["api", "gradio", "settings"] | dict[str, str]]
+        | None = None,
         allowed_paths: list[str] | None = None,
         blocked_paths: list[str] | None = None,
         root_path: str | None = None,
@@ -59,11 +79,10 @@ def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
         share_server_address: str | None = None,
         share_server_protocol: Literal["http", "https"] | None = None,
         share_server_tls_certificate: str | None = None,
-        auth_dependency: Callable[[starlette.requests.Request], str | None]
-        | None = None,
+        auth_dependency: Callable[[Any], str | None] | None = None,
         max_file_size: str | int | None = None,
         enable_monitoring: bool | None = None,
-        strict_cors: bool = True,
+        strict_cors: bool = False,
         node_server_name: str | None = None,
         node_port: int | None = None,
         ssr_mode: bool | None = None,
@@ -71,8 +90,31 @@ def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
         mcp_server: bool | None = None,
         _frontend: bool = True,
         i18n: Any | None = None,
+        theme: Any | str | None = None,
+        css: str | None = None,
+        css_paths: str | Path | Sequence[str | Path] | None = None,
+        js: str | Literal[True] | None = None,
+        head: str | None = None,
+        head_paths: str | Path | Sequence[str | Path] | None = None,
     ) -> tuple[Any, str, str]:
         from gradio.routes import App
+
+        theme = theme if theme is not None else self._deprecated_theme
+        css = css if css is not None else self._deprecated_css
+        css_paths = css_paths if css_paths is not None else self._deprecated_css_paths
+        js = js if js is not None else self._deprecated_js
+        head = head if head is not None else self._deprecated_head
+        head_paths = (
+            head_paths if head_paths is not None else self._deprecated_head_paths
+        )
+
+        self.theme = utils.get_theme(theme)
+        self.css = css
+        self.css_paths = css_paths or []
+        self.js = js
+        self.head = head
+        self.head_paths = head_paths
+        self._set_html_css_theme_variables()
 
         if self._is_running_in_reload_thread:
             # We have already launched the demo
@@ -112,11 +154,9 @@ def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
         self.favicon_path = favicon_path
         self.ssl_verify = ssl_verify
         self.state_session_capacity = state_session_capacity
-        if root_path is None:
-            self.root_path = os.environ.get("GRADIO_ROOT_PATH", "")
-        else:
-            self.root_path = root_path
-        self.show_api = show_api
+
+        self.root_path = base_url.removesuffix("/") if base_url else ""
+        self.footer_links = footer_links or ["api", "gradio", "settings"]
 
         if allowed_paths:
             self.allowed_paths = allowed_paths
@@ -226,8 +266,9 @@ def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
             if not wasm_utils.IS_WASM:
                 pass
             else:
-                self.run_startup_events()
-                asyncio.create_task(self.run_extra_startup_events())
+                pass
+                # self.run_startup_events()
+                # asyncio.create_task(self.run_extra_startup_events())
 
         if share is None:
             if self.is_colab or self.is_hosted_notebook:
@@ -276,63 +317,6 @@ def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
                 f"\n** Streamable HTTP URL: {self.share_url or self.local_url.rstrip('/')}/{mcp_subpath.lstrip('/')}/"
                 f"\n* [Deprecated] SSE URL: {self.share_url or self.local_url.rstrip('/')}/{mcp_subpath.lstrip('/')}/sse"
             )
-
-        if inline is None:
-            inline = utils.ipython_check()
-        if inline:
-            try:
-                from IPython.display import HTML, Javascript, display  # type: ignore
-
-                if self.share and self.share_url:
-                    while not networking.url_ok(self.share_url):
-                        time.sleep(0.25)
-                    artifact = HTML(
-                        f'<div><iframe src="{self.share_url}" width="{self.width}" height="{self.height}" allow="autoplay; camera; microphone; clipboard-read; clipboard-write;" frameborder="0" allowfullscreen></iframe></div>'
-                    )
-
-                elif self.is_colab:
-                    # modified from /usr/local/lib/python3.7/dist-packages/google/colab/output/_util.py within Colab environment
-                    code = """(async (port, path, width, height, cache, element) => {
-                            if (!google.colab.kernel.accessAllowed && !cache) {
-                                return;
-                            }
-                            element.appendChild(document.createTextNode(''));
-                            const url = await google.colab.kernel.proxyPort(port, {cache});
-
-                            const external_link = document.createElement('div');
-                            external_link.innerHTML = `
-                                <div style="font-family: monospace; margin-bottom: 0.5rem">
-                                    Running on <a href=${new URL(path, url).toString()} target="_blank">
-                                        https://localhost:${port}${path}
-                                    </a>
-                                </div>
-                            `;
-                            element.appendChild(external_link);
-
-                            const iframe = document.createElement('iframe');
-                            iframe.src = new URL(path, url).toString();
-                            iframe.height = height;
-                            iframe.allow = "autoplay; camera; microphone; clipboard-read; clipboard-write;"
-                            iframe.width = width;
-                            iframe.style.border = 0;
-                            element.appendChild(iframe);
-                        })""" + "({port}, {path}, {width}, {height}, {cache}, window.element)".format(
-                        port=json.dumps(self.server_port),
-                        path=json.dumps("/"),
-                        width=json.dumps(self.width),
-                        height=json.dumps(self.height),
-                        cache=json.dumps(False),
-                    )
-
-                    artifact = Javascript(code)
-                else:
-                    artifact = HTML(
-                        f'<div><iframe src="{self.local_url}" width="{self.width}" height="{self.height}" allow="autoplay; camera; microphone; clipboard-read; clipboard-write;" frameborder="0" allowfullscreen></iframe></div>'
-                    )
-                self.artifact = artifact
-                display(artifact)
-            except ImportError:
-                pass
 
         if getattr(self, "analytics_enabled", False):
             data = {

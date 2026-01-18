@@ -11,6 +11,28 @@ export class GradioServer extends BasePythonServer {
       dependencies: this.mergeDependencies(options.dependencies, DEPENDENCIES)
     };
     await super.init(mergedOptions);
+    const { initCode, instanceId, kernelClientId } = options;
+
+    const baseURL = this.buildBaseURL({
+      instanceId,
+      kernelClientId
+    });
+    await this.kernelExecutor.executeCode({
+      code: `
+      from jupyterpack.gradio import patch_gradio
+      patch_gradio("${baseURL}", "${instanceId}", "${kernelClientId}")
+      `
+    });
+    if (initCode) {
+      await this.kernelExecutor.executeCode({ code: initCode });
+    }
+
+    const loaderCode = `
+      from jupyterpack.gradio import get_gradio_server
+      from jupyterpack.starlette import StarletteServer 
+      ${this._server_var} = StarletteServer(get_gradio_server("${instanceId}", "${kernelClientId}"), "${baseURL}")
+      `;
+    await this.kernelExecutor.executeCode({ code: loaderCode });
   }
 
   async reloadPythonServer(options: {

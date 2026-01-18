@@ -6,7 +6,7 @@ import sys
 import tempfile
 from pathlib import Path
 from types import ModuleType
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 
 def set_base_url_env(base_url: str):
@@ -32,32 +32,31 @@ def import_from_path(module_name: str, path: str) -> ModuleType:
     return module
 
 
-def create_mock_module(
-    module_names: List[str], mock_content: str = "", patch_parent=True
-):
+def create_mock_module(module_name: str, mock_content: str = "", patch_parent=True):
     tmpdir = tempfile.TemporaryDirectory()
-    package_dir = Path(tmpdir.name) / "__jupyterpack_mock_module"
+    parts = module_name.split(".")
+    base_module_name = f"__jupyterpack_mock_module_{parts}"
+
+    package_dir = Path(tmpdir.name) / base_module_name
     package_dir.mkdir()
     (package_dir / "__init__.py").write_text(mock_content)
 
     sys.path.insert(0, tmpdir.name)
-    mock_module = importlib.import_module("__jupyterpack_mock_module")
+    mock_module = importlib.import_module(base_module_name)
     sys.path.pop(0)
-    for module_name in module_names:
-        if patch_parent:
-            parts = module_name.split(".")
-            for i in range(1, len(parts) + 1):
-                subpath = ".".join(parts[:i])
-                sys.modules[subpath] = mock_module
 
-            for i in range(1, len(parts)):
-                parent_name = ".".join(parts[:i])
-                child_name = ".".join(parts[: i + 1])
-                parent_mod = sys.modules[parent_name]
-                child_mod = sys.modules[child_name]
-                setattr(parent_mod, parts[i], child_mod)
-        else:
-            sys.modules[module_name] = mock_module
+    if patch_parent:
+        for i in range(1, len(parts) + 1):
+            subpath = ".".join(parts[:i])
+            sys.modules[subpath] = mock_module
+        for i in range(1, len(parts)):
+            parent_name = ".".join(parts[:i])
+            child_name = ".".join(parts[: i + 1])
+            parent_mod = sys.modules[parent_name]
+            child_mod = sys.modules[child_name]
+            setattr(parent_mod, parts[i], child_mod)
+    else:
+        sys.modules[module_name] = mock_module
 
     return tmpdir
 
