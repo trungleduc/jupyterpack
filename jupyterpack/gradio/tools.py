@@ -1,15 +1,12 @@
+import asyncio
 import os
 from pathlib import Path
 import sys
 
 from typing import Any, Callable, Literal, Sequence
-from types import SimpleNamespace
-import warnings
+
 
 from ..common.tools import create_mock_module
-
-
-wasm_utils = SimpleNamespace(IS_WASM=True)
 
 GRADIO_SERVER = {}
 
@@ -38,7 +35,7 @@ class FFmpeg:
 """
     create_mock_module("ffmpy", ffmpeg)
 
-    from gradio import analytics, utils, blocks
+    from gradio import utils, blocks
 
     from gradio.route_utils import API_PREFIX
     from gradio.utils import (
@@ -47,16 +44,7 @@ class FFmpeg:
 
     def launch(
         self,
-        inline: bool | None = False,
-        inbrowser: bool = False,
-        share: bool | None = False,
-        debug: bool = True,
         max_threads: int = 40,
-        auth: (
-            Callable[[str, str], bool] | tuple[str, str] | list[tuple[str, str]] | None
-        ) = None,
-        auth_message: str | None = None,
-        prevent_thread_lock: bool = False,
         show_error: bool = True,
         server_name: str | None = "0.0.0.0",
         server_port: int | None = 8778,
@@ -64,31 +52,17 @@ class FFmpeg:
         height: int = 500,
         width: int | str = "100%",
         favicon_path: str | Path | None = None,
-        ssl_keyfile: str | None = None,
-        ssl_certfile: str | None = None,
-        ssl_keyfile_password: str | None = None,
-        ssl_verify: bool = True,
         quiet: bool = False,
         footer_links: list[Literal["api", "gradio", "settings"] | dict[str, str]]
         | None = None,
         allowed_paths: list[str] | None = None,
         blocked_paths: list[str] | None = None,
-        root_path: str | None = None,
         app_kwargs: dict[str, Any] | None = None,
         state_session_capacity: int = 10000,
-        share_server_address: str | None = None,
-        share_server_protocol: Literal["http", "https"] | None = None,
-        share_server_tls_certificate: str | None = None,
         auth_dependency: Callable[[Any], str | None] | None = None,
         max_file_size: str | int | None = None,
-        enable_monitoring: bool | None = None,
         strict_cors: bool = False,
-        node_server_name: str | None = None,
-        node_port: int | None = None,
-        ssr_mode: bool | None = None,
         pwa: bool | None = None,
-        mcp_server: bool | None = None,
-        _frontend: bool = True,
         i18n: Any | None = None,
         theme: Any | str | None = None,
         css: str | None = None,
@@ -96,6 +70,7 @@ class FFmpeg:
         js: str | Literal[True] | None = None,
         head: str | None = None,
         head_paths: str | Path | Sequence[str | Path] | None = None,
+        **kwargs,
     ) -> tuple[Any, str, str]:
         from gradio.routes import App
 
@@ -123,36 +98,12 @@ class FFmpeg:
         if not self.exited:
             self.__exit__()
 
-        if auth is not None and auth_dependency is not None:
-            raise ValueError(
-                "You cannot provide both `auth` and `auth_dependency` in launch(). Please choose one."
-            )
-        if (
-            auth
-            and not callable(auth)
-            and not isinstance(auth[0], tuple)
-            and not isinstance(auth[0], list)
-        ):
-            self.auth = [auth]
-        else:
-            self.auth = auth
-
-        if self.auth and not callable(self.auth):
-            if any(not authenticable[0] for authenticable in self.auth):
-                warnings.warn(
-                    "You have provided an empty username in `auth`. Please provide a valid username."
-                )
-            if any(not authenticable[1] for authenticable in self.auth):
-                warnings.warn(
-                    "You have provided an empty password in `auth`. Please provide a valid password."
-                )
-
-        self.auth_message = auth_message
         self.show_error = show_error
         self.height = height
         self.width = width
         self.favicon_path = favicon_path
-        self.ssl_verify = ssl_verify
+        self.ssl_verify = False
+
         self.state_session_capacity = state_session_capacity
 
         self.root_path = base_url.removesuffix("/") if base_url else ""
@@ -199,10 +150,7 @@ class FFmpeg:
         self.transpile_to_js(quiet=quiet)
 
         self.ssr_mode = False
-        if self.ssr_mode:
-            pass
-        else:
-            self.node_server_name = self.node_port = self.node_process = None
+        self.node_server_name = self.node_port = self.node_process = None
 
         self.i18n_instance = i18n
 
@@ -215,7 +163,7 @@ class FFmpeg:
             app_kwargs=app_kwargs,
             strict_cors=strict_cors,
             ssr_mode=self.ssr_mode,
-            mcp_server=mcp_server,
+            mcp_server=False,
         )
         if self.mcp_error and not quiet:
             print(self.mcp_error)
@@ -230,13 +178,12 @@ class FFmpeg:
                     "Rerunning server... use `close()` to stop if you need to change `launch()` parameters.\n----"
                 )
         else:
-            if wasm_utils.IS_WASM:
-                server_name = "xxx"
-                server_port = 99999
-                local_url = ""
-                server = None
-                if instance_id is not None and kernel_client_id is not None:
-                    GRADIO_SERVER[f"{instance_id}@{kernel_client_id}"] = self.app
+            server_name = "xxx"
+            server_port = 99999
+            local_url = ""
+            server = None
+            if instance_id is not None and kernel_client_id is not None:
+                GRADIO_SERVER[f"{instance_id}@{kernel_client_id}"] = self.app
 
             self.server_name = server_name
             self.local_url = local_url
@@ -244,90 +191,28 @@ class FFmpeg:
             self.server_port = server_port
             self.server = server
             self.is_running = True
-            self.is_colab = utils.colab_check()
-            self.is_hosted_notebook = utils.is_hosted_notebook()
-            self.share_server_address = share_server_address
-            self.share_server_protocol = share_server_protocol or (
-                "http" if share_server_address is not None else "https"
-            )
-            self.share_server_tls_certificate = share_server_tls_certificate
+            self.is_colab = False
+            self.is_hosted_notebook = False
+            self.share_server_address = None
+            self.share_server_protocol = "http"
+            self.share_server_tls_certificate = None
             self.has_launched = True
             if self.mcp_server_obj:
                 self.mcp_server_obj._local_url = self.local_url
 
-            self.protocol = (
-                "https"
-                if self.local_url.startswith("https") or self.is_colab
-                else "http"
-            )
+            self.protocol = "http"
 
             self._queue.set_server_app(self.server_app)
 
-            if not wasm_utils.IS_WASM:
-                pass
-            else:
-                pass
-                # self.run_startup_events()
-                # asyncio.create_task(self.run_extra_startup_events())
+            self.run_startup_events()
+            asyncio.create_task(self.run_extra_startup_events())
 
-        if share is None:
-            if self.is_colab or self.is_hosted_notebook:
-                if not quiet:
-                    print(
-                        "It looks like you are running Gradio on a hosted Jupyter notebook, which requires `share=True`. Automatically setting `share=True` (you can turn this off by setting `share=False` in `launch()` explicitly).\n"
-                    )
-                self.share = True
-            else:
-                self.share = False
-                share_env = os.getenv("GRADIO_SHARE")
-                if share_env is not None and share_env.lower() == "true":
-                    self.share = True
-        else:
-            self.share = share
+        self.share = False
 
-        if enable_monitoring:
-            print(
-                f"Monitoring URL: {self.local_url}monitoring/{self.app.analytics_key}"
-            )
-        self.enable_monitoring = enable_monitoring in [True, None]
-
-        if self.is_colab and not quiet:
-            if debug:
-                print(
-                    "Colab notebook detected. This cell will run indefinitely so that you can see errors and logs. To turn off, set debug=False in launch()."
-                )
-            else:
-                print(
-                    "Colab notebook detected. To show errors in colab notebook, set debug=True in launch()"
-                )
-            if not self.share:
-                print(
-                    "Note: opening Chrome Inspector may crash demo inside Colab notebooks."
-                )
-
-        if self.share:
-            self.share = False
+        self.enable_monitoring = False
 
         self.share_url = None
 
-        mcp_subpath = API_PREFIX + "/mcp"
-        if self.mcp_server:
-            print(
-                "\n🔨 Launching MCP server:"
-                f"\n** Streamable HTTP URL: {self.share_url or self.local_url.rstrip('/')}/{mcp_subpath.lstrip('/')}/"
-                f"\n* [Deprecated] SSE URL: {self.share_url or self.local_url.rstrip('/')}/{mcp_subpath.lstrip('/')}/sse"
-            )
-
-        if getattr(self, "analytics_enabled", False):
-            data = {
-                "launch_method": "browser" if inbrowser else "inline",
-                "is_google_colab": self.is_colab,
-                "is_sharing_on": self.share,
-                "is_space": self.space_id is not None,
-                "mode": self.mode,
-            }
-            analytics.launched_analytics(self, data)
-
-        return TupleNoPrint((self.server_app, self.local_url, self.share_url))  # type: ignore
+        return TupleNoPrint((self.server_app, self.local_url, self.share_url))
 
     blocks.Blocks.launch = launch

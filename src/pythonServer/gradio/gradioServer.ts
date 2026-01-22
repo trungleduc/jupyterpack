@@ -39,6 +39,14 @@ export class GradioServer extends BasePythonServer {
     entryPath?: string;
     initCode?: string;
   }): Promise<void> {
-    //
+    const { initCode } = options;
+    if (initCode) {
+      await this.kernelExecutor.executeCode({ code: initCode });
+    }
+    const reloadCode = `
+    await ${this._server_var}.dispose()
+    ${this._server_var}.reload(get_gradio_server("${this._instanceId}", "${this._kernelClientId}"))
+    `;
+    await this.kernelExecutor.executeCode({ code: reloadCode }, true);
   }
 }
