@@ -1,3 +1,4 @@
+export const GRADIO_APP = `
 # This example is taken from the Panel official documentation (https://github.com/gradio-app/gradio?tab=readme-ov-file#building-your-first-demo)
 
 import gradio as gr
@@ -14,3 +15,5 @@ demo = gr.Interface(
 )
 
 demo.launch()
+
+`;
