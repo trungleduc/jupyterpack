@@ -17,6 +17,7 @@ import shinyStr from '../style/icons/shiny-for-python.svg';
 import streamlitStr from '../style/icons/streamlit-logo-primary.svg';
 import textualStr from '../style/icons/textual.svg';
 import vizroStr from '../style/icons/vizro.svg';
+import gradioStr from '../style/icons/gradio.svg';
 import { IJupyterPackFileFormat } from './type';
 
 export const IS_LITE = !!document.getElementById('jupyter-lite-main');
@@ -74,6 +75,10 @@ export const fasthtmlIcon = new LabIcon({
 export const copyIcon = new LabIcon({
   name: 'jupyterpack:copyIcon',
   svgstr: copyStr
+});
+export const gradioIcon = new LabIcon({
+  name: 'jupyterpack:gradioIcon',
+  svgstr: gradioStr
 });
 
 export function removePrefix(path: string, prefix: string): string {

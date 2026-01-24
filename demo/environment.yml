@@ -21,10 +21,21 @@ dependencies:
   - textual
   - textual-serve
   - vizro
+  - fastapi
+  - pillow
+  - huggingface_hub
+  - aiofiles
+  - safehttpx
+  - semantic_version
+  - pydub
+  - tomlkit
   - pip:
     - shiny
     - shinychat
     - vega_datasets
     - streamlit==1.50.0
+    - gradio
+    - gradio-client
     - pyodide_http
     - ../dist/jupyterpack-0.0.0-py3-none-any.whl
+

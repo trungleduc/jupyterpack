@@ -11,6 +11,7 @@ import {
   dashIcon,
   decodeSpk,
   fasthtmlIcon,
+  gradioIcon,
   logoIcon,
   panelIcon,
   shinyIcon,
@@ -130,7 +131,8 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       [JupyterPackFramework.PANEL]: panelIcon,
       [JupyterPackFramework.TEXTUAL]: textualIcon,
       [JupyterPackFramework.VIZRO]: vizroIcon,
-      [JupyterPackFramework.FASTHTML]: fasthtmlIcon
+      [JupyterPackFramework.FASTHTML]: fasthtmlIcon,
+      [JupyterPackFramework.GRADIO]: gradioIcon
     };
     Object.entries(iconMap).forEach(([framework, icon], index) => {
       addLauncherCommands({

@@ -21,6 +21,7 @@
   - [**Textual**](https://github.com/Textualize/textual)
   - [**Vizro**](https://github.com/mckinsey/vizro)
   - [**FastHTML**](https://github.com/AnswerDotAI/fasthtml)
+  - [**Gradio**](https://github.com/gradio-app/gradio)
 
   You can also use `jupyterpack` to serve any [**Flask**](https://github.com/pallets/flask), [**Starlette**](https://github.com/Kludex/starlette) or [**Tornado**](https://github.com/tornadoweb/tornado) application.
 
@@ -159,6 +160,32 @@ dependencies:
   - cachetools>=4.0,<7
   - vizro
   - pip:
+      - pyodide_http
+```
+
+- **Gradio**
+
+Due to the setup of Gradio, you need to put `gradio` and `gradio-client` in the pip section of the `environment.yml` file. For the remaininng dependencies, they are handled by `jupyterpack` automatically, but you can also specify them in the `environment.yml` file to improve the loading time. Here is the example of the `environment.yml` file for Gradio
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - jupyterpack
+  - fastapi
+  - pillow
+  - huggingface_hub
+  - aiofiles
+  - safehttpx
+  - semantic_version
+  - pydub
+  - tomlkit
+  - pip:
+      - gradio
+      - gradio-client
       - pyodide_http
 ```
 
@@ -338,6 +365,10 @@ There is no special requirement for Vizro applications, just write your code as 
 ### FastHTML application
 
 JupyterPack only supports async handlers with FastHTML. You must convert all synchronous handlers to async, and you should not call `serve()` yourself — jupyterpack is responsible for starting and managing the server lifecycle.
+
+### Gradio application
+
+There is no special requirement for Gradio applications, just write your code as a standard Vizro application and call the `launch` method to serve your dashboard.
 
 ## License
 

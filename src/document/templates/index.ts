@@ -10,6 +10,7 @@ import { STREAMLIT_APP } from './streamlit';
 import { TEXTUAL_APP } from './textual';
 import { VIZRO_APP } from './vizro';
 import { FASTHTML_APP } from './fasthtml';
+import { GRADIO_APP } from './gradio';
 
 export async function generateAppFiles(options: {
   contentsManager: Contents.IManager;
@@ -55,6 +56,10 @@ export async function generateAppFiles(options: {
     }
     case JupyterPackFramework.FASTHTML: {
       appContent = FASTHTML_APP;
+      break;
+    }
+    case JupyterPackFramework.GRADIO: {
+      appContent = GRADIO_APP;
       break;
     }
     default:
