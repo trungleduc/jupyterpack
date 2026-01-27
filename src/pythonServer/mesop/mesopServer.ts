@@ -23,7 +23,6 @@ export class MesopServer extends BasePythonServer {
       kernelClientId
     });
 
-    
     const serverCode = `
       from jupyterpack.mesop import MesopServer
       ${this._server_var} = MesopServer("${entryPath}", "${baseURL}")
