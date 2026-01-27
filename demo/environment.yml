@@ -4,38 +4,47 @@ channels:
   - https://repo.prefix.dev/conda-forge
 dependencies:
   - xeus-python
-  - dash
-  - werkzeug>=2.2,<3.0
+  # - dash
+  # - werkzeug>=2.2,<3.0
   - httpx
+  - tornado
+  - starlette
   - numpy
   - pandas
-  - tornado
-  - blinker>=1.5.0,<2
-  - cachetools>=4.0,<7
+  # - blinker>=1.5.0,<2
+  # - cachetools>=4.0,<7
   - protobuf
-  - altair
-  - pyarrow
-  - starlette
-  - htmltools
-  - panel
-  - textual
-  - textual-serve
-  - vizro
-  - fastapi
-  - pillow
-  - huggingface_hub
-  - aiofiles
-  - safehttpx
-  - semantic_version
-  - pydub
-  - tomlkit
+  # - altair
+  # - pyarrow
+  # - htmltools
+  # - panel
+  # - textual
+  # - textual-serve
+  # - vizro
+  # - fastapi
+  # - pillow
+  # - huggingface_hub
+  # - aiofiles
+  # - safehttpx
+  # - semantic_version
+  # - pydub
+  # - tomlkit
+  - flask
+  - absl-py
+  - deepdiff>=8.6.1,<9
+  - msgpack
+  - pydantic
+  - python-dotenv
+  - sqlalchemy
   - pip:
-    - shiny
-    - shinychat
-    - vega_datasets
+    # - shiny
+    # - shinychat
+    # - vega_datasets
     - streamlit==1.50.0
-    - gradio
-    - gradio-client
+    # - gradio
+    # - gradio-client
+    - mesop
+    - flask-sock
     - pyodide_http
     - ../dist/jupyterpack-0.0.0-py3-none-any.whl
 

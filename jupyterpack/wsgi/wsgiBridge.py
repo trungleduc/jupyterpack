@@ -21,6 +21,7 @@ class WSGIBridge(BaseBridge):
         method = request.get("method", "GET").upper()
         url = request.get("url", "/")
         headers = dict(request.get("headers", []))
+        headers["Origin"] = "http://testserver"
         body = request.get("body", None)
         params = request.get("params", None)
 
@@ -34,7 +35,10 @@ class WSGIBridge(BaseBridge):
                 content_b64 = base64.b64encode(r.content).decode("ascii")
 
                 # encode headers like ConnectionState
-                headers_json = json.dumps(dict(r.headers)).encode("utf-8")
+                headers_dict = dict(r.headers)
+                headers_dict.pop("content-security-policy", None)
+                headers_json = json.dumps(headers_dict).encode("utf-8")
+
                 headers_b64 = base64.b64encode(headers_json).decode("ascii")
                 return {
                     "content": content_b64,

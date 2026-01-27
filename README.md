@@ -79,6 +79,7 @@ dependencies:
 ```
 
 - **Streamlit**
+  Since `streamlit` can't be installed using `conda`, you need to install in in the `pip` section.
 
 ```yaml
 name: xeus-kernels

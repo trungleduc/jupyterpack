@@ -1,0 +1,5 @@
+{
+  "name": "Mesop Example",
+  "entry": "server.py",
+  "framework": "mesop"
+}

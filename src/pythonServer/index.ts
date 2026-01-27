@@ -4,6 +4,7 @@ import { FastAPIServer } from './fastapi/fastapiServer';
 import { FastHTMLServer } from './fasthtml/fasthtmlServer';
 import { GradioServer } from './gradio/gradioServer';
 import { KernelExecutor } from './kernelExecutor';
+import { MesopServer } from './mesop/mesopServer';
 import { PanelServer } from './panel/panelServer';
 import { ShinyServer } from './shiny/shinyServer';
 import { StarletteServer } from './starlette/starletteServer';
@@ -30,5 +31,6 @@ export const PYTHON_SERVER = new Map<
   [JupyterPackFramework.FASTAPI, FastAPIServer],
   [JupyterPackFramework.FASTHTML, FastHTMLServer],
   [JupyterPackFramework.VIZRO, VizroServer],
-  [JupyterPackFramework.GRADIO, GradioServer]
+  [JupyterPackFramework.GRADIO, GradioServer],
+  [JupyterPackFramework.MESOP, MesopServer]
 ]);
