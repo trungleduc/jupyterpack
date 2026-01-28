@@ -11,6 +11,7 @@ import { TEXTUAL_APP } from './textual';
 import { VIZRO_APP } from './vizro';
 import { FASTHTML_APP } from './fasthtml';
 import { GRADIO_APP } from './gradio';
+import { MESOP_APP } from './mesop';
 
 export async function generateAppFiles(options: {
   contentsManager: Contents.IManager;
@@ -60,6 +61,10 @@ export async function generateAppFiles(options: {
     }
     case JupyterPackFramework.GRADIO: {
       appContent = GRADIO_APP;
+      break;
+    }
+    case JupyterPackFramework.MESOP: {
+      appContent = MESOP_APP;
       break;
     }
     default:

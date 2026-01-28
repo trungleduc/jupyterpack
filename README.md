@@ -22,6 +22,7 @@
   - [**Vizro**](https://github.com/mckinsey/vizro)
   - [**FastHTML**](https://github.com/AnswerDotAI/fasthtml)
   - [**Gradio**](https://github.com/gradio-app/gradio)
+  - [**Mesop**](https://github.com/mesop-dev/mesop)
 
   You can also use `jupyterpack` to serve any [**Flask**](https://github.com/pallets/flask), [**Starlette**](https://github.com/Kludex/starlette) or [**Tornado**](https://github.com/tornadoweb/tornado) application.
 
@@ -79,6 +80,7 @@ dependencies:
 ```
 
 - **Streamlit**
+  Since `streamlit` can't be installed using `conda`, you need to install in in the `pip` section.
 
 ```yaml
 name: xeus-kernels
@@ -186,6 +188,31 @@ dependencies:
   - pip:
       - gradio
       - gradio-client
+      - pyodide_http
+```
+
+- **Mesop**
+
+Since Mesop is not available in the conda-forge channel. You need to install it via pip. Here is the example of the `environment.yml` file for Mesop.
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - jupyterpack
+  - flask
+  - absl-py
+  - deepdiff>=8.6.1,<9
+  - msgpack
+  - pydantic
+  - python-dotenv
+  - sqlalchemy
+  - pip:
+      - mesop
+      - flask-sock
       - pyodide_http
 ```
 
@@ -369,6 +396,10 @@ JupyterPack only supports async handlers with FastHTML. You must convert all syn
 ### Gradio application
 
 There is no special requirement for Gradio applications, just write your code as a standard Vizro application and call the `launch` method to serve your dashboard.
+
+### Mesop application
+
+There is no special requirement for Mesop applications. Just write your code as a standard Mesop application, and opening the `.spk` file will launch the app in JupyterLab.
 
 ## License
 

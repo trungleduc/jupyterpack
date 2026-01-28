@@ -18,6 +18,7 @@ export class DashServer extends BasePythonServer {
       instanceId,
       kernelClientId
     });
+    const origin = window.location.origin;
     await this.kernelExecutor.executeCode({
       code: `
       from jupyterpack.dash import patch_dash
@@ -30,7 +31,7 @@ export class DashServer extends BasePythonServer {
     const loaderCode = `
       from jupyterpack.dash import DashServer
       
-      ${this._server_var} = DashServer(globals().get("app", None), "${baseURL}", "${instanceId}", "${kernelClientId}")
+      ${this._server_var} = DashServer(globals().get("app", None), "${baseURL}", "${instanceId}", "${kernelClientId}", "${origin}")
       `;
     await this.kernelExecutor.executeCode({ code: loaderCode });
   }

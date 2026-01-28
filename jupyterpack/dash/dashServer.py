@@ -9,9 +9,10 @@ class DashServer(WsgiServer):
         base_url=None,
         instance_id=None,
         kernel_client_id=None,
+        origin=None,
     ):
         dash_app = self._get_dash_app(maybe_dash_app, instance_id, kernel_client_id)
-        super().__init__(dash_app.server, base_url)
+        super().__init__(dash_app.server, base_url, origin)
 
     def reload(self, maybe_dash_app=None, instance_id=None, kernel_client_id=None):
         dash_app = self._get_dash_app(maybe_dash_app, instance_id, kernel_client_id)
