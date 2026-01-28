@@ -18,6 +18,7 @@ import streamlitStr from '../style/icons/streamlit-logo-primary.svg';
 import textualStr from '../style/icons/textual.svg';
 import vizroStr from '../style/icons/vizro.svg';
 import gradioStr from '../style/icons/gradio.svg';
+import mesopStr from '../style/icons/mesop.svg';
 import { IJupyterPackFileFormat } from './type';
 
 export const IS_LITE = !!document.getElementById('jupyter-lite-main');
@@ -76,9 +77,15 @@ export const copyIcon = new LabIcon({
   name: 'jupyterpack:copyIcon',
   svgstr: copyStr
 });
+
 export const gradioIcon = new LabIcon({
   name: 'jupyterpack:gradioIcon',
   svgstr: gradioStr
+});
+
+export const mesopIcon = new LabIcon({
+  name: 'jupyterpack:mesopIcon',
+  svgstr: mesopStr
 });
 
 export function removePrefix(path: string, prefix: string): string {

@@ -13,6 +13,7 @@ import {
   fasthtmlIcon,
   gradioIcon,
   logoIcon,
+  mesopIcon,
   panelIcon,
   shinyIcon,
   streamlitIcon,
@@ -132,7 +133,8 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       [JupyterPackFramework.TEXTUAL]: textualIcon,
       [JupyterPackFramework.VIZRO]: vizroIcon,
       [JupyterPackFramework.FASTHTML]: fasthtmlIcon,
-      [JupyterPackFramework.GRADIO]: gradioIcon
+      [JupyterPackFramework.GRADIO]: gradioIcon,
+      [JupyterPackFramework.MESOP]: mesopIcon
     };
     Object.entries(iconMap).forEach(([framework, icon], index) => {
       addLauncherCommands({
