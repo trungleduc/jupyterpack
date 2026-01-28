@@ -21,7 +21,7 @@ export class StarletteServer extends BasePythonServer {
     await this.kernelExecutor.executeCode({ code: bootstrapCode });
     if (initCode) {
       const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
-      const origin = window.location.origin
+      const origin = window.location.origin;
       await this.kernelExecutor.executeCode({ code: initCodeWithUrl });
       const loaderCode = `
       from jupyterpack.starlette import StarletteServer
