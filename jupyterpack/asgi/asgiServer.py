@@ -4,7 +4,7 @@ from ..common import BaseServer
 
 
 class AsgiServer(BaseServer):
-    def __init__(self, asgi_app, base_url: str):
+    def __init__(self, asgi_app, base_url: str, origin: str):
         """
         Args:
             app : ASGI application instance
@@ -12,7 +12,8 @@ class AsgiServer(BaseServer):
         """
         super().__init__(base_url)
         self._app = asgi_app
-        self._bridge = ASGIBridge(asgi_app, base_url)
+        self._origin = origin
+        self._bridge = ASGIBridge(asgi_app, base_url, origin)
 
     @property
     def bridge(self):
@@ -30,5 +31,5 @@ class AsgiServer(BaseServer):
             app : ASGIApplication instance
         """
         self._app = app
-        self._bridge = ASGIBridge(app, self.base_url)
+        self._bridge = ASGIBridge(app, self.base_url, self._origin)
         return True

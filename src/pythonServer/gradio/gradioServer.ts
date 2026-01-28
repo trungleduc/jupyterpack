@@ -26,11 +26,12 @@ export class GradioServer extends BasePythonServer {
     if (initCode) {
       await this.kernelExecutor.executeCode({ code: initCode });
     }
+    const origin = window.location.origin;
 
     const loaderCode = `
       from jupyterpack.gradio import get_gradio_server
       from jupyterpack.starlette import StarletteServer 
-      ${this._server_var} = StarletteServer(get_gradio_server("${instanceId}", "${kernelClientId}"), "${baseURL}")
+      ${this._server_var} = StarletteServer(get_gradio_server("${instanceId}", "${kernelClientId}"), "${baseURL}", "${origin}")
       `;
     await this.kernelExecutor.executeCode({ code: loaderCode });
   }
