@@ -9,9 +9,10 @@ from jupyterpack.common import BaseBridge
 
 
 class WSGIBridge(BaseBridge):
-    def __init__(self, wsgi_app, base_url: str):
+    def __init__(self, wsgi_app, base_url: str, origin: str):
         self.base_url = base_url
         self.wsgi_app = wsgi_app
+        self._origin = origin if origin is not None else "http://testserver"
         self._wsgi_transport = WSGITransport(app=wsgi_app)
 
     async def fetch(self, request: Dict):
@@ -21,13 +22,14 @@ class WSGIBridge(BaseBridge):
         method = request.get("method", "GET").upper()
         url = request.get("url", "/")
         headers = dict(request.get("headers", []))
-        headers["Origin"] = "http://testserver"
         body = request.get("body", None)
         params = request.get("params", None)
+        origin: str = headers.get("origin", self._origin)
+        if origin.endswith("/"):
+            origin = origin[:-1]
+        headers["origin"] = origin
 
-        with Client(
-            transport=self._wsgi_transport, base_url="http://testserver"
-        ) as client:
+        with Client(transport=self._wsgi_transport, base_url=origin) as client:
             try:
                 r = client.request(
                     method, url, headers=headers, content=body, params=params

@@ -62,9 +62,9 @@ def create_mesop_flask_app(script_path: str, base_url: str):
 
 
 class MesopServer(WsgiServer):
-    def __init__(self, script_path: str, base_url: str):
+    def __init__(self, script_path: str, base_url: str, origin: str):
         mesop_flask_app = create_mesop_flask_app(script_path, base_url)
-        super().__init__(mesop_flask_app, base_url)
+        super().__init__(mesop_flask_app, base_url, origin)
 
     def reload(self, script_path):
         mesop_flask_app = create_mesop_flask_app(script_path, self.base_url)

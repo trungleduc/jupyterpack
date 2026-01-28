@@ -3,7 +3,7 @@ from .wsgiBridge import WSGIBridge
 
 
 class WsgiServer(BaseServer):
-    def __init__(self, wsgi_app, base_url: str):
+    def __init__(self, wsgi_app, base_url: str, origin: str):
         """
         Args:
             app : WSGIApplication instance
@@ -11,7 +11,8 @@ class WsgiServer(BaseServer):
         """
         super().__init__(base_url)
         self._app = wsgi_app
-        self._bridge = WSGIBridge(wsgi_app, base_url)
+        self._origin = origin
+        self._bridge = WSGIBridge(wsgi_app, base_url, origin)
 
     @property
     def bridge(self):
@@ -29,5 +30,5 @@ class WsgiServer(BaseServer):
             app : WSGIApplication instance
         """
         self._app = app
-        self._bridge = WSGIBridge(app, self.base_url)
+        self._bridge = WSGIBridge(app, self.base_url, self._origin)
         return True

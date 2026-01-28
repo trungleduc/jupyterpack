@@ -42,6 +42,7 @@ class ASGIBridge(BaseBridge):
         origin: str = headers.get("origin", self._origin)
         if origin.endswith('/'):
             origin = origin[:-1]
+        headers["origin"] = origin
 
         async with AsyncClient(
             transport=self._http_transport, base_url=origin
