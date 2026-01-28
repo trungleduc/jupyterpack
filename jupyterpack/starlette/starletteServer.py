@@ -5,7 +5,7 @@ from starlette.routing import Mount
 
 
 class StarletteServer(AsgiServer):
-    def __init__(self, starlette_app, base_url: str):
+    def __init__(self, starlette_app, base_url: str, origin: str):
         """
         Args:
             app : ASGI application instance
@@ -17,8 +17,7 @@ class StarletteServer(AsgiServer):
                 Mount(base_url, app=starlette_app),
             ]
         )
-        super().__init__(main_app, base_url)
-        self._bridge = ASGIBridge(self._app, "/")
+        super().__init__(main_app, base_url, origin)
 
     def reload(self, starlette_app):
         """
@@ -30,5 +29,5 @@ class StarletteServer(AsgiServer):
                 Mount(self.base_url, app=starlette_app),
             ]
         )
-        self._bridge = ASGIBridge(self._app, "/")
+        self._bridge = ASGIBridge(self._app, self.base_url, self._origin)
         return True

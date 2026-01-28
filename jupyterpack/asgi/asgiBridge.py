@@ -19,11 +19,11 @@ ALL_BROADCAST_CHANNEL: Dict[str, BroadcastChannel] = {}
 
 
 class ASGIBridge(BaseBridge):
-    def __init__(self, asgi_app, base_url: str):
+    def __init__(self, asgi_app, base_url: str, origin: str):
         self.base_url = base_url
         self.asgi_app = asgi_app
+        self._origin = origin
         self._http_transport = ASGITransport(app=asgi_app)
-
         self._ws_adapters: Dict[str, WebSocketAdapter] = {}
         self._tasks = []
 
@@ -39,9 +39,12 @@ class ASGIBridge(BaseBridge):
         headers = dict(request.get("headers", []))
         body = request.get("body", None)
         params = request.get("params", None)
+        origin: str = headers.get("origin", self._origin)
+        if origin.endswith('/'):
+            origin = origin[:-1]
 
         async with AsyncClient(
-            transport=self._http_transport, base_url="http://testserver"
+            transport=self._http_transport, base_url=origin
         ) as client:
             try:
                 r = await client.request(
