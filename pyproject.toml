@@ -32,8 +32,7 @@ dependencies = [
     "starlette",
     "numpy",
     "pandas",
-    "specta>=0.4.6",
-    "jupyterlite-xeus>=4.4.0",
+    "specta>=0.4.6"
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 

@@ -111,7 +111,7 @@ jobs:
             pip=24.0
             jupyterlab
             jupyterlite-core
-            jupyterlite-xeus              
+            jupyterlite-xeus>=4.4.0            
 
       - name: Download extension package
         uses: actions/download-artifact@v4
