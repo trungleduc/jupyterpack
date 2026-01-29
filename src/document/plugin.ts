@@ -29,9 +29,11 @@ import { addCommands, addLauncherCommands } from './commands';
 import { JupyterPackWidgetFactory } from './widgetFactory';
 import { spkFactory } from './templates/spk';
 import { newFile } from './templates';
+import { SpkButtonExtention } from './spkButton';
 
 const FACTORY = 'jupyterpack';
 const CONTENT_TYPE = 'jupyterpack';
+const PY_CONTENT_TYPE = 'jupyterpack-py';
 
 export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
   id: 'jupyterpack:spkplugin',
@@ -49,7 +51,7 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
     const widgetFactory = new JupyterPackWidgetFactory({
       name: FACTORY,
       modelName: 'text',
-      fileTypes: [CONTENT_TYPE],
+      fileTypes: [CONTENT_TYPE, PY_CONTENT_TYPE],
       defaultFor: [CONTENT_TYPE],
       commands: app.commands,
       manager: app.serviceManager,
@@ -71,6 +73,16 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
       icon: logoIcon
     });
 
+    app.docRegistry.addFileType({
+      name: PY_CONTENT_TYPE,
+      displayName: 'PY',
+      mimeTypes: ['text/x-python'],
+      extensions: ['.py', '.PY'],
+      fileFormat: 'text',
+      contentType: PY_CONTENT_TYPE,
+      icon: logoIcon
+    });
+
     widgetFactory.widgetCreated.connect((_, widget) => {
       widget.title.icon = logoIcon;
       widget.context.pathChanged.connect(() => {
@@ -78,6 +90,10 @@ export const spkPlugin: JupyterFrontEndPlugin<IJupyterpackDocTracker> = {
       });
       tracker.add(widget);
     });
+
+    const spkButtonExt = new SpkButtonExtention(app.commands);
+
+    app.docRegistry.addWidgetExtension('Editor', spkButtonExt);
 
     return tracker;
   }
@@ -88,7 +104,6 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
   id: 'jupyterpack:spklauncher',
   optional: [ILauncher],
   autoStart: true,
-  provides: IJupyterpackDocTrackerToken,
   activate: (app: JupyterFrontEnd, launcher: ILauncher | null): void => {
     if (!launcher) {
       return;
