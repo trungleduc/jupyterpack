@@ -1,0 +1,5 @@
+{
+  "name": "NiceGUI Example",
+  "entry": "server.py",
+  "framework": "nicegui"
+}

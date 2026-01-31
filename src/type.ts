@@ -35,7 +35,8 @@ export enum JupyterPackFramework {
   FASTHTML = 'fasthtml',
   VIZRO = 'vizro',
   GRADIO = 'gradio',
-  MESOP = 'mesop'
+  MESOP = 'mesop',
+  NICEGUI = 'nicegui'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
