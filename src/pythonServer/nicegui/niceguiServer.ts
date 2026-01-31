@@ -1,6 +1,7 @@
 import { IPythonServerInitOptions, JupyterPackFramework } from '../../type';
 import { BasePythonServer } from '../baseServer';
 import { DEPENDENCIES } from './deps';
+import { Kernel } from '@jupyterlab/services';
 
 export class NiceGUIServer extends BasePythonServer {
   framework = JupyterPackFramework.NICEGUI;
@@ -36,13 +37,13 @@ export class NiceGUIServer extends BasePythonServer {
     await this.kernelExecutor.executeCode({ code: loaderCode });
   }
 
-  async disposePythonServer(): Promise<void> {
-    await this.kernelExecutor.executeCode({
-      code: `${this._server_var}.dispose()`
-    });
+  async disposePythonServer(options?: {
+    kernel?: Kernel.IKernelConnection | null;
+  }): Promise<void> {
     for (const element of this._openedWebsockets) {
       await this.closeWebsocket(element);
     }
+    await options?.kernel?.shutdown();
   }
 
   async reloadPythonServer(options: {
@@ -51,12 +52,12 @@ export class NiceGUIServer extends BasePythonServer {
   }): Promise<void> {
     const { initCode } = options;
     if (initCode) {
-      await this.kernelExecutor.executeCode({
-        code: initCode.replaceAll('{{base_url}}', this._baseUrl ?? '')
-      });
+      if (initCode) {
+        await this.kernelExecutor.executeCode({ code: initCode });
+      }
       const reloadCode = `
       await ${this._server_var}.dispose()
-      ${this._server_var}.reload(app)
+      ${this._server_var}.reload(get_nicegui_server("${this._instanceId}", "${this._kernelClientId}"))
       `;
       await this.kernelExecutor.executeCode({ code: reloadCode }, true);
     }

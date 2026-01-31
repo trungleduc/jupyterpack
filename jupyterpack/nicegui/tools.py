@@ -1,11 +1,10 @@
 import asyncio
 import os
 from pathlib import Path
-import nicegui.slot
+
 from starlette.routing import Route
 from typing import Any, Callable, Literal, Optional, Union
 
-from jupyterpack.js.jsLog import js_log
 
 NICEGUI_SERVER = {}
 
@@ -16,9 +15,8 @@ def get_nicegui_server(instance_id: str, kernel_client_id: str):
 
 def patch_nicegui(base_url: str, instance_id: str, kernel_client_id: str):
     from fastapi.middleware.gzip import GZipMiddleware
-    import nicegui
 
-    from nicegui import ui, core, slot
+    from nicegui import ui, core, slot, background_tasks, binding, Client, nicegui
     from nicegui.middlewares import (
         RedirectWithPrefixMiddleware,
         SetCacheControlMiddleware,
@@ -61,6 +59,9 @@ def patch_nicegui(base_url: str, instance_id: str, kernel_client_id: str):
         show_welcome_message: bool = True,
         **kwargs: Any,
     ) -> None:
+        if core.app.is_started:
+            core.root = root
+            return
         # if core.script_mode:
         #     if Client.page_routes:
         #         if (
@@ -130,7 +131,7 @@ def patch_nicegui(base_url: str, instance_id: str, kernel_client_id: str):
                 continue
             if route.path.startswith("/_nicegui") and hasattr(route, "methods"):
                 route.include_in_schema = endpoint_documentation in {"internal", "all"}
-            if route.path == "/" or route.path in nicegui.client.Client.page_routes.values():
+            if route.path == "/" or route.path in Client.page_routes.values():
                 route.include_in_schema = endpoint_documentation in {"page", "all"}
 
         if fastapi_docs:
@@ -187,13 +188,14 @@ def patch_nicegui(base_url: str, instance_id: str, kernel_client_id: str):
 
         core.sio.eio.ping_interval = max(core.app.config.reconnect_timeout * 0.8, 4)
         core.sio.eio.ping_timeout = max(core.app.config.reconnect_timeout * 0.4, 2)
-        
+
         core.loop = asyncio.get_running_loop()
         core.app.start()
-        nicegui.background_tasks.create(nicegui.binding.refresh_loop(), name='refresh bindings')
-        core.app.timer(10, nicegui.Client.prune_instances)
+        background_tasks.create(binding.refresh_loop(), name="refresh bindings")
+        core.app.timer(10, Client.prune_instances)
         core.app.timer(10, slot.Slot.prune_stacks)
-        core.app.timer(10, nicegui.nicegui.prune_tab_storage)
+        core.app.timer(10, nicegui.prune_tab_storage)
         if core.app.storage.secret is not None:
             core.app.timer(10, nicegui.nicegui.prune_user_storage)
+
     ui.run = run

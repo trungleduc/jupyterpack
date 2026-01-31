@@ -1,5 +1,5 @@
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { KernelMessage } from '@jupyterlab/services';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 import { IDisposable } from '@lumino/disposable';
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { ISignal } from '@lumino/signaling';
@@ -90,7 +90,9 @@ export interface IBasePythonServer extends IDisposable {
     message: string;
   }): Promise<void>;
   init(options: IPythonServerInitOptions): Promise<void>;
-  disposePythonServer(): Promise<void>;
+  disposePythonServer(options?: {
+    kernel?: Kernel.IKernelConnection | null;
+  }): Promise<void>;
   reloadPythonServer(options: {
     entryPath?: string;
     initCode?: string;

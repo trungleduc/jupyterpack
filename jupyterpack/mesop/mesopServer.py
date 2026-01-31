@@ -40,7 +40,9 @@ def create_mesop_flask_app(script_path: str, base_url: str):
     from mesop.cli.execute_module import execute_module
     from mesop.server.wsgi_app import create_app
     from mesop.runtime import reset_runtime
+
     reset_runtime(without_hot_reload=True)
+
     def execute_main_module(absolute_path: str):
         try:
             # Clear app modules

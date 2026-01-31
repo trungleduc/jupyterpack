@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Tuple
 import traceback
 
 from httpx import ASGITransport, AsyncClient
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse
 
 
 from jupyterpack.common import (
