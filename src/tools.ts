@@ -19,7 +19,7 @@ import textualStr from '../style/icons/textual.svg';
 import vizroStr from '../style/icons/vizro.svg';
 import gradioStr from '../style/icons/gradio.svg';
 import mesopStr from '../style/icons/mesop.svg';
-import { IJupyterPackFileFormat } from './type';
+import { IJupyterPackFileFormat, JupyterPackFramework } from './type';
 
 export const IS_LITE = !!document.getElementById('jupyter-lite-main');
 
@@ -258,4 +258,25 @@ export function decodeSpk(hash: string): {
     spk: JSON.parse(payload.spk),
     entry: payload.entry
   };
+}
+
+export function detectFrameworkFromShebang(
+  content: string
+): JupyterPackFramework {
+  // shebang is the first comment in the file with value jupyterpack.<name of framework>
+  const shebang = content.trim().split('\n')[0];
+  if (shebang.startsWith('#!')) {
+    const [jupyterpack, framework] = shebang
+      .replaceAll('#!', '')
+      .trim()
+      .split('.');
+
+    if (jupyterpack === 'jupyterpack' && framework) {
+      if (Object.values(JupyterPackFramework).includes(framework as any)) {
+        return framework as JupyterPackFramework;
+      }
+      throw new Error(`Framework ${framework} is not supported`);
+    }
+  }
+  throw new Error('Wrong shebang format');
 }

@@ -15,6 +15,8 @@ import {
 } from '../type';
 import { JupyterPackDocWidget } from './jupyterpackDocWidget';
 import { ToolbarWidget } from './toolbar';
+import { PathExt } from '@jupyterlab/coreutils';
+import { detectFrameworkFromShebang } from '../tools';
 
 interface IOptions extends DocumentRegistry.IWidgetFactoryOptions {
   commands: CommandRegistry;
@@ -41,8 +43,21 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
     const content = new Panel();
     content.addClass('jp-jupyterpack-document-panel');
     context.ready.then(() => {
-      const jpackModel =
-        context.model.toJSON() as any as IJupyterPackFileFormat;
+      const filePath = context.localPath;
+      const fileExt = PathExt.extname(filePath).toLowerCase();
+      const fileName = PathExt.basename(filePath);
+      let jpackModel: IJupyterPackFileFormat;
+      if (fileExt === '.py') {
+        const fileContent = context.model.toString();
+        const framework = detectFrameworkFromShebang(fileContent);
+        jpackModel = {
+          entry: fileName,
+          framework
+        };
+      } else {
+        jpackModel = context.model.toJSON() as any as IJupyterPackFileFormat;
+      }
+
       switch (jpackModel.framework) {
         case JupyterPackFramework.REACT: {
           const jpContent = new SandpackPanel({
