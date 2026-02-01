@@ -103,3 +103,9 @@ def generate_broadcast_channel_name(
     if broadcast_channel_suffix is not None:
         return f"/jupyterpack/ws/{instance_id}/{kernel_client_id}/{broadcast_channel_suffix}"
     return f"/jupyterpack/ws/{instance_id}/{kernel_client_id}"
+
+
+def reset_module(module_name: str):
+    for name in list(sys.modules):
+        if name == module_name or name.startswith(f"{module_name}."):
+            del sys.modules[name]

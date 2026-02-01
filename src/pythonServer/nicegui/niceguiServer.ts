@@ -53,14 +53,11 @@ export class NiceGUIServer extends BasePythonServer {
   }): Promise<void> {
     const { initCode, entryPath } = options;
     const resetCode = `
-    import sys
     from nicegui import core
-    if core.script_mode:
-      print("RESETING NICEGUI")
-      for name in list(sys.modules):
-        if name == "nicegui" or name.startswith("nicegui."):
-            del sys.modules[name]
+    from jupyterpack.common import reset_module
 
+    if core.script_mode:
+      reset_module(""nicegui"")
       from jupyterpack.nicegui import patch_nicegui
       patch_nicegui("${this._baseUrl}", "${this._instanceId}", "${this._kernelClientId}", ${stringOrNone(entryPath)})
     True  

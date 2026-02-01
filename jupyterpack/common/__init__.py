@@ -6,6 +6,7 @@ from .tools import (
     decode_broadcast_message,
     encode_broadcast_message,
     generate_broadcast_channel_name,
+    reset_module,
 )
 from .baseServer import BaseServer
 from .baseBridge import BaseBridge
@@ -23,4 +24,5 @@ __all__ = [
     "decode_broadcast_message",
     "encode_broadcast_message",
     "generate_broadcast_channel_name",
+    "reset_module",
 ]
