@@ -1,3 +1,4 @@
+import { stringOrNone } from '../../tools';
 import { IPythonServerInitOptions, JupyterPackFramework } from '../../type';
 import { BasePythonServer } from '../baseServer';
 import { DEPENDENCIES } from './deps';
@@ -11,7 +12,7 @@ export class NiceGUIServer extends BasePythonServer {
       dependencies: this.mergeDependencies(options.dependencies, DEPENDENCIES)
     };
     await super.init(mergedOptions);
-    const { initCode, instanceId, kernelClientId } = options;
+    const { initCode, instanceId, kernelClientId, entryPath } = options;
 
     const baseURL = this.buildBaseURL({
       instanceId,
@@ -21,7 +22,7 @@ export class NiceGUIServer extends BasePythonServer {
     await this.kernelExecutor.executeCode({
       code: `
       from jupyterpack.nicegui import patch_nicegui
-      patch_nicegui("${baseURL}", "${instanceId}", "${kernelClientId}")
+      patch_nicegui("${baseURL}", "${instanceId}", "${kernelClientId}", ${stringOrNone(entryPath)})
       `
     });
     if (initCode) {
@@ -50,7 +51,23 @@ export class NiceGUIServer extends BasePythonServer {
     entryPath?: string;
     initCode?: string;
   }): Promise<void> {
-    const { initCode } = options;
+    const { initCode, entryPath } = options;
+    const resetCode = `
+    import sys
+    from nicegui import core
+    if core.script_mode:
+      print("RESETING NICEGUI")
+      for name in list(sys.modules):
+        if name == "nicegui" or name.startswith("nicegui."):
+            del sys.modules[name]
+
+      from jupyterpack.nicegui import patch_nicegui
+      patch_nicegui("${this._baseUrl}", "${this._instanceId}", "${this._kernelClientId}", ${stringOrNone(entryPath)})
+    True  
+    `;
+
+    await this.kernelExecutor.executeCode({ code: resetCode }, true);
+
     if (initCode) {
       if (initCode) {
         await this.kernelExecutor.executeCode({ code: initCode });

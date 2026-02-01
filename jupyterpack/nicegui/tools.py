@@ -4,7 +4,7 @@ from pathlib import Path
 
 from starlette.routing import Route
 from typing import Any, Callable, Literal, Optional, Union
-
+import runpy
 
 NICEGUI_SERVER = {}
 
@@ -13,7 +13,9 @@ def get_nicegui_server(instance_id: str, kernel_client_id: str):
     return NICEGUI_SERVER.get(f"{instance_id}@{kernel_client_id}", None)
 
 
-def patch_nicegui(base_url: str, instance_id: str, kernel_client_id: str):
+def patch_nicegui(
+    base_url: str, instance_id: str, kernel_client_id: str, entry_path: str = None
+):
     from fastapi.middleware.gzip import GZipMiddleware
 
     from nicegui import ui, core, slot, background_tasks, binding, Client, nicegui
@@ -59,50 +61,46 @@ def patch_nicegui(base_url: str, instance_id: str, kernel_client_id: str):
         show_welcome_message: bool = True,
         **kwargs: Any,
     ) -> None:
+        if core.script_mode:
+            if Client.page_routes:
+                if (
+                    core.script_client
+                    and not core.script_client.content.default_slot.children
+                    and (
+                        core.script_client._head_html or core.script_client._body_html  # pylint: disable=protected-access
+                    )
+                ):
+                    raise RuntimeError(
+                        "ui.add_head_html, ui.add_body_html, or ui.add_css has been called inside the global scope while using ui.page.\n"
+                        "Consider using shared=True for this call to add the code to all pages.\n"
+                        "Alternatively, to add the code to a specific page, move the call into the page function."
+                    )
+                raise RuntimeError(
+                    "ui.page cannot be used in NiceGUI scripts when UI is defined in the global scope.\n"
+                    "To use multiple pages, either move all UI into page functions or use ui.sub_pages."
+                )
+
+            if core.app.is_started:
+                return
+
+            def run_script() -> None:
+                if entry_path is None:
+                    raise RuntimeError(
+                        "Script mode requires a valid script file to re-execute.\n"
+                        "This error occurs when running code interactively (e.g., Shift-Enter in an IDE).\n"
+                        "To fix this, either:\n"
+                        '  1. Run the complete file instead of a selection (e.g., "python script.py")\n'
+                        "  2. Use a root function: wrap your UI code in a function and pass it to ui.run(root=my_function)"
+                    )
+                runpy.run_path(entry_path, run_name="__main__")
+
+            root = run_script
+            assert core.script_client is not None
+            core.script_client.delete()
+
         if core.app.is_started:
             core.root = root
             return
-        # if core.script_mode:
-        #     if Client.page_routes:
-        #         if (
-        #             core.script_client
-        #             and not core.script_client.content.default_slot.children
-        #             and (
-        #                 core.script_client._head_html or core.script_client._body_html  # pylint: disable=protected-access
-        #             )
-        #         ):
-        #             raise RuntimeError(
-        #                 "ui.add_head_html, ui.add_body_html, or ui.add_css has been called inside the global scope while using ui.page.\n"
-        #                 "Consider using shared=True for this call to add the code to all pages.\n"
-        #                 "Alternatively, to add the code to a specific page, move the call into the page function."
-        #             )
-        #         raise RuntimeError(
-        #             "ui.page cannot be used in NiceGUI scripts when UI is defined in the global scope.\n"
-        #             "To use multiple pages, either move all UI into page functions or use ui.sub_pages."
-        #         )
-
-        #     if helpers.is_pytest():
-        #         raise RuntimeError(
-        #             "Script mode is not supported in pytest. "
-        #             "Please pass a root function to ui.run() or use page decorators."
-        #         )
-        #     if core.app.is_started:
-        #         return
-
-        #     def run_script() -> None:
-        #         if not sys.argv or not sys.argv[0] or not helpers.is_file(sys.argv[0]):
-        #             raise RuntimeError(
-        #                 "Script mode requires a valid script file to re-execute.\n"
-        #                 "This error occurs when running code interactively (e.g., Shift-Enter in an IDE).\n"
-        #                 "To fix this, either:\n"
-        #                 '  1. Run the complete file instead of a selection (e.g., "python script.py")\n'
-        #                 "  2. Use a root function: wrap your UI code in a function and pass it to ui.run(root=my_function)"
-        #             )
-        #         runpy.run_path(sys.argv[0], run_name="__main__")
-
-        #     root = run_script
-        #     assert core.script_client is not None
-        #     core.script_client.delete()
 
         core.app.config.add_run_config(
             reload=reload,
