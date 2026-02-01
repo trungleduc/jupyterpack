@@ -17,6 +17,7 @@ import {
 } from '../type';
 import websocketPatch from '../websocket/websocket.js?raw';
 import { KernelExecutor } from './kernelExecutor';
+import { Kernel } from '@jupyterlab/services';
 
 export abstract class BasePythonServer implements IBasePythonServer {
   constructor(options: KernelExecutor.IOptions) {
@@ -67,7 +68,9 @@ export abstract class BasePythonServer implements IBasePythonServer {
     }
   }
 
-  async disposePythonServer(): Promise<void> {
+  async disposePythonServer(options?: {
+    kernel?: Kernel.IKernelConnection | null;
+  }): Promise<void> {
     await this.kernelExecutor.executeCode({
       code: `${this._server_var}.dispose()`
     });

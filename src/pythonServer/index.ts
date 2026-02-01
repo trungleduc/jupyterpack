@@ -6,6 +6,7 @@ import { GradioServer } from './gradio/gradioServer';
 import { KernelExecutor } from './kernelExecutor';
 import { MesopServer } from './mesop/mesopServer';
 import { PanelServer } from './panel/panelServer';
+import { NiceGUIServer } from './nicegui/niceguiServer';
 import { ShinyServer } from './shiny/shinyServer';
 import { StarletteServer } from './starlette/starletteServer';
 import { StreamlitServer } from './streamlit/streamlitServer';
@@ -32,5 +33,6 @@ export const PYTHON_SERVER = new Map<
   [JupyterPackFramework.FASTHTML, FastHTMLServer],
   [JupyterPackFramework.VIZRO, VizroServer],
   [JupyterPackFramework.GRADIO, GradioServer],
-  [JupyterPackFramework.MESOP, MesopServer]
+  [JupyterPackFramework.MESOP, MesopServer],
+  [JupyterPackFramework.NICEGUI, NiceGUIServer]
 ]);

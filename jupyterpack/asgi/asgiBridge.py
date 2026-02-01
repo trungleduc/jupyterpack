@@ -2,7 +2,10 @@ import base64
 import json
 from typing import Dict, List, Optional, Tuple
 import traceback
+
 from httpx import ASGITransport, AsyncClient
+from urllib.parse import urlparse
+
 
 from jupyterpack.common import (
     BaseBridge,
@@ -40,7 +43,7 @@ class ASGIBridge(BaseBridge):
         body = request.get("body", None)
         params = request.get("params", None)
         origin: str = headers.get("origin", self._origin)
-        if origin.endswith('/'):
+        if origin.endswith("/"):
             origin = origin[:-1]
         headers["origin"] = origin
 
@@ -101,6 +104,8 @@ class ASGIBridge(BaseBridge):
         if protocols_str:
             raw_headers.append(("Sec-WebSocket-Protocol", protocols_str))
         headers = [(k.encode("utf-8"), v.encode("utf-8")) for (k, v) in raw_headers]
+        parsed = urlparse(ws_url)
+
         scope = {
             "type": "websocket",
             "asgi": {"version": "3.0", "spec_version": "2.3"},
@@ -113,7 +118,7 @@ class ASGIBridge(BaseBridge):
             "method": "GET",
             "path": ws_url,
             "raw_path": ws_url.encode("utf8"),
-            "query_string": "".encode("utf8"),
+            "query_string": parsed.query.encode("utf8"),
         }
 
         ws_adapter.start(self.asgi_app, scope)
@@ -158,6 +163,7 @@ class ASGIBridge(BaseBridge):
         broadcast_channel_key = generate_broadcast_channel_name(
             instance_id, kernel_client_id, broadcast_channel_suffix
         )
+
         broadcast_channel = ALL_BROADCAST_CHANNEL.get(broadcast_channel_key)
         if broadcast_channel is not None:
             broadcast_channel.postMessage(

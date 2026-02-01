@@ -1,5 +1,5 @@
 import { DocumentWidget } from '@jupyterlab/docregistry';
-import { KernelMessage } from '@jupyterlab/services';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 import { IDisposable } from '@lumino/disposable';
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { ISignal } from '@lumino/signaling';
@@ -35,7 +35,8 @@ export enum JupyterPackFramework {
   FASTHTML = 'fasthtml',
   VIZRO = 'vizro',
   GRADIO = 'gradio',
-  MESOP = 'mesop'
+  MESOP = 'mesop',
+  NICEGUI = 'nicegui'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
@@ -89,7 +90,9 @@ export interface IBasePythonServer extends IDisposable {
     message: string;
   }): Promise<void>;
   init(options: IPythonServerInitOptions): Promise<void>;
-  disposePythonServer(): Promise<void>;
+  disposePythonServer(options?: {
+    kernel?: Kernel.IKernelConnection | null;
+  }): Promise<void>;
   reloadPythonServer(options: {
     entryPath?: string;
     initCode?: string;

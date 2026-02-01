@@ -77,6 +77,7 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
         case JupyterPackFramework.PANEL:
         case JupyterPackFramework.VIZRO:
         case JupyterPackFramework.MESOP:
+        case JupyterPackFramework.NICEGUI:
         case JupyterPackFramework.GRADIO:
         case JupyterPackFramework.TEXTUAL: {
           const model = new PythonWidgetModel({

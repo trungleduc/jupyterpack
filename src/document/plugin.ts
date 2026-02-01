@@ -14,6 +14,7 @@ import {
   gradioIcon,
   logoIcon,
   mesopIcon,
+  niceguiIcon,
   panelIcon,
   shinyIcon,
   streamlitIcon,
@@ -149,7 +150,8 @@ export const launcherPlugin: JupyterFrontEndPlugin<void> = {
       [JupyterPackFramework.VIZRO]: vizroIcon,
       [JupyterPackFramework.FASTHTML]: fasthtmlIcon,
       [JupyterPackFramework.GRADIO]: gradioIcon,
-      [JupyterPackFramework.MESOP]: mesopIcon
+      [JupyterPackFramework.MESOP]: mesopIcon,
+      [JupyterPackFramework.NICEGUI]: niceguiIcon
     };
     Object.entries(iconMap).forEach(([framework, icon], index) => {
       addLauncherCommands({

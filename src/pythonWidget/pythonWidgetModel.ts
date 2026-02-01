@@ -163,8 +163,11 @@ export class PythonWidgetModel implements IPythonWidgetModel {
     if (!IS_LITE) {
       this._sessionConnection?.kernel?.shutdown();
     }
-    void this._executor?.disposePythonServer();
-    this._contentsManager.fileChanged.disconnect(this._onFileChanged);
+    this._contentsManager.fileChanged.disconnect(this._onFileChanged, this);
+    void this._executor?.disposePythonServer({
+      kernel: this._sessionConnection?.kernel
+    });
+
     this._commBroadcastManager.dispose();
     this._isDisposed = true;
   }
