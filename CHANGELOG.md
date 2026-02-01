@@ -2,6 +2,36 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.6.0
+
+([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.5.6...c2b2f5681408f5f061f89b31e2d18dc9f4a228c7))
+
+### Enhancements made
+
+- add tests [#27](https://github.com/trungleduc/jupyterpack/pull/27) ([@trungleduc](https://github.com/trungleduc))
+- nicegui work [#26](https://github.com/trungleduc/jupyterpack/pull/26) ([@trungleduc](https://github.com/trungleduc))
+- python work [#25](https://github.com/trungleduc/jupyterpack/pull/25) ([@trungleduc](https://github.com/trungleduc))
+- gradio [#22](https://github.com/trungleduc/jupyterpack/pull/22) ([@trungleduc](https://github.com/trungleduc))
+
+### Bugs fixed
+
+- Fix root [#24](https://github.com/trungleduc/jupyterpack/pull/24) ([@trungleduc](https://github.com/trungleduc))
+
+### Other merged PRs
+
+- Mesop [#23](https://github.com/trungleduc/jupyterpack/pull/23) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2026-01-17&to=2026-02-01&type=c))
+
+@trungleduc ([activity](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2026-01-17..2026-02-01&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.5.6
 
 ([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.5.5...962b577627772ab941755e7dfc525d67718249b1))
@@ -23,8 +53,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2026-01-02&to=2026-01-17&type=c))
 
 @trungleduc ([activity](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2026-01-02..2026-01-17&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.5.5
 
