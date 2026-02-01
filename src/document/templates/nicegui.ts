@@ -1,3 +1,4 @@
+export const NICEGUI_APP = `
 #! jupyterpack.nicegui
 # This example is taken from https://nicegui.io/#single-page_applications
 
@@ -32,3 +33,4 @@ def map_page(lat: float, lon: float):
 
 
 ui.run(root)
+`;

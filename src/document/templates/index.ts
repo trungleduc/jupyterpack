@@ -12,6 +12,7 @@ import { VIZRO_APP } from './vizro';
 import { FASTHTML_APP } from './fasthtml';
 import { GRADIO_APP } from './gradio';
 import { MESOP_APP } from './mesop';
+import { NICEGUI_APP } from './nicegui';
 
 export async function generateAppFiles(options: {
   contentsManager: Contents.IManager;
@@ -65,6 +66,10 @@ export async function generateAppFiles(options: {
     }
     case JupyterPackFramework.MESOP: {
       appContent = MESOP_APP;
+      break;
+    }
+    case JupyterPackFramework.NICEGUI: {
+      appContent = NICEGUI_APP;
       break;
     }
     default:

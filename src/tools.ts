@@ -18,6 +18,7 @@ import streamlitStr from '../style/icons/streamlit-logo-primary.svg';
 import textualStr from '../style/icons/textual.svg';
 import vizroStr from '../style/icons/vizro.svg';
 import gradioStr from '../style/icons/gradio.svg';
+import niceguiStr from '../style/icons/nicegui.svg';
 import mesopStr from '../style/icons/mesop.svg';
 import { IJupyterPackFileFormat, JupyterPackFramework } from './type';
 
@@ -86,6 +87,11 @@ export const gradioIcon = new LabIcon({
 export const mesopIcon = new LabIcon({
   name: 'jupyterpack:mesopIcon',
   svgstr: mesopStr
+});
+
+export const niceguiIcon = new LabIcon({
+  name: 'jupyterpack:niceguiIcon',
+  svgstr: niceguiStr
 });
 
 export function removePrefix(path: string, prefix: string): string {
