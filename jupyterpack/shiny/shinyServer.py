@@ -2,10 +2,10 @@ from jupyterpack.asgi import AsgiServer
 
 
 class ShinyServer(AsgiServer):
-    def __init__(self, shiny_app, base_url: str):
+    def __init__(self, shiny_app, base_url: str, origin: str):
         self._shiny_app = shiny_app
         asgi_app = self._generate_asgi_app(shiny_app, base_url)
-        super().__init__(asgi_app, base_url)
+        super().__init__(asgi_app, base_url, origin)
 
     async def dispose(self):
         try:

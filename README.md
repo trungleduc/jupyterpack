@@ -23,6 +23,7 @@
   - [**FastHTML**](https://github.com/AnswerDotAI/fasthtml)
   - [**Gradio**](https://github.com/gradio-app/gradio)
   - [**Mesop**](https://github.com/mesop-dev/mesop)
+  - [**NiceGUI**](https://github.com/zauberzeug/nicegui)
 
   You can also use `jupyterpack` to serve any [**Flask**](https://github.com/pallets/flask), [**Starlette**](https://github.com/Kludex/starlette) or [**Tornado**](https://github.com/tornadoweb/tornado) application. Example of each framework can be found in the [demo](https://github.com/trungleduc/jupyterpack/tree/main/demo/files) folder.
 
@@ -73,11 +74,12 @@ The available shebang options are:
 - `#! jupyterpack.fasthtml` for Fasthtml
 - `#! jupyterpack.gradio` for Gradio
 - `#! jupyterpack.mesop` for Mesop
+- `#! jupyterpack.nicegui` for NiceGUI
 
 After adding the shebang, you have two options to run your application:
 
-1. **Open from file browser**: Right-click the Python file in JupyterLab and select `Open with` > `JupyterPack`.
-2. **Using toolbar buttons**: Open the Python file using the `Editor` then click on `Open with JupyterPack` button in the toolbar.
+1. **Open from file browser**: Right-click the Python file in JupyterLab and select `Open with` > `Jupyterpack`.
+2. **Using toolbar buttons**: Open the Python file using the `Editor` then click on `Open with Jupyterpack` button in the toolbar.
 
 ### Using a `.spk` file
 
@@ -249,7 +251,7 @@ dependencies:
 
 ### Streamlit application
 
-There is no special requirement for Streamlit applications, just write your code as a standard Streamlit application and do **not** start the server manually — `jupyterpack` will handle execution and serving automatically.
+There are no special requirements for Streamlit applications, just write your code as a standard Streamlit application and do **not** start the server manually — `jupyterpack` will handle execution and serving automatically.
 
 Opening the `.spk` file will launch the Streamlit app in a new JupyterLab tab.
 
@@ -300,7 +302,7 @@ dependencies:
 
 ### Panel application
 
-There is no special requirement for Panel applications, just write your code as a standard Panel application and call `.servable()` on the layout you want to serve.
+There are no special requirements for Panel applications, just write your code as a standard Panel application and call `.servable()` on the layout you want to serve.
 
 Here is the environment file for Panel applications:
 
@@ -339,7 +341,7 @@ dependencies:
 
 ### Vizro application
 
-There is no special requirement for Vizro applications, just write your code as a standard Vizro application and call `Vizro().build(...).run()` to serve your dashboard.
+There are no special requirements for Vizro applications, just write your code as a standard Vizro application and call `Vizro().build(...).run()` to serve your dashboard.
 
 Here is the environment file for Vizro applications:
 
@@ -361,7 +363,7 @@ dependencies:
 
 ### FastHTML application
 
-JupyterPack only supports async handlers with FastHTML. You must convert all synchronous handlers to async, and you should not call `serve()` yourself — jupyterpack is responsible for starting and managing the server lifecycle.
+There are no special requirements for FastHTML applications, just write your code as a standard FastHTML application. You should not call `serve()` yourself — jupyterpack is responsible for starting and managing the server lifecycle.
 Here is the environment file for FastHTML applications:
 
 ```yaml
@@ -386,7 +388,7 @@ dependencies:
 
 ### Gradio application
 
-There is no special requirement for Gradio applications, just write your code as a standard Vizro application and call the `launch` method to serve your dashboard.
+There are no special requirements for Gradio applications, just write your code as a standard Vizro application and call the `launch` method to serve your dashboard.
 
 Due to the setup of Gradio, you need to put `gradio` and `gradio-client` in the pip section of the `environment.yml` file. For the remaininng dependencies, they are handled by `jupyterpack` automatically, but you can also specify them in the `environment.yml` file to improve the loading time. Here is the example of the `environment.yml` file for Gradio.
 Here is the environment file for Gradio applications:
@@ -415,7 +417,7 @@ dependencies:
 
 ### Mesop application
 
-There is no special requirement for Mesop applications. Just write your code as a standard Mesop application, and opening the `.spk` file will launch the app in JupyterLab.
+There are no special requirements for Mesop applications. Just write your code as a standard Mesop application, and opening the `.spk` file will launch the app in JupyterLab.
 
 Since Mesop is not available in the conda-forge channel. You need to install it via pip.
 Here is the environment file for Mesop applications:
@@ -438,6 +440,37 @@ dependencies:
   - pip:
       - mesop
       - flask-sock
+      - pyodide_http
+```
+
+### NiceGUI application
+
+There are no special requirements for NiceGUI applications. Jupyterpack supports creating pages using the page decorator, root function and script mode.
+
+Due to the setup of NiceGUI, you need to include it into the `pip` section of the environment file. Here is an example environment file for NiceGUI applications:
+
+```yaml
+name: xeus-kernels
+channels:
+  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/conda-forge
+dependencies:
+  - xeus-python
+  - jupyterpack
+  - python-multipart
+  - python-socketio
+  - pydantic >=1.10.21,<3.0
+  - fastapi
+  - rich
+  - markdown2
+  - itsdangerous
+  - ifaddr
+  - jinja2
+  - docutils
+  - vbuild
+  - wait_for2
+  - pip:
+      - nicegui
       - pyodide_http
 ```
 

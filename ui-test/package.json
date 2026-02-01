@@ -1,0 +1,12 @@
+{
+  "name": "jupyterpack-ui-test",
+  "version": "1.0.0",
+  "description": "jupyterpack Integration Tests",
+  "private": true,
+  "scripts": {
+    "test": "npx playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.1"
+  }
+}

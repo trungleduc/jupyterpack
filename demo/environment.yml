@@ -11,32 +11,32 @@ dependencies:
   - starlette
   - numpy
   - pandas
-  # - blinker>=1.5.0,<2
-  # - cachetools>=4.0,<7
-  # - protobuf
-  # - altair
-  # - pyarrow
-  # - htmltools
-  # - panel
-  # - textual
-  # - textual-serve
-  # - vizro
+  - blinker>=1.5.0,<2
+  - cachetools>=4.0,<7
+  - protobuf
+  - altair
+  - pyarrow
+  - htmltools
+  - panel
+  - textual
+  - textual-serve
+  - vizro
   - fastapi
-  # - pillow
-  # - huggingface_hub
+  - pillow
+  - huggingface_hub
   - aiofiles
   - aiohttp
-  # - safehttpx
-  # - semantic_version
-  # - pydub
-  # - tomlkit
-  # - flask
-  # - absl-py
-  # - deepdiff>=8.6.1,<9
-  # - msgpack
-  # - pydantic
-  # - python-dotenv
-  # - sqlalchemy
+  - safehttpx
+  - semantic_version
+  - pydub
+  - tomlkit
+  - flask
+  - absl-py
+  - deepdiff>=8.6.1,<9
+  - msgpack
+  - pydantic
+  - python-dotenv
+  - sqlalchemy
   - python-multipart
   - python-socketio
   - pydantic >=1.10.21,<3.0
@@ -49,15 +49,15 @@ dependencies:
   - vbuild
   - wait_for2
   - pip:
-    # - shiny
+    - shiny
     - nicegui
-    # - shinychat
-    # - vega_datasets
-    # - streamlit==1.50.0
-    # - gradio
-    # - gradio-client
-    # - mesop
-    # - flask-sock
+    - shinychat
+    - vega_datasets
+    - streamlit==1.50.0
+    - gradio
+    - gradio-client
+    - mesop
+    - flask-sock
     - pyodide_http
     - ../dist/jupyterpack-0.0.0-py3-none-any.whl
 

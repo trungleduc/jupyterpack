@@ -24,11 +24,10 @@ export class ShinyServer extends BasePythonServer {
     `;
     await this.kernelExecutor.executeCode({ code: bootstrapCode });
     if (entryPath) {
+      const origin = window.location.origin;
       const loaderCode = `
       from jupyterpack.shiny import ShinyServer, get_shiny_app
-
-
-      ${this._server_var} = ShinyServer(get_shiny_app("${entryPath}"), "${baseURL}")
+      ${this._server_var} = ShinyServer(get_shiny_app("${entryPath}"), "${baseURL}", "${origin}")
       `;
 
       await this.kernelExecutor.executeCode({ code: loaderCode });

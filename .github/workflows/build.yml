@@ -50,7 +50,7 @@ jobs:
           pip uninstall -y "jupyterpack" jupyterlab
 
       - name: Upload extension packages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: extension-artifacts
           path: dist/jupyterpack*
@@ -66,7 +66,7 @@ jobs:
         with:
           python-version: "3.12"
           architecture: "x64"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: extension-artifacts
       - name: Install and Test
@@ -111,7 +111,7 @@ jobs:
             pip=24.0
             jupyterlab
             jupyterlite-core
-            jupyterlite-xeus>=4.4.0            
+            jupyterlite-xeus>=4.4.0
 
       - name: Download extension package
         uses: actions/download-artifact@v4
@@ -136,11 +136,63 @@ jobs:
 
       - name: Upload artifact
         id: upload-jupyterlite-artifact
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./demo/_output
           retention-days: 30
 
+      - name: Upload artifact for test
+        id: upload-jupyterlite-pr-artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v6
+        with:
+          path: ./demo/_output
+          name: jupyterlite-build-asset
+
+  ui-test:
+    needs: build-lite
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - uses: actions/download-artifact@v7
+        with:
+          name: jupyterlite-build-asset
+          path: ./demo/_output
+
+      - name: Serve JupyterLite
+        shell: bash -l {0}
+        run: |
+          set -eux
+          npm install -g http-server
+          http-server -p 8777 ./demo/_output &
+
+  
+      - name: Run UI tests
+        shell: bash -l {0}
+        working-directory: ./ui-test
+        run: |
+          set -eux
+          npm install
+          npx playwright install chromium
+          npm run test
+
+      - name: Upload Playwright Test report
+        id: upload-galata-artifact
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: jupyterpack-playwright-tests
+          path: |
+            ui-test/test-results
+            ui-test/playwright-report
+      
   deploy:
     needs: build-lite
     if: github.ref == 'refs/heads/main'
