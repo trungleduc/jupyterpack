@@ -115,6 +115,7 @@
         "demo",
         "dist",
         "coverage",
+        "ui-test",
         "**/*.d.ts"
     ],
     "eslintConfig": {
