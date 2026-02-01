@@ -190,8 +190,8 @@ jobs:
         with:
           name: jupyterpack-playwright-tests
           path: |
-            ui-tests/test-results
-            ui-tests/playwright-report
+            ui-test/test-results
+            ui-test/playwright-report
       
   deploy:
     needs: build-lite
