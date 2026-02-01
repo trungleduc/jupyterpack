@@ -125,3 +125,6 @@ demo/_output
 *.doit.db
 
 generatedPythonFiles.ts
+
+playwright-report/
+test-results/
