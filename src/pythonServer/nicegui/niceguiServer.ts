@@ -57,7 +57,7 @@ export class NiceGUIServer extends BasePythonServer {
     from jupyterpack.common import reset_module
 
     if core.script_mode:
-      reset_module(""nicegui"")
+      reset_module("nicegui")
       from jupyterpack.nicegui import patch_nicegui
       patch_nicegui("${this._baseUrl}", "${this._instanceId}", "${this._kernelClientId}", ${stringOrNone(entryPath)})
     True  
