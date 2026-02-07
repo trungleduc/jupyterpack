@@ -2,6 +2,12 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.6.1
+
+No merged PRs
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.6.0
 
 ([Full Changelog](https://github.com/trungleduc/jupyterpack/compare/v0.5.6...c2b2f5681408f5f061f89b31e2d18dc9f4a228c7))
@@ -29,8 +35,6 @@ See [our definition of contributors](https://github-activity.readthedocs.io/en/l
 ([GitHub contributors page for this release](https://github.com/trungleduc/jupyterpack/graphs/contributors?from=2026-01-17&to=2026-02-01&type=c))
 
 @trungleduc ([activity](https://github.com/search?q=repo%3Atrungleduc%2Fjupyterpack+involves%3Atrungleduc+updated%3A2026-01-17..2026-02-01&type=Issues))
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.5.6
 
