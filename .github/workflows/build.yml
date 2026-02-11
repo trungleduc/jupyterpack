@@ -112,6 +112,7 @@ jobs:
             jupyterlab
             jupyterlite-core
             jupyterlite-xeus>=4.4.0
+            jupyterlite-ai
 
       - name: Download extension package
         uses: actions/download-artifact@v4
