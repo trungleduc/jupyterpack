@@ -48,6 +48,7 @@ dependencies:
   - docutils
   - vbuild
   - wait_for2
+  - semver
   - pip:
     - shiny
     - nicegui

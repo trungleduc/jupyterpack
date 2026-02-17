@@ -2,6 +2,7 @@ import asyncio
 import os
 from pathlib import Path
 
+import semver
 from starlette.routing import Route
 from typing import Any, Callable, Literal, Optional, Union
 import runpy
@@ -18,7 +19,16 @@ def patch_nicegui(
 ):
     from fastapi.middleware.gzip import GZipMiddleware
 
-    from nicegui import ui, core, slot, background_tasks, binding, Client, nicegui
+    from nicegui import (
+        ui,
+        core,
+        slot,
+        background_tasks,
+        binding,
+        Client,
+        nicegui,
+        __version__ as NICEGUI_VERSION,
+    )
     from nicegui.middlewares import (
         RedirectWithPrefixMiddleware,
         SetCacheControlMiddleware,
@@ -101,8 +111,7 @@ def patch_nicegui(
         if core.app.is_started:
             core.root = root
             return
-
-        core.app.config.add_run_config(
+        run_kwargs = dict(
             reload=reload,
             title=title,
             viewport=viewport,
@@ -117,6 +126,10 @@ def patch_nicegui(
             prod_js=prod_js,
             show_welcome_message=show_welcome_message,
         )
+        need_patch = semver.compare(NICEGUI_VERSION, '3.6.1')
+        if need_patch > 0:
+            run_kwargs['unocss'] = None
+        core.app.config.add_run_config(**run_kwargs)
         core.root = root
         core.app.config.endpoint_documentation = endpoint_documentation
         if gzip_middleware_factory is not None:
@@ -170,7 +183,6 @@ def patch_nicegui(
             app=core.app,
             host=host,
             port=port,
-            reload=reload,
             reload_includes=split_args(uvicorn_reload_includes) if reload else None,
             reload_excludes=split_args(uvicorn_reload_excludes) if reload else None,
             reload_dirs=split_args(uvicorn_reload_dirs) if reload else None,
