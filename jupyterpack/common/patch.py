@@ -16,6 +16,17 @@ else:
 def patch_multiprocessing():
     if IS_WASM:
         multiprocessing.Lock = contextlib.nullcontext
+        content = """
+class SemLock:
+    SEM_VALUE_MAX = 1
+    def __init__(self, *args, **kwargs):
+       pass
+    def _rebuild(self, *args, **kwargs):
+        pass
+def sem_unlink(name):
+    pass
+"""
+        create_mock_module('_multiprocessing', content)
 
 
 def patch_anyio():

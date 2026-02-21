@@ -32,7 +32,8 @@ dependencies = [
     "starlette",
     "numpy",
     "pandas",
-    "specta>=0.4.6"
+    "specta>=0.4.6",
+    "semver"
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 
