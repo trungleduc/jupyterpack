@@ -4,7 +4,6 @@ import json
 import traceback
 from textual_serve.server import Server
 from typing import Dict, List, Optional
-from aiohttp.test_utils import make_mocked_request
 from jupyterpack.common import BaseBridge
 from .textualDriver import JupyterPackDriver
 from ..common.tools import (
@@ -12,7 +11,14 @@ from ..common.tools import (
     encode_broadcast_message,
     generate_broadcast_channel_name,
 )
-from .tools import DATA, META, MemoryWriter, deserialize_packet, serialize_packet
+from .tools import (
+    DATA,
+    META,
+    MemoryWriter,
+    deserialize_packet,
+    make_mocked_request,
+    serialize_packet,
+)
 from jupyterpack.js import BroadcastChannel, js_log
 
 ALL_BROADCAST_CHANNEL: Dict[str, BroadcastChannel] = {}

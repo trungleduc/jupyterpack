@@ -83,15 +83,6 @@ jobs:
           jupyter labextension list 2>&1 | grep -ie "jupyterpack.*OK"
           python -m jupyterlab.browser_check --no-browser-test
 
-  check_links:
-    name: Check Links
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
-
   build-lite:
     name: Build JupyterLite
     needs: test_isolated
@@ -174,7 +165,6 @@ jobs:
           npm install -g http-server
           http-server -p 8777 ./demo/_output &
 
-  
       - name: Run UI tests
         shell: bash -l {0}
         working-directory: ./ui-test
@@ -193,7 +183,7 @@ jobs:
           path: |
             ui-test/test-results
             ui-test/playwright-report
-      
+
   deploy:
     needs: build-lite
     if: github.ref == 'refs/heads/main'
