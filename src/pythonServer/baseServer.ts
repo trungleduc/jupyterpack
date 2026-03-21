@@ -191,10 +191,12 @@ export abstract class BasePythonServer implements IBasePythonServer {
       content
     });
     const raw = await this._kernelExecutor.executeCode({ code }, true);
+
     if (!raw) {
       throw new Error(`Missing response for ${urlPath}`);
     }
     const jsonStr = raw.replaceAll("'", '');
+
     const obj: {
       headers: string;
       status_code: number;

@@ -19,5 +19,6 @@ def convert_headers(
 ) -> HTTPHeaders:
     tornado_headers = HTTPHeaders()
     for k, v in headers:
-        tornado_headers.add(k, v)
+        if v is not None:
+            tornado_headers.add(k, v)
     return tornado_headers

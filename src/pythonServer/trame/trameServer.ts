@@ -17,18 +17,19 @@ export class TrameServer extends BasePythonServer {
       kernelClientId
     });
     const bootstrapCode = `
-    from jupyterpack.common import set_base_url_env, patch_tornado
+    from jupyterpack.common import set_base_url_env
+    from jupyterpack.trame import patch_trame
     set_base_url_env("${baseURL}")
-    patch_tornado()
-
+    patch_trame("${baseURL}", "${instanceId}", "${kernelClientId}")
     `;
     await this.kernelExecutor.executeCode({ code: bootstrapCode });
     if (initCode) {
+      const origin = window.location.origin;
       const initCodeWithUrl = initCode.replaceAll('{{base_url}}', baseURL);
       await this.kernelExecutor.executeCode({ code: initCodeWithUrl });
       const loaderCode = `
-      from jupyterpack.tornado import TornadoServer
-      ${this._server_var} = TornadoServer(app, "${baseURL}")
+      from jupyterpack.trame import TrameServer
+      ${this._server_var} = TrameServer("${baseURL}", "${instanceId}", "${kernelClientId}", "${origin}")
       `;
 
       await this.kernelExecutor.executeCode({ code: loaderCode });
@@ -39,16 +40,6 @@ export class TrameServer extends BasePythonServer {
     entryPath?: string;
     initCode?: string;
   }): Promise<void> {
-    const { initCode } = options;
-    if (initCode) {
-      await this.kernelExecutor.executeCode({
-        code: initCode.replaceAll('{{base_url}}', this._baseUrl ?? '')
-      });
-      const reloadCode = `
-      ${this._server_var}.dispose()
-      ${this._server_var}.reload(app)
-      `;
-      await this.kernelExecutor.executeCode({ code: reloadCode }, true);
-    }
+    //
   }
 }

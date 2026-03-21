@@ -1,0 +1,6 @@
+{
+  "name": "Trame Example",
+  "entry": "server.py",
+  "rootUrl": "/index.html",
+  "framework": "trame"
+}
