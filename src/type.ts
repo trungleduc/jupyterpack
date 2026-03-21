@@ -36,7 +36,8 @@ export enum JupyterPackFramework {
   VIZRO = 'vizro',
   GRADIO = 'gradio',
   MESOP = 'mesop',
-  NICEGUI = 'nicegui'
+  NICEGUI = 'nicegui',
+  TRAME = 'trame'
 }
 export interface IJupyterPackFileFormat {
   entry: string;
