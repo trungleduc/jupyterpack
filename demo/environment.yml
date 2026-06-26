@@ -52,10 +52,12 @@ dependencies:
   - opentelemetry-sdk
   - matplotlib
   - plotnine
+  - tinycss2
   - pip:
     - hf-gradio
     - shiny
     - nicegui
+    - python-fasthtml==0.14.1
     - shinychat
     - vega_datasets
     - streamlit==1.50.0

@@ -26,7 +26,7 @@ class SemLock:
 def sem_unlink(name):
     pass
 """
-        create_mock_module('_multiprocessing', content)
+        create_mock_module("_multiprocessing", content)
 
 
 def patch_anyio():

@@ -28,7 +28,7 @@ export default defineConfig({
 
     toHaveScreenshot: {
       // An acceptable amount of pixels that could be different, unset by default.
-      maxDiffPixels: 1000
+      maxDiffPixelRatio: 0.01
     },
 
     toMatchSnapshot: {

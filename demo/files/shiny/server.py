@@ -14,11 +14,13 @@ mtcars.drop(["disp", "hp", "drat", "qsec", "vs", "gear", "carb"], axis=1, inplac
 FAST_INTERACT_INTERVAL = 60
 
 app_ui = ui.page_fluid(
-    ui.head_content(ui.tags.style("""
+    ui.head_content(
+        ui.tags.style("""
         pre, table.table {
             font-size: smaller;
         }
-        """)),
+        """)
+    ),
     ui.row(
         ui.column(
             4,
