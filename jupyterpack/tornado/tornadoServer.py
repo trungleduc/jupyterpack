@@ -3,10 +3,10 @@ from .tornadoBridge import TornadoBridge
 
 
 class TornadoServer(BaseServer):
-    def __init__(self, tornado_app, base_url: str):
+    def __init__(self, tornado_app, base_url: str, origin: str = None):
         super().__init__(base_url)
         self._tornado_server = tornado_app
-        self._bridge = TornadoBridge(tornado_app, base_url)
+        self._bridge = TornadoBridge(tornado_app, base_url, origin)
 
     @property
     def bridge(self):

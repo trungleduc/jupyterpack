@@ -33,11 +33,14 @@ class TornadoBridge(BaseBridge):
     Encapsulates Tornado app lifecycle, request/response bridging, and WebSocket handling.
     """
 
-    def __init__(self, tornado_app: tornado.web.Application, base_url: str):
+    def __init__(
+        self, tornado_app: tornado.web.Application, base_url: str, origin: str = None
+    ):
         self.base_url = base_url
         self.tornado_app = tornado_app
         self.websocket_handlers: Dict[str, tornado.websocket.WebSocketHandler] = {}
         self._ws_handlers = {}
+        self._origin = origin if origin is not None else "http://testserver"
 
     async def fetch(self, request: Dict):
         """

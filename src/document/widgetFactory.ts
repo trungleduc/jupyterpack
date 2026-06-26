@@ -68,18 +68,19 @@ export class JupyterPackWidgetFactory extends ABCWidgetFactory<JupyterPackDocWid
           break;
         }
         case JupyterPackFramework.DASH:
-        case JupyterPackFramework.STREAMLIT:
-        case JupyterPackFramework.TORNADO:
-        case JupyterPackFramework.STARLETTE:
         case JupyterPackFramework.FASTAPI:
         case JupyterPackFramework.FASTHTML:
-        case JupyterPackFramework.SHINY:
-        case JupyterPackFramework.PANEL:
-        case JupyterPackFramework.VIZRO:
+        case JupyterPackFramework.GRADIO:
         case JupyterPackFramework.MESOP:
         case JupyterPackFramework.NICEGUI:
-        case JupyterPackFramework.GRADIO:
-        case JupyterPackFramework.TEXTUAL: {
+        case JupyterPackFramework.PANEL:
+        case JupyterPackFramework.SHINY:
+        case JupyterPackFramework.STARLETTE:
+        case JupyterPackFramework.STREAMLIT:
+        case JupyterPackFramework.TEXTUAL:
+        case JupyterPackFramework.TORNADO:
+        case JupyterPackFramework.TRAME:
+        case JupyterPackFramework.VIZRO: {
           const model = new PythonWidgetModel({
             jpackModel,
             context,

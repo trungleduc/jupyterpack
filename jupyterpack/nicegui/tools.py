@@ -126,9 +126,9 @@ def patch_nicegui(
             prod_js=prod_js,
             show_welcome_message=show_welcome_message,
         )
-        need_patch = semver.compare(NICEGUI_VERSION, '3.6.1')
+        need_patch = semver.compare(NICEGUI_VERSION, "3.6.1")
         if need_patch > 0:
-            run_kwargs['unocss'] = None
+            run_kwargs["unocss"] = None
         core.app.config.add_run_config(**run_kwargs)
         core.root = root
         core.app.config.endpoint_documentation = endpoint_documentation

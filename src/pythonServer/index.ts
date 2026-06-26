@@ -13,6 +13,7 @@ import { StreamlitServer } from './streamlit/streamlitServer';
 import { TextualServer } from './textual/textualServer';
 import { TornadoServer } from './tornado/tornadoServer';
 import { VizroServer } from './vizro/vizroServer';
+import { TrameServer } from './trame/trameServer';
 
 type BasePythonServerConstructor = new (
   options: KernelExecutor.IOptions
@@ -34,5 +35,6 @@ export const PYTHON_SERVER = new Map<
   [JupyterPackFramework.VIZRO, VizroServer],
   [JupyterPackFramework.GRADIO, GradioServer],
   [JupyterPackFramework.MESOP, MesopServer],
-  [JupyterPackFramework.NICEGUI, NiceGUIServer]
+  [JupyterPackFramework.NICEGUI, NiceGUIServer],
+  [JupyterPackFramework.TRAME, TrameServer]
 ]);

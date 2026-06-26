@@ -1,6 +1,6 @@
 name: xeus-kernels
 channels:
-  - https://repo.prefix.dev/emscripten-forge-dev
+  - https://repo.prefix.dev/emscripten-forge-4x
   - https://repo.prefix.dev/conda-forge
 dependencies:
   - xeus-python
@@ -49,6 +49,12 @@ dependencies:
   - vbuild
   - wait_for2
   - semver
+  - trame
+  - trame-vtk
+  - vtk
+  - trame-vuetify
+  - plotly
+  - trame-plotly
   - pip:
     - shiny
     - nicegui
@@ -61,4 +67,3 @@ dependencies:
     - flask-sock
     - pyodide_http
     - ../dist/jupyterpack-0.0.0-py3-none-any.whl
-
