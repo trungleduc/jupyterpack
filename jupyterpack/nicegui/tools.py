@@ -126,9 +126,17 @@ def patch_nicegui(
             prod_js=prod_js,
             show_welcome_message=show_welcome_message,
         )
-        need_patch = semver.compare(NICEGUI_VERSION, '3.6.1')
+        import inspect
+
+        need_patch = semver.compare(NICEGUI_VERSION, "3.6.1")
         if need_patch > 0:
-            run_kwargs['unocss'] = None
+            run_kwargs["unocss"] = None
+        sig = inspect.signature(core.app.config.add_run_config)
+        params = sig.parameters
+        for name, param in params.items():
+            if param.default is inspect.Parameter.empty and name not in run_kwargs:
+                run_kwargs[name] = None
+        run_kwargs = {k: v for k, v in run_kwargs.items() if k in params}
         core.app.config.add_run_config(**run_kwargs)
         core.root = root
         core.app.config.endpoint_documentation = endpoint_documentation
@@ -201,11 +209,15 @@ def patch_nicegui(
 
         core.loop = asyncio.get_running_loop()
         core.app.start()
-        background_tasks.create(binding.refresh_loop(), name="refresh bindings")
-        core.app.timer(10, Client.prune_instances)
-        core.app.timer(10, slot.Slot.prune_stacks)
-        core.app.timer(10, nicegui.prune_tab_storage)
-        if core.app.storage.secret is not None:
-            core.app.timer(10, nicegui.nicegui.prune_user_storage)
+        if hasattr(binding, "refresh_loop"):
+            background_tasks.create(binding.refresh_loop(), name="refresh bindings")
+        if hasattr(nicegui, "prune_tab_storage"):
+            # old NiceGUI: timers must be registered manually
+            core.app.timer(10, Client.prune_instances)
+            core.app.timer(10, slot.Slot.prune_stacks)
+            core.app.timer(10, nicegui.prune_tab_storage)
+            if core.app.storage.secret is not None:
+                core.app.timer(10, nicegui.nicegui.prune_user_storage)
+        # new NiceGUI (>= PR #6074): app.start() registers all prune timers internally
 
     ui.run = run

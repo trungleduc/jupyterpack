@@ -10,5 +10,5 @@ export const DEPENDENCIES: IDependencies = {
     'pydub',
     'tomlkit'
   ],
-  pip: []
+  pip: ['hf-gradio']
 };
