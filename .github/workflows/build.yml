@@ -134,6 +134,13 @@ jobs:
           path: ./demo/_output
           retention-days: 30
 
+      - name: Upload artifact for Vercel
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlite-vercel
+          path: ./demo/_output
+
       - name: Upload artifact for test
         id: upload-jupyterlite-pr-artifact
         if: github.event_name == 'pull_request'
@@ -183,6 +190,29 @@ jobs:
           path: |
             ui-test/test-results
             ui-test/playwright-report
+
+  deploy-vercel:
+    needs: build-lite
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download lite artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jupyterlite-vercel
+          path: demo/_output
+
+      - name: Setup Vercel output structure
+        run: |
+          mkdir -p .vercel/output/static
+          cp -r demo/_output/. .vercel/output/static/
+          echo '{"version": 3}' > .vercel/output/config.json
+
+      - name: Deploy to Vercel
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
   deploy:
     needs: build-lite
