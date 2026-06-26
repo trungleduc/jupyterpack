@@ -49,7 +49,11 @@ dependencies:
   - vbuild
   - wait_for2
   - semver
+  - opentelemetry-sdk
+  - matplotlib
+  - plotnine
   - pip:
+    - hf-gradio
     - shiny
     - nicegui
     - shinychat

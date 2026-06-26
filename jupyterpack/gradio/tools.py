@@ -157,14 +157,23 @@ class FFmpeg:
         if app_kwargs is None:
             app_kwargs = {}
 
-        self.server_app = self.app = App.create_app(
-            self,
-            auth_dependency=auth_dependency,
-            app_kwargs=app_kwargs,
-            strict_cors=strict_cors,
-            ssr_mode=self.ssr_mode,
-            mcp_server=False,
-        )
+        try:
+            self.server_app = self.app = App.create_app(
+                self,
+                auth_dependency=auth_dependency,
+                app_kwargs=app_kwargs,
+                strict_cors=strict_cors,
+                ssr_mode=self.ssr_mode,
+                mcp_server=False,
+            )
+        except TypeError:
+            self.server_app = self.app = App.create_app(
+                self,
+                auth_dependency=auth_dependency,
+                app_kwargs=app_kwargs,
+                strict_cors=strict_cors,
+                mcp_server=False,
+            )
         if self.mcp_error and not quiet:
             print(self.mcp_error)
 

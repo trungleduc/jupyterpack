@@ -202,6 +202,10 @@ jobs:
           name: jupyterlite-vercel
           path: demo/_output
 
+      - name: Patch jupyter-lite.json for Vercel
+        run: |
+          jq 'del(."jupyter-config-data".enableMemoryStorage, ."jupyter-config-data".contentsStorageDrivers)' demo/_output/jupyter-lite.json > tmp.json && mv tmp.json demo/_output/jupyter-lite.json
+
       - name: Setup Vercel output structure
         run: |
           mkdir -p .vercel/output/static
