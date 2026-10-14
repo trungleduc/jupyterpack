@@ -39,17 +39,19 @@ def patch_anyio():
         return func(*args)
 
     try:
-        import anyio
+        # anyio >= 4.15 imports submodules lazily, so import them explicitly
+        import anyio._core._eventloop as _eventloop
+        import anyio.to_thread as _to_thread
 
-        _get_async_backend = anyio._core._eventloop.get_async_backend
+        _get_async_backend = _eventloop.get_async_backend
 
         def get_async_backend(*args, **kwargs):
             Cls = _get_async_backend(*args, **kwargs)
             Cls.run_sync_in_worker_thread = _run_sync_in_worker_thread
             return Cls
 
-        anyio._core._eventloop.get_async_backend = get_async_backend
-        anyio.to_thread.get_async_backend = get_async_backend
+        _eventloop.get_async_backend = get_async_backend
+        _to_thread.get_async_backend = get_async_backend
     except Exception:
         pass
 

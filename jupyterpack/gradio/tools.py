@@ -16,7 +16,7 @@ def get_gradio_server(instance_id: str, kernel_client_id: str):
 
 
 def patch_gradio(base_url: str, instance_id: str, kernel_client_id: str):
-    os.link = lambda src, dst: None
+    os.link = lambda *args, **kwargs: None
     os.environ["GRADIO_ANALYTICS_ENABLED"] = "false"
     sys.modules["audioop"] = {}
 
